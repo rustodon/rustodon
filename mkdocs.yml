@@ -1,5 +1,0 @@
-site_name: rustodon
-pages:
-  - Home: index.md
-  - Stories: stories.md
-theme: readthedocs
