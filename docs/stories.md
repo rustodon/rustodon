@@ -10,6 +10,13 @@
 
 * As a user, I can block other users.
   - As a user, I will not see blocked users' statuses.
+  - As a user, blocked users will not be able to interact with me.
+
+* As a user, I can mute other users.
+  - As a user, I will not see muted users' posts.
+
+* As a user, I can mute keywords.
+  - As a user, I will not see posts with muted keywords.
 
 
 * As a user, I can create statuses.
