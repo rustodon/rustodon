@@ -3,7 +3,7 @@
 ## Sooner
 * As an admin, I can block instances.
   - As a user, I cannot interact with blocked instances.
-  
+
 * As a user, I can silence instances.
   - As a user, I cannot interact with users on a silenced instance unless I explicitly follow them.
   - As a user, I will not see statuses from users on a silenced instance unless I explicitly follow them.
@@ -32,7 +32,10 @@
 * As a user, I can mention other users in statuses.
   - As a user, I will be notified if I am mentioned in a status.
   - As a remote ActivityPub user, I will be notified if I am mentioned in a status.
-  - As a user, I will not see any post beginning with a mention to someone i do not follow, from the people i do follow.
+  - As a user, I will not see posts from users I follow that mention someone I do not follow.
+
+* As a user, I can reply to statuses.
+  - As a user, I will not see replies from users I follow to users I do not follow.
 
 * As a remote ActivityPub user, I can retrieve public statuses from users.
 
@@ -52,7 +55,7 @@
     + As a local user, I cannot see statuses from a user who has blocked me.
     + As a local user, I cannot see statuses from a user who I have blocked.
 
-* As a user, I can authenticate to the website
+* As a user, I can authenticate to the website.
   - As a user, I can register for an account on the website.
 
 * As a user, I can set a profile.
@@ -61,10 +64,11 @@
 * As a non-authenticated user, I can see user profiles on public pages.
   - As a non-authenticated user, I can see users' statuses on profile pages.
 
+
 ## Later
 * I can use an external client to interact with the application.
   - I can use my credentials to obtain a token for external interaction with the application.
-  
+
 * As a user, I can report a status, instance, and/or user.
   - As a user, I can add statuses other than the one used to begin a report.
   - As an admin, I can view all reports and use a report to begin drafting other administrative actions.
