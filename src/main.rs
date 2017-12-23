@@ -1,3 +1,6 @@
+#![feature(plugin)]
+#![plugin(rocket_codegen)]
+
 extern crate rocket;
 #[macro_use] extern crate diesel;
 extern crate r2d2;
