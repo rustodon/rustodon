@@ -1,10 +1,17 @@
 [package]
 name = "rustodon"
 version = "0.1.0"
-authors = ["Erin <erin@hashbang.sh>, Bea <beatrix.bitrot@gmail.com>, David Yip <yipdw@member.fsf.org>"]
+authors = ["Erin <erin@hashbang.sh>"]
 
 [dependencies]
 rocket = "0.3.4"
 rocket_codegen = "0.3.4"
+
 diesel = { version = "1.0.0-beta1", features = ["postgres"] }
 diesel_infer_schema = { version = "1.0.0-beta1", features = ["postgres"] }
+dotenv = "0.10.1"
+
+[dependencies.rocket_contrib]
+version = "0.3.4"
+default-features = false
+features = ["json", "handlebars_templates"]
