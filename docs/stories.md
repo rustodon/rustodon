@@ -47,7 +47,8 @@
     + As a user, I can rescind a follow request.
 
 * 12) As a user, I can lock my account so that followers must be approved.
-  - (C) in Later
+  - As a user, I will be notified of pending follow requests.
+  - 12c) in Later.
 
 * 13) As a user, I can see statuses of accounts I follow.
   - As a remote ActivityPub user, I can receive statuses from a user I follow.
@@ -61,25 +62,25 @@
 
 * 15) As a user, I can set a profile.
   - As a remote ActivityPub user, I can see these profiles.
-  - (C) in Later
+  - 15c) in Later.
 
 * 16) As a non-authenticated user, I can see user profiles on public pages.
   - As a non-authenticated user, I can see users' statuses on profile pages.
 
 
 ## Later
-* 12c) As a user, I may specify accounts that may follow me without authentication, if I know I would like to be followed by them
-  - I will still be notified when they do follow me.
-  - a notification will show in the top of my notifications that may be dismissed until new follow requests arrive, alerting me of pending follow requests
+* 12c) As a user, I can specify accounts that may follow me without authentication.
+  - As a user, I will still be notified when they do follow me.
   - A notification will be added to my notifications when a follow request I accepted completes, showing they did in fact follow me.
-  
+
 * 15c) As a user, I may opt out of public profile pages for non-authenticated users.
   - As a user, I may opt out/in of being indexed by search engines.
-  
+
 * 17) I can use an external client to interact with the application.
   - I can use my credentials to obtain a token for external interaction with the application.
 
 * 18) As a user, I can report a status, instance, and/or user.
-  - As a user, I can add statuses other than the one used to begin a report.
-  - As an admin, I can view all reports and use a report to begin drafting other administrative actions.
-  - Reports will federate to the instance that owns the user being reported, for user reports, and status reports
+  - As a user, I can attach multiple statuses to a report.
+  - As an admin, I can view all reports, and use a report to begin drafting other administrative actions.
+  - As an admin, I can view reports of my instance's users and statuses reported by other instances.
+    + The converse is also true.
