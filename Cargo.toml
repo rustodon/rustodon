@@ -4,12 +4,15 @@ version = "0.1.0"
 authors = ["Erin <erin@hashbang.sh>"]
 
 [dependencies]
+dotenv = "0.10.1"
+
 rocket = "0.3.4"
 rocket_codegen = "0.3.4"
 
 diesel = { version = "1.0.0-beta1", features = ["postgres"] }
 diesel_infer_schema = { version = "1.0.0-beta1", features = ["postgres"] }
-dotenv = "0.10.1"
+r2d2 = "0.8.1"
+r2d2-diesel = "1.0.0-beta1"
 
 [dependencies.rocket_contrib]
 version = "0.3.4"
