@@ -6,6 +6,10 @@ use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
 use rocket::http::Status;
 
+pub mod schema;
+pub mod models;
+
+
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
