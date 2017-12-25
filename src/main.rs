@@ -12,6 +12,11 @@ mod db;
 use std::env;
 use dotenv::dotenv;
 
+#[get("/")]
+fn hello_world(db_conn: db::Connection) -> &'static str {
+    "Hello, world!"
+}
+
 fn main() {
     dotenv().ok();
 
@@ -21,6 +26,7 @@ fn main() {
 
 
     rocket::ignite()
+        .mount("/", routes![hello_world])
         .manage(db_connection_pool)
         .launch();
 }
