@@ -4,7 +4,10 @@ CREATE TABLE accounts (
 
     username VARCHAR NOT NULL,
     display_name VARCHAR,
-    summary TEXT
+    summary TEXT,
+
+    -- make sure no two accounts on the same domain have the same username
+    UNIQUE(username, domain)
 );
 
 CREATE TABLE users (
