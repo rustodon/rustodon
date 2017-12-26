@@ -13,10 +13,17 @@ mod db;
 
 use std::env;
 use dotenv::dotenv;
+use diesel::prelude::*;
+
 
 #[get("/")]
-fn hello_world(db_conn: db::Connection) -> &'static str {
-    "Hello, world!"
+fn hello_world(db_conn: db::Connection) -> String {
+    use db::schema::users::dsl::*;
+    use db::models::User;
+
+    let found_users = users.load::<User>(&*db_conn)
+        .expect("error loading users");
+    format!("users: {:?}", found_users)
 }
 
 fn main() {
