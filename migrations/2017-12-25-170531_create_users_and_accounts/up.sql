@@ -1,7 +1,10 @@
 CREATE TABLE accounts (
     id BIGSERIAL PRIMARY KEY,
+    domain VARCHAR,
+
     username VARCHAR NOT NULL,
-    domain VARCHAR
+    display_name VARCHAR,
+    summary TEXT
 );
 
 CREATE TABLE users (

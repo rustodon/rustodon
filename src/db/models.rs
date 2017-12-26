@@ -6,6 +6,8 @@ use db::schema::{accounts, users};
 pub struct Account {
     pub id: i64,
     pub username: String,
+    pub display_name: Option<String>,
+    pub summary: Option<String>,
     pub domain: Option<String>,
 }
 
