@@ -1,4 +1,5 @@
 use db::schema::{accounts, users};
+use pwhash::bcrypt;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 #[derive(Identifiable, Queryable, Debug, PartialEq)]
@@ -21,4 +22,19 @@ pub struct User {
     pub encrypted_password: String,
 
     account_id: i64,
+}
+
+
+impl User {
+    pub fn valid_password<S>(&self, password: S) -> bool
+        where S: Into<String>
+    {
+        bcrypt::verify(&self.encrypted_password, &password.into())
+    }
+
+    pub fn encrypt_password<S>(password: S) -> String
+        where S: Into<String>
+    {
+        bcrypt::hash(&password.into()).expect("Couldn't hash password!")
+    }
 }
