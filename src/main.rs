@@ -27,8 +27,10 @@ fn hello_world(db_conn: db::Connection) -> String {
 }
 
 fn main() {
+    // load environment variables fron .env
     dotenv().ok();
 
+    // extract the database url from the environment and create the db connection pool
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_connection_pool = db::init_connection_pool(db_url)
         .expect("Couldn't establish connection to database!");
@@ -36,6 +38,7 @@ fn main() {
 
     rocket::ignite()
         .mount("/", routes![hello_world])
-        .manage(db_connection_pool)
+        .manage(db_connection_pool) // store the db pool as Rocket managed state
+                                    // (this lets us use the db::Connection guard)
         .launch();
 }

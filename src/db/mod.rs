@@ -43,7 +43,7 @@ impl <'a, 'r> FromRequest<'a, 'r> for Connection {
         // retrieve the database connection from Rocket's managed data
         let pool = request.guard::<State<Pool>>()?;
 
-        match pool.get() { // .get() gets a connection from the pool
+        match pool.get() { // .get() a connection from the pool
             Ok(conn) => Outcome::Success(Connection(conn)),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
         }

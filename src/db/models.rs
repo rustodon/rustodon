@@ -26,12 +26,14 @@ pub struct User {
 
 
 impl User {
+    /// Checks if a plaintext password is valid.
     pub fn valid_password<S>(&self, password: S) -> bool
         where S: Into<String>
     {
         bcrypt::verify(&self.encrypted_password, &password.into())
     }
 
+    /// Hashes a plaintext password for storage in the database.
     pub fn encrypt_password<S>(password: S) -> String
         where S: Into<String>
     {
