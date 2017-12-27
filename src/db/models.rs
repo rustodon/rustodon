@@ -1,4 +1,4 @@
-use db::schema::{accounts, users};
+use db::schema::{accounts, users, statuses, follows};
 use pwhash::bcrypt;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
@@ -22,6 +22,27 @@ pub struct User {
     pub encrypted_password: String,
 
     account_id: i64,
+}
+
+/// Represents a post.
+#[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
+#[belongs_to(Account)]
+#[table_name = "statuses"]
+pub struct Status {
+    pub id: i64,
+    pub text: String,
+    pub content_warning: Option<String>,
+
+    pub account_id: i64,
+}
+
+/// Represents a following relationship `[source user] -> [target user]`.
+#[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
+#[table_name = "follows"]
+pub struct Follow {
+    pub id: i64,
+    pub source_id: i64,
+    pub target_id: i64,
 }
 
 
