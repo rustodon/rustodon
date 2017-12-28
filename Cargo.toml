@@ -16,7 +16,9 @@ r2d2-diesel = "1.0.0-beta1"
 
 pwhash = "0.1.2"
 
+try_opt = "0.1.1"
+
 [dependencies.rocket_contrib]
 version = "0.3.4"
 default-features = false
-features = ["json", "handlebars_templates"]
+features = ["json", "tera_templates"]

@@ -1,9 +1,10 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
-extern crate rocket;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_infer_schema;
+#[macro_use] extern crate try_opt;
+extern crate rocket;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate dotenv;
