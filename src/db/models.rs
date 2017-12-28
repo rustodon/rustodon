@@ -4,7 +4,9 @@
 //! The ordering must match that in the generated schema, which
 //! you can obtain with `diesel print-schema`.
 
+use diesel::prelude::*;
 use db::schema::{accounts, users, statuses, follows};
+use db::Connection;
 use pwhash::bcrypt;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
@@ -66,5 +68,23 @@ impl User {
         where S: Into<String>
     {
         bcrypt::hash(&password.into()).expect("Couldn't hash password!")
+    }
+}
+
+impl User {
+    // TODO: should probably be Result<Option<T>>?
+    pub fn by_username(db_conn: &Connection, username: String) -> Option<User> {
+        let account = try_opt!({
+            use db::schema::accounts::dsl;
+            dsl::accounts
+                .filter(dsl::username.eq(username))
+                .filter(dsl::domain.is_null())
+                .first::<Account>(&**db_conn).ok()
+        });
+
+        use db::schema::users::dsl;
+        dsl::users
+            .filter(dsl::account_id.eq(account.id))
+            .first::<User>(&**db_conn).ok()
     }
 }
