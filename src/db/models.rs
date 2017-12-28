@@ -1,3 +1,9 @@
+//! Database models.
+//!
+//! Note: do _not_ change the ordering of fields in these structs!
+//! The ordering must match that in the generated schema, which
+//! you can obtain with `diesel print-schema`.
+
 use db::schema::{accounts, users, statuses, follows};
 use pwhash::bcrypt;
 
@@ -6,10 +12,11 @@ use pwhash::bcrypt;
 #[table_name = "accounts"]
 pub struct Account {
     pub id: i64,
-    pub username: String,
-    pub display_name: Option<String>,
-    pub summary: Option<String>,
     pub domain: Option<String>,
+    pub username: String,
+
+    pub summary: Option<String>,
+    pub display_name: Option<String>,
 }
 
 /// Represents a local user, and information required to authenticate that user.
