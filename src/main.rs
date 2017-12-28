@@ -11,6 +11,7 @@ extern crate dotenv;
 extern crate pwhash;
 
 mod db;
+mod error;
 
 use std::env;
 use dotenv::dotenv;
