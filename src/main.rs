@@ -11,22 +11,11 @@ extern crate dotenv;
 extern crate pwhash;
 
 mod db;
+mod routes;
 mod error;
 
 use std::env;
 use dotenv::dotenv;
-use diesel::prelude::*;
-
-
-#[get("/")]
-fn hello_world(db_conn: db::Connection) -> String {
-    use db::schema::users::dsl::*;
-    use db::models::User;
-
-    let found_users = users.load::<User>(&*db_conn)
-        .expect("error loading users");
-    format!("users: {:?}", found_users)
-}
 
 fn main() {
     // load environment variables fron .env
@@ -39,7 +28,7 @@ fn main() {
 
 
     rocket::ignite()
-        .mount("/", routes![hello_world])
+        .mount("/", routes::ui_routes())
         .manage(db_connection_pool) // store the db pool as Rocket managed state
                                     // (this lets us use the db::Connection guard)
         .launch();
