@@ -12,9 +12,9 @@ extern crate pwhash;
 extern crate serde;
 #[macro_use] extern crate serde_json;
 
+mod error;
 mod db;
 mod routes;
-mod error;
 
 use std::env;
 use dotenv::dotenv;
@@ -30,7 +30,7 @@ fn main() {
 
 
     rocket::ignite()
-        .mount("/", routes::ui_routes())
+        .mount("/", routes::ui::routes())
         .manage(db_connection_pool) // store the db pool as Rocket managed state
                                     // (this lets us use the db::Connection guard)
         .launch();
