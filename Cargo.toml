@@ -5,6 +5,7 @@ authors = ["Erin <erin@hashbang.sh>"]
 
 [dependencies]
 dotenv = "0.10.1"
+try_opt = "0.1.1"
 
 rocket = "0.3.4"
 rocket_codegen = "0.3.4"
@@ -16,7 +17,8 @@ r2d2-diesel = "1.0.0-beta1"
 
 pwhash = "0.1.2"
 
-try_opt = "0.1.1"
+serde = "1.0"
+serde_json = "1.0"
 
 [dependencies.rocket_contrib]
 version = "0.3.4"
