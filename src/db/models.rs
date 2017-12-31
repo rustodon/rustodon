@@ -4,10 +4,12 @@
 //! The ordering must match that in the generated schema, which
 //! you can obtain with `diesel print-schema`.
 
+use std::borrow::Cow;
 use diesel::prelude::*;
 use db::schema::{accounts, users, statuses, follows};
 use db::Connection;
 use pwhash::bcrypt;
+use ::DOMAIN;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 #[derive(Identifiable, Queryable, Debug, PartialEq)]
@@ -70,9 +72,7 @@ impl User {
     {
         bcrypt::hash(&password.into()).expect("Couldn't hash password!")
     }
-}
 
-impl User {
     // TODO: should probably be Result<Option<T>>?
     pub fn by_username(db_conn: &Connection, username: String) -> Option<User> {
         let account = try_opt!({
@@ -87,5 +87,38 @@ impl User {
         dsl::users
             .filter(dsl::account_id.eq(account.id))
             .first::<User>(&**db_conn).ok()
+    }
+}
+
+impl Account {
+    // TODO: gross, should probably clean up sometime
+    pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
+        self.uri.as_ref().map(|x| String::as_str(x).into())
+            .unwrap_or(format!("{domain}/users/{user}", domain=DOMAIN.as_str(),
+                                                        user=self.username).into())
+    }
+
+    pub fn get_inbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
+        self.uri.as_ref().map(|x| String::as_str(x).into())
+            .unwrap_or(format!("{domain}/users/{user}/inbox", domain=DOMAIN.as_str(),
+                                                        user=self.username).into())
+    }
+
+    pub fn get_outbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
+        self.uri.as_ref().map(|x| String::as_str(x).into())
+            .unwrap_or(format!("{domain}/users/{user}/outbox", domain=DOMAIN.as_str(),
+                                                        user=self.username).into())
+    }
+
+    pub fn get_following_endpoint<'a>(&'a self) -> Cow<'a, str> {
+        self.uri.as_ref().map(|x| String::as_str(x).into())
+            .unwrap_or(format!("{domain}/users/{user}/following", domain=DOMAIN.as_str(),
+                                                        user=self.username).into())
+    }
+
+    pub fn get_followers_endpoint<'a>(&'a self) -> Cow<'a, str> {
+        self.uri.as_ref().map(|x| String::as_str(x).into())
+            .unwrap_or(format!("{domain}/users/{user}/followers", domain=DOMAIN.as_str(),
+                                                        user=self.username).into())
     }
 }
