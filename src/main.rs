@@ -40,6 +40,7 @@ fn main() {
 
     rocket::ignite()
         .mount("/", routes::ui::routes())
+        .mount("/", routes::ap::routes())
         .manage(db_connection_pool) // store the db pool as Rocket managed state
                                     // (this lets us use the db::Connection guard)
         .launch();
