@@ -1,5 +1,6 @@
-#![feature(plugin)]
+#![feature(plugin, nll, custom_derive)]
 #![plugin(rocket_codegen)]
+#![recursion_limit="128"]
 
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_infer_schema;
