@@ -6,7 +6,9 @@
 #[macro_use] extern crate diesel_infer_schema;
 #[macro_use] extern crate try_opt;
 #[macro_use] extern crate lazy_static;
+extern crate itertools;
 extern crate rocket;
+extern crate rocket_contrib;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate dotenv;
@@ -17,6 +19,7 @@ extern crate serde;
 mod error;
 mod db;
 mod routes;
+mod activitypub;
 
 use std::env;
 use dotenv::dotenv;
