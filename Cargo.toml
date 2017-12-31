@@ -4,8 +4,9 @@ version = "0.1.0"
 authors = ["Erin <erin@hashbang.sh>"]
 
 [dependencies]
-dotenv = "0.10.1"
-try_opt = "0.1.1"
+dotenv = "0.10"
+try_opt = "0.1"
+lazy_static = "1.0"
 
 rocket = "0.3.4"
 rocket_codegen = "0.3.4"

@@ -4,6 +4,7 @@
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_infer_schema;
 #[macro_use] extern crate try_opt;
+#[macro_use] extern crate lazy_static;
 extern crate rocket;
 extern crate r2d2;
 extern crate r2d2_diesel;
@@ -18,6 +19,10 @@ mod routes;
 
 use std::env;
 use dotenv::dotenv;
+
+lazy_static! {
+    pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set").to_owned();
+}
 
 fn main() {
     // load environment variables fron .env
