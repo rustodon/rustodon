@@ -14,6 +14,7 @@ use pwhash::bcrypt;
 #[table_name = "accounts"]
 pub struct Account {
     pub id: i64,
+    pub uri: Option<String>,
     pub domain: Option<String>,
     pub username: String,
 

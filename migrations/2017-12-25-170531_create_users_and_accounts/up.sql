@@ -1,5 +1,6 @@
 CREATE TABLE accounts (
     id BIGSERIAL PRIMARY KEY,
+    uri VARCHAR,
     domain VARCHAR,
 
     username VARCHAR NOT NULL,
