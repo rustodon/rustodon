@@ -74,6 +74,7 @@ impl User {
     }
 
     // TODO: should probably be Result<Option<T>>?
+    // requires a bit of thought, because we can't just try_opt! then :(
     pub fn by_username(db_conn: &Connection, username: String) -> Option<User> {
         let account = try_opt!({
             use db::schema::accounts::dsl;
@@ -91,6 +92,17 @@ impl User {
 }
 
 impl Account {
+    // TODO: result
+    pub fn fetch_local_by_username<S>(db_conn: &Connection, username: S) -> Option<Account>
+        where S: Into<String>
+    {
+        use db::schema::accounts::dsl;
+        dsl::accounts
+            .filter(dsl::username.eq(username.into()))
+            .filter(dsl::domain.is_null())
+            .first::<Account>(&**db_conn).ok()
+    }
+
     // TODO: gross, should probably clean up sometime
     pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())

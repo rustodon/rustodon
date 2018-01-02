@@ -40,13 +40,7 @@ pub fn is_ap(accept: &Accept) -> bool {
 
 #[get("/users/<username>", rank=2)]
 pub fn ap_user_object(username: String, _ag: ActivityGuard, db_conn: db::Connection) -> Option<ActivityStreams> {
-    let account = try_opt!({
-        use db::schema::accounts::dsl;
-        dsl::accounts
-            .filter(dsl::username.eq(username))
-            .filter(dsl::domain.is_null())
-            .first::<Account>(&*db_conn).ok()
-    });
+    let account = try_opt!(Account::fetch_local_by_username(&db_conn, username));
 
     Some(account.as_activitypub())
 }
@@ -64,13 +58,7 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Option
 
     // TODO: check domain, don't just assume it's local
 
-    let account = try_opt!({
-        use db::schema::accounts::dsl;
-        dsl::accounts
-            .filter(dsl::username.eq(username))
-            .filter(dsl::domain.is_null())
-            .first::<Account>(&*db_conn).ok()
-    });
+    let account = try_opt!(Account::fetch_local_by_username(&db_conn, username));
 
     let wf_doc = json!({
         "aliases": [account.get_uri()],
