@@ -9,10 +9,11 @@ use rocket_contrib::Json;
 use db;
 use db::models::Account;
 use activitypub::{ActivityStreams, AsActivityPub};
+use ::DOMAIN;
 
 
 pub fn routes() -> Vec<Route> {
-    routes![ap_user_object, webfinger_get_resource]
+    routes![ap_user_object, webfinger_get_resource, webfinger_host_meta]
 }
 
 pub struct ActivityGuard();
@@ -54,7 +55,7 @@ pub struct WFQuery {
 pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Option<Content<Json>> {
     // TODO: don't unwrap
     let (_, addr) = query.resource.split_at(query.resource.rfind("acct:").unwrap() + "acct:".len());
-    let (username, domain) = addr.split("@").next_tuple().unwrap();
+    let (username, domain) = addr.split("@").collect_tuple().unwrap();
 
     // TODO: check domain, don't just assume it's local
 
@@ -82,6 +83,16 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Option
     Some(Content(wf_content, Json(wf_doc)))
 }
 
+/// Returns metadata about well-known routes as XRD; necessary to be Webfinger-compliant.
+#[get("/.well-known/host-meta")]
+pub fn webfinger_host_meta() -> Content<String> {
+    let xrd_xml = ContentType::new("application", "xrd+xml");
+
+    Content(xrd_xml, format!(r#"<?xml version="1.0"?>
+<XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
+  <Link rel="lrdd" type="application/xrd+xml" template="{domain}/.well-known/webfinger?resource={{uri}}"/>
+</XRD>"#, domain=DOMAIN.as_str()))
+}
 
 #[cfg(test)]
 mod test {
