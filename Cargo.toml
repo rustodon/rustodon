@@ -9,13 +9,13 @@ try_opt = "0.1"
 lazy_static = "1.0"
 itertools = "0.7.4"
 
-rocket = "0.3.4"
-rocket_codegen = "0.3.4"
+rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
+rocket_codegen = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 
-diesel = { version = "1.0.0-beta1", features = ["postgres"] }
-diesel_infer_schema = { version = "1.0.0-beta1", features = ["postgres"] }
+diesel = { version = "1.0.0", features = ["postgres"] }
+diesel_infer_schema = { version = "1.0.0", features = ["postgres"] }
 r2d2 = "0.8.1"
-r2d2-diesel = "1.0.0-beta1"
+r2d2-diesel = "1.0.0"
 
 pwhash = "0.1.2"
 
@@ -23,6 +23,10 @@ serde = "1.0"
 serde_json = "1.0"
 
 [dependencies.rocket_contrib]
-version = "0.3.4"
+git = "https://github.com/SergioBenitez/Rocket"
+branch = "v0.3"
 default-features = false
 features = ["json", "tera_templates"]
+
+[patch.crates-io]
+ring = { git = "https://github.com/SergioBenitez/ring", branch = "v0.11" }
