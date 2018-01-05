@@ -24,6 +24,7 @@ mod activitypub;
 
 use std::env;
 use dotenv::dotenv;
+use rocket_contrib::Template;
 
 lazy_static! {
     pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set").to_owned();
@@ -40,6 +41,7 @@ fn main() {
 
 
     rocket::ignite()
+        .attach(Template::fairing())
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
         .manage(db_connection_pool) // store the db pool as Rocket managed state
