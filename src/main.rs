@@ -14,6 +14,7 @@ extern crate r2d2_diesel;
 extern crate dotenv;
 extern crate pwhash;
 extern crate serde;
+#[macro_use] extern crate serde_derive;
 #[macro_use] extern crate serde_json;
 
 mod error;
