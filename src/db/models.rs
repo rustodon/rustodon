@@ -20,8 +20,8 @@ pub struct Account {
     pub domain: Option<String>,
     pub username: String,
 
-    pub summary: Option<String>,
     pub display_name: Option<String>,
+    pub summary: Option<String>,
 }
 
 /// Represents a local user, and information required to authenticate that user.
