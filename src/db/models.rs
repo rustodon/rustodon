@@ -81,13 +81,13 @@ impl User {
             dsl::accounts
                 .filter(dsl::username.eq(username))
                 .filter(dsl::domain.is_null())
-                .first::<Account>(&**db_conn).ok()
+                .first::<Account>(&**db_conn).optional().unwrap()
         });
 
         use db::schema::users::dsl;
         dsl::users
             .filter(dsl::account_id.eq(account.id))
-            .first::<User>(&**db_conn).ok()
+            .first::<User>(&**db_conn).optional().unwrap()
     }
 }
 
@@ -100,7 +100,7 @@ impl Account {
         dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .filter(dsl::domain.is_null())
-            .first::<Account>(&**db_conn).ok()
+            .first::<Account>(&**db_conn).optional().unwrap()
     }
 
     // TODO: gross, should probably clean up sometime
