@@ -25,10 +25,6 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Option<Template> 
 }
 
 #[get("/")]
-pub fn index(db_conn: db::Connection) -> String {
-    use db::schema::users::dsl::*;
-
-    let found_users = users.load::<User>(&*db_conn)
-        .expect("error loading users");
-    format!("users: {:?}", found_users)
+pub fn index(db_conn: db::Connection) -> Template {
+    Template::render("index", json!({}))
 }

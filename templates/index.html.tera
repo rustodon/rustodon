@@ -1,0 +1,5 @@
+{% extends "common/static_base" %}
+
+{% block main %}
+<h1>Rustodon</h1>
+{% endblock main %}
