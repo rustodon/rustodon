@@ -27,7 +27,8 @@ use dotenv::dotenv;
 use rocket_contrib::Template;
 
 lazy_static! {
-    pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set").to_owned();
+    pub static ref BASE_URL: String = format!("https://{}", env::var("DOMAIN").expect("DOMAIN must be set"));
+    pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
 }
 
 fn main() {

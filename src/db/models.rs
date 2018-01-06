@@ -9,7 +9,7 @@ use diesel::prelude::*;
 use db::schema::{accounts, users, statuses, follows};
 use db::Connection;
 use pwhash::bcrypt;
-use ::DOMAIN;
+use ::{BASE_URL, DOMAIN};
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 #[derive(Identifiable, Queryable, Debug, Serialize, PartialEq)]
@@ -106,31 +106,31 @@ impl Account {
     // TODO: gross, should probably clean up sometime
     pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{domain}/users/{user}", domain=DOMAIN.as_str(),
+            .unwrap_or(format!("{base}/users/{user}", base=BASE_URL.as_str(),
                                                         user=self.username).into())
     }
 
     pub fn get_inbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{domain}/users/{user}/inbox", domain=DOMAIN.as_str(),
+            .unwrap_or(format!("{base}/users/{user}/inbox", base=BASE_URL.as_str(),
                                                         user=self.username).into())
     }
 
     pub fn get_outbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{domain}/users/{user}/outbox", domain=DOMAIN.as_str(),
+            .unwrap_or(format!("{base}/users/{user}/outbox", base=BASE_URL.as_str(),
                                                         user=self.username).into())
     }
 
     pub fn get_following_endpoint<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{domain}/users/{user}/following", domain=DOMAIN.as_str(),
+            .unwrap_or(format!("{base}/users/{user}/following", base=BASE_URL.as_str(),
                                                         user=self.username).into())
     }
 
     pub fn get_followers_endpoint<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{domain}/users/{user}/followers", domain=DOMAIN.as_str(),
+            .unwrap_or(format!("{base}/users/{user}/followers", base=BASE_URL.as_str(),
                                                         user=self.username).into())
     }
 }

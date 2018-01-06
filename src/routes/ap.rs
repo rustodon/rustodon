@@ -8,7 +8,7 @@ use rocket_contrib::Json;
 use db;
 use db::models::Account;
 use activitypub::{ActivityStreams, AsActivityPub};
-use ::DOMAIN;
+use ::BASE_URL;
 
 
 pub fn routes() -> Vec<Route> {
@@ -89,8 +89,8 @@ pub fn webfinger_host_meta() -> Content<String> {
 
     Content(xrd_xml, format!(r#"<?xml version="1.0"?>
 <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
-  <Link rel="lrdd" type="application/xrd+xml" template="{domain}/.well-known/webfinger?resource={{uri}}"/>
-</XRD>"#, domain=DOMAIN.as_str()))
+  <Link rel="lrdd" type="application/xrd+xml" template="{base}/.well-known/webfinger?resource={{uri}}"/>
+</XRD>"#, base=BASE_URL.as_str()))
 }
 
 #[cfg(test)]
