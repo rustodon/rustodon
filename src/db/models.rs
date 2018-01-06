@@ -12,7 +12,7 @@ use pwhash::bcrypt;
 use ::DOMAIN;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
-#[derive(Identifiable, Queryable, Debug, PartialEq)]
+#[derive(Identifiable, Queryable, Debug, Serialize, PartialEq)]
 #[table_name = "accounts"]
 pub struct Account {
     pub id: i64,
@@ -25,7 +25,7 @@ pub struct Account {
 }
 
 /// Represents a local user, and information required to authenticate that user.
-#[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
+#[derive(Identifiable, Queryable, Associations, PartialEq, Serialize, Debug)]
 #[belongs_to(Account)]
 #[table_name = "users"]
 pub struct User {
