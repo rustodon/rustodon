@@ -2,14 +2,14 @@
 
 {% block main %}
 <div class="h-card">
-	<h1>
-		<a class="u-url u-uid" href="{{uri}}"><span class="p-name">{{display_name}}</span></a>
-		<small>
-			<span>{{username}}</span>
-		</small>
-	</h1>
-	<div class="p-note">
-		{{bio | safe}}
-	</div>
+  <h1>
+    <a class="u-url u-uid" href="{{uri}}"><span class="p-name">{{display_name}}</span></a>
+    <small>
+      <span>{{fq_username}}</span>
+    </small>
+  </h1>
+  <div class="p-note">
+    {{bio | safe}}
+  </div>
 </div>
 {% endblock main %}

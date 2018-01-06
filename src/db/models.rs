@@ -103,6 +103,11 @@ impl Account {
             .first::<Account>(&**db_conn).optional().unwrap()
     }
 
+    pub fn fully_qualified_username(&self) -> String {
+        format!("@{user}@{domain}", user=self.username,
+                                    domain=DOMAIN.as_str())
+    }
+
     // TODO: gross, should probably clean up sometime
     pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())

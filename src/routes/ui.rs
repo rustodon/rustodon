@@ -15,7 +15,7 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Option<Template> 
     // We can use a cute hack to remove the need to explicitly write out a context struct,
     // by using the serde_json helper to construct a `Serialize`-able struct on the fly.
     let context = json!({
-        "username": &account.username,
+        "fq_username": account.fully_qualified_username(),
         "display_name": account.display_name.as_ref().unwrap_or(&account.username),
         "uri": &account.get_uri(),
         "bio": account.summary.as_ref().map(String::as_str).unwrap_or("<p></p>"),
