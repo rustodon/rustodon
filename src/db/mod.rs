@@ -1,7 +1,7 @@
 use std::ops::Deref;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
-use diesel::pg::PgConnection;
+use diesel::sqlite::SqliteConnection;
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
 use rocket::http::Status;
@@ -10,17 +10,17 @@ pub mod schema;
 pub mod models;
 
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
-type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+type Pool = r2d2::Pool<ConnectionManager<SqliteConnection>>;
 
 /// Type alias for the pooled connection.
-type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
+type PooledConnection = r2d2::PooledConnection<ConnectionManager<SqliteConnection>>;
 
 /// Initializes a new connection pool for the database at `url`.
 pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::Error>
 where
     S: Into<String>,
 {
-    let manager = ConnectionManager::<PgConnection>::new(url);
+    let manager = ConnectionManager::<SqliteConnection>::new(url);
 
     r2d2::Pool::builder().build(manager)
 }
@@ -48,11 +48,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for Connection {
     }
 }
 
-/// A convenient way to use a `&db::Connection` as a `&PgConnection`.
+/// A convenient way to use a `&db::Connection` as a `&SqliteConnection`.
 ///
 /// Just allows deref-ing the inner `PooledConnection`.
 impl Deref for Connection {
-    type Target = PgConnection;
+    type Target = SqliteConnection;
 
     fn deref(&self) -> &Self::Target {
         &self.0
