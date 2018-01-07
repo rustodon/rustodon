@@ -5,6 +5,10 @@ use rocket::http::{Status, ContentType};
 use rocket::response::{self, Responder, Content};
 use ::db::models::Account;
 
+/// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
+///
+/// Implements `Responder`, so we can return this from Rocket routes
+/// and have Content-Type and friends be handled ✨automagically✨
 pub struct ActivityStreams<T = Value>(pub T);
 
 impl<T> Responder<'static> for ActivityStreams<T>
@@ -16,12 +20,15 @@ impl<T> Responder<'static> for ActivityStreams<T>
 
             Content(ap_json, string).respond_to(req).unwrap()
         }).map_err(|e| {
-            // TODO: logging
+            // TODO: logging (what happens if the Value won't serialize?)
+            // the code i cribbed this from did some internal Rocket thing.
             Status::InternalServerError
         })
     }
 }
 
+/// Trait implemented by structs which can serialize to
+/// ActivityPub-compliant ActivityStreams2 JSON-LD.
 pub trait AsActivityPub {
     fn as_activitypub(&self) -> ActivityStreams;
 }
