@@ -23,6 +23,10 @@ Then, run the database setup:
 $ diesel database setup
 ```
 
+On some operating systems, you may need to separately install the Postgres client library:
+
+* Debian/Ubuntu: `apt install libpq-dev`
+
 You can now launch Rustodon by running
 ```
 $ cargo run
