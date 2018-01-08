@@ -5,6 +5,8 @@
 //! you can obtain with `diesel print-schema`.
 
 use std::borrow::Cow;
+use chrono::DateTime;
+use chrono::offset::Utc;
 use diesel::prelude::*;
 use db::schema::{accounts, users, statuses, follows};
 use db::Connection;
@@ -44,6 +46,7 @@ pub struct Status {
     pub id: i64,
     pub text: String,
     pub content_warning: Option<String>,
+    pub created_at: DateTime<Utc>,
 
     pub account_id: i64,
 }

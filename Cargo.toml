@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["The Rustodon team"]
 
 [dependencies]
+chrono = "0.4"
 dotenv = "0.10"
 try_opt = "0.1"
 lazy_static = "1.0"
@@ -12,7 +13,7 @@ itertools = "0.7.4"
 rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 rocket_codegen = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 
-diesel = { version = "1.0.0", features = ["postgres"] }
+diesel = { version = "1.0.0", features = ["postgres", "chrono"] }
 diesel_infer_schema = { version = "1.0.0", features = ["postgres"] }
 r2d2 = "0.8.1"
 r2d2-diesel = "1.0.0"
