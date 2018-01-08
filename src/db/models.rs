@@ -47,8 +47,8 @@ pub struct Status {
     pub text: String,
     pub content_warning: Option<String>,
     pub created_at: DateTime<Utc>,
-
     pub account_id: i64,
+    pub uri: Option<String>,
 }
 
 /// Represents a following relationship `[source user] -> [target user]`.

@@ -1,0 +1,1 @@
+ALTER TABLE statuses DROP COLUMN uri RESTRICT;
