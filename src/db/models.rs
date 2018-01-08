@@ -14,6 +14,8 @@ use pwhash::bcrypt;
 use ::{BASE_URL, DOMAIN};
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
+///
+/// A uri of None implies a local account.
 #[derive(Identifiable, Queryable, Debug, Serialize, PartialEq)]
 #[table_name = "accounts"]
 pub struct Account {
@@ -39,6 +41,8 @@ pub struct User {
 }
 
 /// Represents a post.
+///
+/// A uri of None implies a local status.
 #[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
 #[belongs_to(Account)]
 #[table_name = "statuses"]
