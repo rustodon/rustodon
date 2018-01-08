@@ -151,3 +151,26 @@ impl Account {
                                                                 user=self.username).into())
     }
 }
+
+impl Status {
+    pub fn account(&self, db_conn: &Connection) -> QueryResult<Account> {
+        use db::schema::accounts::dsl;
+        dsl::accounts
+            .find(self.account_id)
+            .get_result::<Account>(&**db_conn)
+    }
+
+    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Cow<'a, str>> {
+        Ok(self.uri
+            .as_ref()
+            .map(|x| String::as_str(x).into())
+            .unwrap_or(
+                format!(
+                    "{base}/users/{user}/updates/{id}",
+                    base = BASE_URL.as_str(),
+                    user = self.account(db_conn)?.username,
+                    id = self.id
+                ).into(),
+            ))
+    }
+}
