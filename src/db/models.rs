@@ -5,6 +5,8 @@
 //! you can obtain with `diesel print-schema`.
 
 use std::borrow::Cow;
+use chrono::DateTime;
+use chrono::offset::Utc;
 use diesel::prelude::*;
 use db::schema::{accounts, users, statuses, follows};
 use db::Connection;
@@ -12,6 +14,8 @@ use pwhash::bcrypt;
 use ::{BASE_URL, DOMAIN};
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
+///
+/// A uri of None implies a local account.
 #[derive(Identifiable, Queryable, Debug, Serialize, PartialEq)]
 #[table_name = "accounts"]
 pub struct Account {
@@ -37,6 +41,8 @@ pub struct User {
 }
 
 /// Represents a post.
+///
+/// A uri of None implies a local status.
 #[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
 #[belongs_to(Account)]
 #[table_name = "statuses"]
@@ -44,8 +50,9 @@ pub struct Status {
     pub id: i64,
     pub text: String,
     pub content_warning: Option<String>,
-
+    pub created_at: DateTime<Utc>,
     pub account_id: i64,
+    pub uri: Option<String>,
 }
 
 /// Represents a following relationship `[source user] -> [target user]`.
@@ -142,5 +149,28 @@ impl Account {
         self.uri.as_ref().map(|x| String::as_str(x).into())
             .unwrap_or(format!("{base}/users/{user}/followers", base=BASE_URL.as_str(),
                                                                 user=self.username).into())
+    }
+}
+
+impl Status {
+    pub fn account(&self, db_conn: &Connection) -> QueryResult<Account> {
+        use db::schema::accounts::dsl;
+        dsl::accounts
+            .find(self.account_id)
+            .get_result::<Account>(&**db_conn)
+    }
+
+    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Cow<'a, str>> {
+        Ok(self.uri
+            .as_ref()
+            .map(|x| String::as_str(x).into())
+            .unwrap_or(
+                format!(
+                    "{base}/users/{user}/updates/{id}",
+                    base = BASE_URL.as_str(),
+                    user = self.account(db_conn)?.username,
+                    id = self.id
+                ).into(),
+            ))
     }
 }

@@ -6,6 +6,7 @@
 #[macro_use] extern crate diesel_infer_schema;
 #[macro_use] extern crate try_opt;
 #[macro_use] extern crate lazy_static;
+extern crate chrono;
 extern crate itertools;
 extern crate rocket;
 extern crate rocket_contrib;
