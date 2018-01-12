@@ -1,4 +1,3 @@
-fn_single_line = true
 match_block_trailing_comma = true
 normalize_comments = true
 struct_field_align_threshold = 3
