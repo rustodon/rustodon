@@ -117,38 +117,43 @@ impl Account {
 
     pub fn get_domain(&self) -> &str {
         self.domain.as_ref().map(String::as_str)
-            .unwrap_or(DOMAIN.as_str())
+            .unwrap_or_else(|| DOMAIN.as_str())
     }
 
     // TODO: gross, should probably clean up sometime
     pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{base}/users/{user}", base=BASE_URL.as_str(),
-                                                      user=self.username).into())
+            .unwrap_or_else(|| format!("{base}/users/{user}",
+                base=BASE_URL.as_str(),
+                user=self.username).into())
     }
 
     pub fn get_inbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{base}/users/{user}/inbox", base=BASE_URL.as_str(),
-                                                            user=self.username).into())
+            .unwrap_or_else(|| format!("{base}/users/{user}/inbox",
+                base=BASE_URL.as_str(),
+                user=self.username).into())
     }
 
     pub fn get_outbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{base}/users/{user}/outbox", base=BASE_URL.as_str(),
-                                                             user=self.username).into())
+            .unwrap_or_else(|| format!("{base}/users/{user}/outbox",
+                base=BASE_URL.as_str(),
+                user=self.username).into())
     }
 
     pub fn get_following_endpoint<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{base}/users/{user}/following", base=BASE_URL.as_str(),
-                                                                user=self.username).into())
+            .unwrap_or_else(|| format!("{base}/users/{user}/following",
+                base=BASE_URL.as_str(),
+                user=self.username).into())
     }
 
     pub fn get_followers_endpoint<'a>(&'a self) -> Cow<'a, str> {
         self.uri.as_ref().map(|x| String::as_str(x).into())
-            .unwrap_or(format!("{base}/users/{user}/followers", base=BASE_URL.as_str(),
-                                                                user=self.username).into())
+            .unwrap_or_else(|| format!("{base}/users/{user}/followers",
+                base=BASE_URL.as_str(),
+                user=self.username).into())
     }
 }
 
