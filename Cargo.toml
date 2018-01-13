@@ -3,6 +3,11 @@ name = "rustodon"
 version = "0.1.0"
 authors = ["The Rustodon team"]
 
+[features]
+default = ["postgres"]
+postgres = []
+sqlite = []
+
 [dependencies]
 chrono = "0.4"
 dotenv = "0.10"
