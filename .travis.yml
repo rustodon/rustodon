@@ -17,10 +17,8 @@ env:
   - MIGRATION_DIR=migrations_sqlite FEATURES=sqlite   DATABASE_URL=rustodon.sqlite3
 
 before_script:
-  - psql -c 'create database rustodon;' -U postgres
-  - if [ ! -x `which diesel` ]; then cargo install diesel_cli --features='postgres sqlite'; fi
+  - if [ ! `which diesel` ]; then cargo install diesel_cli --features='postgres sqlite'; fi
 
 script:
-  - diesel migration run --migration-dir=${MIGRATION_DIR}
+  - diesel database setup --migration-dir=${MIGRATION_DIR}
   - cargo build --no-default-features --features=${FEATURES} --release
-  - cargo clippy
