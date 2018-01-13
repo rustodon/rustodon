@@ -1,8 +1,7 @@
-use diesel::prelude::*;
 use rocket::Route;
 use rocket_contrib::Template;
 use ::db;
-use db::models::{User, Account};
+use db::models::Account;
 
 pub fn routes() -> Vec<Route> {
     routes![index, user_page]

@@ -54,7 +54,7 @@ pub struct WFQuery {
 pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Option<Content<Json>> {
     // TODO: don't unwrap
     let (_, addr) = query.resource.split_at(query.resource.rfind("acct:").unwrap() + "acct:".len());
-    let (username, _domain) = addr.split("@").collect_tuple().unwrap();
+    let (username, _domain) = addr.split('@').collect_tuple().unwrap();
 
     // TODO: check domain, don't just assume it's local
 

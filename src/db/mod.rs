@@ -52,7 +52,7 @@ impl <'a, 'r> FromRequest<'a, 'r> for Connection {
 
 /// A convenient way to use a `&db::Connection` as a `&PgConnection`.
 ///
-/// Just allows deref-ing the inner PooledConnection.
+/// Just allows deref-ing the inner `PooledConnection`.
 impl Deref for Connection {
     type Target = PgConnection;
 
