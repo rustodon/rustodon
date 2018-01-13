@@ -19,7 +19,9 @@ env:
 before_script:
   - psql -c 'create database rustodon;' -U postgres
   - cargo install diesel_cli --features='postgres sqlite'
+  - cargo install clippy
 
 script:
   - diesel migration run --migration-dir=${MIGRATION_DIR}
   - cargo build --no-default-features --features=${FEATURES} --release
+  - cargo clippy
