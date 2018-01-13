@@ -14,7 +14,6 @@ before_install:
 
 env:
   - MIGRATION_DIR=migrations        FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
-  - MIGRATION_DIR=migrations_sqlite FEATURES=sqlite   DATABASE_URL=rustodon.sqlite3
 
 before_script:
   - if [ ! `which diesel` ]; then cargo install diesel_cli --features='postgres sqlite'; fi
