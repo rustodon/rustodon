@@ -1,0 +1,25 @@
+language: rust
+
+rust:
+  - nightly
+
+cache: cargo
+
+services:
+  - postgresql
+
+before_install:
+  - sudo apt-get update -yqq
+  - sudo apt-get install -yqq libpq-dev
+
+env:
+  - MIGRATION_DIR=migrations        FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
+  - MIGRATION_DIR=migrations_sqlite FEATURES=sqlite   DATABASE_URL=rustodon.sqlite3
+
+before_script:
+  - psql -c 'create database rustodon;' -U postgres
+  - cargo install diesel_cli --features='postgres sqlite'
+
+script:
+  - diesel migration run --migration-dir=${MIGRATION_DIR}
+  - cargo build --no-default-features --features=${FEATURES} --release
