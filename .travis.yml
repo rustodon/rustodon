@@ -13,7 +13,8 @@ before_install:
   - sudo apt-get install -yqq libpq-dev
 
 env:
-  - MIGRATION_DIR=migrations FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
+  - MIGRATION_DIR=migrations        FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
+  - MIGRATION_DIR=migrations_sqlite FEATURES=sqlite   DATABASE_URL=rustodon.sqlite3
 
 before_script:
   - rustup component add --toolchain nightly rustfmt-preview
