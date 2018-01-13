@@ -22,6 +22,8 @@ To set up a new database in Postgres and run all the migrations, first install t
 $ cargo install diesel_cli
 ```
 
+Cargo, by default, will install any package binaries into `~/.cargo/bin`. We will assume you have added that directory to your `PATH` environment variable.
+
 Then, run the database setup:
 ```
 $ diesel database setup
