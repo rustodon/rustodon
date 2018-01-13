@@ -24,10 +24,8 @@ type DieselConnection = SqliteConnection;
 #[cfg(all(not(feature = "sqlite"), feature = "postgres"))]
 type DieselConnection = PgConnection;
 
-
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
 type Pool = r2d2::Pool<ConnectionManager<DieselConnection>>;
-
 
 /// Type alias for the pooled connection.
 type PooledConnection = r2d2::PooledConnection<ConnectionManager<DieselConnection>>;
