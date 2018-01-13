@@ -1,13 +1,13 @@
 use rocket::Route;
 use rocket_contrib::Template;
-use ::db;
+use db;
 use db::models::Account;
 
 pub fn routes() -> Vec<Route> {
     routes![index, user_page]
 }
 
-#[get("/users/<username>", format="text/html")]
+#[get("/users/<username>", format = "text/html")]
 pub fn user_page(username: String, db_conn: db::Connection) -> Option<Template> {
     let account = try_opt!(Account::fetch_local_by_username(&db_conn, username));
 
