@@ -13,9 +13,9 @@ $ export DATABASE_URL=postgres://username:password@localhost/rustodon
 
 This environment variable could alternatively be added to the `.env` file (you can use `git update-index --assume-unchanged .env` to keep Git from telling you `.env` has been modified. Please don't commit _your_ environment to the repo :p).
 
-On some operating systems, you may need to separately install the Postgres client library:
+On some operating systems, you may need to separately install the Postgres client library, as well as the MySQL library (even if we won't ever use it):
 
-* Debian/Ubuntu: `apt install libpq-dev`
+* Debian/Ubuntu: `apt install libpq-dev libmysqlclient-dev`
 
 To set up a new database in Postgres and run all the migrations, first install the Diesel CLI:
 ```
