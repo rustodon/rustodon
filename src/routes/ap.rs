@@ -1,15 +1,14 @@
 use itertools::Itertools;
-use rocket::{Route, Outcome};
+use rocket::{Outcome, Route};
 use rocket::response::Content;
-use rocket::request::{self, Request, FromRequest};
-use rocket::http::{Accept, MediaType, ContentType};
+use rocket::request::{self, FromRequest, Request};
+use rocket::http::{Accept, ContentType, MediaType};
 use rocket_contrib::Json;
 
 use db;
 use db::models::Account;
 use activitypub::{ActivityStreams, AsActivityPub};
-use ::BASE_URL;
-
+use BASE_URL;
 
 pub fn routes() -> Vec<Route> {
     routes![ap_user_object, webfinger_get_resource, webfinger_host_meta]
@@ -33,13 +32,21 @@ pub fn is_ap(accept: &Accept) -> bool {
 
     // TODO: clean this up/make these const, if MediaType::new ever becomes a const fn
     let ap_json = MediaType::new("application", "activity+json");
-    let ap_json_ld = MediaType::with_params("application", "ld+json", ("profile", "https://www.w3.org/ns/activitystreams"));
+    let ap_json_ld = MediaType::with_params(
+        "application",
+        "ld+json",
+        ("profile", "https://www.w3.org/ns/activitystreams"),
+    );
 
     media_type.exact_eq(&ap_json) || media_type.exact_eq(&ap_json_ld)
 }
 
-#[get("/users/<username>", rank=2)]
-pub fn ap_user_object(username: String, _ag: ActivityGuard, db_conn: db::Connection) -> Option<ActivityStreams> {
+#[get("/users/<username>", rank = 2)]
+pub fn ap_user_object(
+    username: String,
+    _ag: ActivityGuard,
+    db_conn: db::Connection,
+) -> Option<ActivityStreams> {
     let account = try_opt!(Account::fetch_local_by_username(&db_conn, username));
 
     Some(account.as_activitypub())
@@ -53,7 +60,9 @@ pub struct WFQuery {
 #[get("/.well-known/webfinger?<query>")]
 pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Option<Content<Json>> {
     // TODO: don't unwrap
-    let (_, addr) = query.resource.split_at(query.resource.rfind("acct:").unwrap() + "acct:".len());
+    let (_, addr) = query
+        .resource
+        .split_at(query.resource.rfind("acct:").unwrap() + "acct:".len());
     let (username, _domain) = addr.split('@').collect_tuple().unwrap();
 
     // TODO: check domain, don't just assume it's local
@@ -102,7 +111,9 @@ mod test {
         use std::str::FromStr;
 
         let accept_json = Accept::from_str("application/activity+json").unwrap();
-        let accept_json_ld = Accept::from_str("application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"").unwrap();
+        let accept_json_ld = Accept::from_str(
+            "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
+        ).unwrap();
 
         assert!(is_ap(&accept_json_ld));
         assert!(is_ap(&accept_json));

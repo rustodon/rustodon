@@ -1,9 +1,9 @@
 use serde::Serialize;
 use serde_json::{self, Value};
 use rocket::Request;
-use rocket::http::{Status, ContentType};
-use rocket::response::{self, Responder, Content};
-use ::db::models::Account;
+use rocket::http::{ContentType, Status};
+use rocket::response::{self, Content, Responder};
+use db::models::Account;
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
@@ -12,18 +12,21 @@ use ::db::models::Account;
 pub struct ActivityStreams<T = Value>(pub T);
 
 impl<T> Responder<'static> for ActivityStreams<T>
-    where T: Serialize
+where
+    T: Serialize,
 {
     fn respond_to(self, req: &Request) -> response::Result<'static> {
-        serde_json::to_string(&self.0).map(|string| {
-            let ap_json = ContentType::new("application", "activity+json");
+        serde_json::to_string(&self.0)
+            .map(|string| {
+                let ap_json = ContentType::new("application", "activity+json");
 
-            Content(ap_json, string).respond_to(req).unwrap()
-        }).map_err(|e| {
-            // TODO: logging (what happens if the Value won't serialize?)
-            // the code i cribbed this from did some internal Rocket thing.
-            Status::InternalServerError
-        })
+                Content(ap_json, string).respond_to(req).unwrap()
+            })
+            .map_err(|e| {
+                // TODO: logging (what happens if the Value won't serialize?)
+                // the code i cribbed this from did some internal Rocket thing.
+                Status::InternalServerError
+            })
     }
 }
 
