@@ -1,0 +1,26 @@
+language: rust
+
+rust:
+  - nightly
+
+cache: cargo
+
+services:
+  - postgresql
+
+before_install:
+  - sudo apt-get update -yqq
+  - sudo apt-get install -yqq libpq-dev
+
+env:
+  - MIGRATION_DIR=migrations        FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
+
+before_script:
+  - rustup component add --toolchain nightly rustfmt-preview
+  - which cargo-install-update || cargo install cargo-update
+  - cargo install-update diesel_cli
+
+script:
+  - cargo fmt -- --write-mode=diff
+  - diesel database setup --migration-dir=${MIGRATION_DIR}
+  - cargo build --no-default-features --features=${FEATURES} --release
