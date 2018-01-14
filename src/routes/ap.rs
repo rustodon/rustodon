@@ -7,6 +7,7 @@ use rocket_contrib::Json;
 
 use db;
 use db::models::Account;
+use error::OptionalResult;
 use activitypub::{ActivityStreams, AsActivityPub};
 use BASE_URL;
 
@@ -46,10 +47,9 @@ pub fn ap_user_object(
     username: String,
     _ag: ActivityGuard,
     db_conn: db::Connection,
-) -> Option<ActivityStreams> {
-    let account = try_opt!(Account::fetch_local_by_username(&db_conn, username));
-
-    Some(account.as_activitypub())
+) -> OptionalResult<ActivityStreams> {
+    Ok(Account::fetch_local_by_username(&db_conn, username)?
+        .map(|acct| acct.as_activitypub()))
 }
 
 #[derive(FromForm, Debug)]
@@ -58,7 +58,7 @@ pub struct WFQuery {
 }
 
 #[get("/.well-known/webfinger?<query>")]
-pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Option<Content<Json>> {
+pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> OptionalResult<Content<Json>> {
     // TODO: don't unwrap
     let (_, addr) = query
         .resource
@@ -67,7 +67,7 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Option
 
     // TODO: check domain, don't just assume it's local
 
-    let account = try_opt!(Account::fetch_local_by_username(&db_conn, username));
+    let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
 
     let wf_doc = json!({
         "aliases": [account.get_uri()],
@@ -88,7 +88,7 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Option
 
     let wf_content = ContentType::new("application", "jrd+json");
 
-    Some(Content(wf_content, Json(wf_doc)))
+    Ok(Some(Content(wf_content, Json(wf_doc))))
 }
 
 /// Returns metadata about well-known routes as XRD; necessary to be Webfinger-compliant.
