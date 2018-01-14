@@ -8,10 +8,17 @@ use std::borrow::Cow;
 use chrono::DateTime;
 use chrono::offset::Utc;
 use diesel::prelude::*;
+use pwhash::bcrypt;
 use db::schema::{accounts, follows, statuses, users};
 use db::Connection;
-use pwhash::bcrypt;
+use diesel::result::Error as DieselError;
 use {BASE_URL, DOMAIN};
+
+/// Type representing the result of a database operation.
+///
+/// The nested `Option<T>` in the `Result` allows a semantic distinction bewteen "query error"
+/// and "no records returned".
+type DatabaseResult<T> = Result<Option<T>, DieselError>;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
@@ -81,41 +88,36 @@ impl User {
         bcrypt::hash(&password.into()).expect("Couldn't hash password!")
     }
 
-    // TODO: should probably be Result<Option<T>>?
-    // requires a bit of thought, because we can't just try_opt! then :(
-    pub fn by_username(db_conn: &Connection, username: String) -> Option<User> {
-        let account = try_opt!({
+    pub fn by_username(db_conn: &Connection, username: String) -> DatabaseResult<User> {
+        let account = try_resopt!({
             use db::schema::accounts::dsl;
             dsl::accounts
                 .filter(dsl::username.eq(username))
                 .filter(dsl::domain.is_null())
                 .first::<Account>(&**db_conn)
                 .optional()
-                .unwrap()
         });
 
         use db::schema::users::dsl;
-        dsl::users
+        Ok(dsl::users
             .filter(dsl::account_id.eq(account.id))
             .first::<User>(&**db_conn)
-            .optional()
-            .unwrap()
+            .optional()?)
     }
 }
 
 impl Account {
     // TODO: result
-    pub fn fetch_local_by_username<S>(db_conn: &Connection, username: S) -> Option<Account>
+    pub fn fetch_local_by_username<S>(db_conn: &Connection, username: S) -> DatabaseResult<Account>
     where
         S: Into<String>,
     {
         use db::schema::accounts::dsl;
-        dsl::accounts
+        Ok(dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .filter(dsl::domain.is_null())
             .first::<Account>(&**db_conn)
-            .optional()
-            .unwrap()
+            .optional()?)
     }
 
     pub fn fully_qualified_username(&self) -> String {
@@ -201,24 +203,25 @@ impl Account {
 }
 
 impl Status {
-    pub fn account(&self, db_conn: &Connection) -> QueryResult<Account> {
+    pub fn account(&self, db_conn: &Connection) -> DatabaseResult<Account> {
         use db::schema::accounts::dsl;
         dsl::accounts
             .find(self.account_id)
-            .get_result::<Account>(&**db_conn)
+            .first::<Account>(&**db_conn)
+            .optional()
     }
 
-    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Cow<'a, str>> {
-        Ok(self.uri
+    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> DatabaseResult<Cow<'a, str>> {
+        Ok(Some(self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
             .unwrap_or(
                 format!(
                     "{base}/users/{user}/updates/{id}",
                     base = BASE_URL.as_str(),
-                    user = self.account(db_conn)?.username,
+                    user = try_resopt!(self.account(db_conn)).username,
                     id = self.id
                 ).into(),
-            ))
+            )))
     }
 }
