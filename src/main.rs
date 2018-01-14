@@ -2,14 +2,15 @@
 #![plugin(rocket_codegen)]
 #![recursion_limit = "128"]
 
-extern crate failure;
-#[macro_use] extern crate failure_derive;
 extern crate chrono;
 #[macro_use]
 extern crate diesel;
 #[macro_use]
 extern crate diesel_infer_schema;
 extern crate dotenv;
+extern crate failure;
+#[macro_use]
+extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;

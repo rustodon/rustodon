@@ -48,8 +48,7 @@ pub fn ap_user_object(
     _ag: ActivityGuard,
     db_conn: db::Connection,
 ) -> OptionalResult<ActivityStreams> {
-    Ok(Account::fetch_local_by_username(&db_conn, username)?
-        .map(|acct| acct.as_activitypub()))
+    Ok(Account::fetch_local_by_username(&db_conn, username)?.map(|acct| acct.as_activitypub()))
 }
 
 #[derive(FromForm, Debug)]
@@ -58,7 +57,10 @@ pub struct WFQuery {
 }
 
 #[get("/.well-known/webfinger?<query>")]
-pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> OptionalResult<Content<Json>> {
+pub fn webfinger_get_resource(
+    query: WFQuery,
+    db_conn: db::Connection,
+) -> OptionalResult<Content<Json>> {
     // TODO: don't unwrap
     let (_, addr) = query
         .resource

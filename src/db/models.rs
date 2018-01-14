@@ -212,16 +212,18 @@ impl Status {
     }
 
     pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> DatabaseResult<Cow<'a, str>> {
-        Ok(Some(self.uri
-            .as_ref()
-            .map(|x| String::as_str(x).into())
-            .unwrap_or(
-                format!(
-                    "{base}/users/{user}/updates/{id}",
-                    base = BASE_URL.as_str(),
-                    user = try_resopt!(self.account(db_conn)).username,
-                    id = self.id
-                ).into(),
-            )))
+        Ok(Some(
+            self.uri
+                .as_ref()
+                .map(|x| String::as_str(x).into())
+                .unwrap_or(
+                    format!(
+                        "{base}/users/{user}/updates/{id}",
+                        base = BASE_URL.as_str(),
+                        user = try_resopt!(self.account(db_conn)).username,
+                        id = self.id
+                    ).into(),
+                ),
+        ))
     }
 }
