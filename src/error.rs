@@ -1,8 +1,8 @@
-/// A type which could be nonexistent, existent, or errored.
-/// Useful for routes which might return {something, a 404, a 500}.
-pub type OptionalResult<T> = Result<Option<T>, ::failure::Error>;
+/// A type which could be nonexistent, existent, or errored;
+/// used for routes which might return {something, a 404, a 500}.
+pub type Perhaps<T> = Result<Option<T>, ::failure::Error>;
 
-/// An analog of `try!` for `OptionalResult`s.
+/// An analog of `try!` for `Result<Option<_>, _>`s.
 macro_rules! try_resopt {
     ($expr:expr) => (match $expr {
         ::std::result::Result::Ok(opt_val) => {

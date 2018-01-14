@@ -16,8 +16,8 @@ use {BASE_URL, DOMAIN};
 
 /// Type representing the result of a database operation.
 ///
-/// The nested `Option<T>` in the `Result` allows a semantic distinction bewteen "query error"
-/// and "no records returned".
+/// The nested `Option<T>` in the `Result` allows a semantic distinction
+/// bewteen "query error" and "no records returned".
 type DatabaseResult<T> = Result<Option<T>, DieselError>;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.

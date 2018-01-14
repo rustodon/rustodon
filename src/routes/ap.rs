@@ -7,7 +7,7 @@ use rocket_contrib::Json;
 
 use db;
 use db::models::Account;
-use error::OptionalResult;
+use error::Perhaps;
 use activitypub::{ActivityStreams, AsActivityPub};
 use BASE_URL;
 
@@ -47,7 +47,7 @@ pub fn ap_user_object(
     username: String,
     _ag: ActivityGuard,
     db_conn: db::Connection,
-) -> OptionalResult<ActivityStreams> {
+) -> Perhaps<ActivityStreams> {
     Ok(Account::fetch_local_by_username(&db_conn, username)?.map(|acct| acct.as_activitypub()))
 }
 
@@ -57,10 +57,7 @@ pub struct WFQuery {
 }
 
 #[get("/.well-known/webfinger?<query>")]
-pub fn webfinger_get_resource(
-    query: WFQuery,
-    db_conn: db::Connection,
-) -> OptionalResult<Content<Json>> {
+pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhaps<Content<Json>> {
     // TODO: don't unwrap
     let (_, addr) = query
         .resource
