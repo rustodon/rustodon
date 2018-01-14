@@ -93,10 +93,10 @@ impl User {
         });
 
         use db::schema::users::dsl;
-        Ok(dsl::users
+        dsl::users
             .filter(dsl::account_id.eq(account.id))
             .first::<User>(&**db_conn)
-            .optional()?)
+            .optional()
     }
 }
 
@@ -110,11 +110,11 @@ impl Account {
         S: Into<String>,
     {
         use db::schema::accounts::dsl;
-        Ok(dsl::accounts
+        dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .filter(dsl::domain.is_null())
             .first::<Account>(&**db_conn)
-            .optional()?)
+            .optional()
     }
 
     pub fn fully_qualified_username(&self) -> String {
