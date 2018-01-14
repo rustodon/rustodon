@@ -2,6 +2,8 @@
 #![plugin(rocket_codegen)]
 #![recursion_limit = "128"]
 
+extern crate failure;
+#[macro_use] extern crate failure_derive;
 extern crate chrono;
 #[macro_use]
 extern crate diesel;
@@ -21,8 +23,6 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
-#[macro_use]
-extern crate try_opt;
 
 mod error;
 mod db;
