@@ -8,6 +8,9 @@ extern crate diesel;
 #[macro_use]
 extern crate diesel_infer_schema;
 extern crate dotenv;
+extern crate failure;
+#[macro_use]
+extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
@@ -21,9 +24,8 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
-#[macro_use]
-extern crate try_opt;
 
+#[macro_use]
 mod error;
 mod db;
 mod routes;
