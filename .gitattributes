@@ -1,1 +1,2 @@
 *.rs linguist-language=Rust
+Cargo.lock linguist-generated=true
