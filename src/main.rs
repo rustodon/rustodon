@@ -24,6 +24,7 @@ extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
 
+#[macro_use]
 mod error;
 mod db;
 mod routes;
