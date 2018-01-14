@@ -24,6 +24,6 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Option<Template> 
 }
 
 #[get("/")]
-pub fn index(db_conn: db::Connection) -> Template {
+pub fn index() -> Template {
     Template::render("index", json!({}))
 }
