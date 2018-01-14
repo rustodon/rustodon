@@ -14,12 +14,6 @@ use db::Connection;
 use diesel::result::Error as DieselError;
 use {BASE_URL, DOMAIN};
 
-/// Type representing the result of a database operation.
-///
-/// The nested `Option<T>` in the `Result` allows a semantic distinction
-/// bewteen "query error" and "no records returned".
-type DatabaseResult<T> = Result<Option<T>, DieselError>;
-
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
 /// A uri of None implies a local account.
@@ -88,7 +82,7 @@ impl User {
         bcrypt::hash(&password.into()).expect("Couldn't hash password!")
     }
 
-    pub fn by_username(db_conn: &Connection, username: String) -> DatabaseResult<User> {
+    pub fn by_username(db_conn: &Connection, username: String) -> QueryResult<Option<User>> {
         let account = try_resopt!({
             use db::schema::accounts::dsl;
             dsl::accounts
@@ -108,7 +102,10 @@ impl User {
 
 impl Account {
     // TODO: result
-    pub fn fetch_local_by_username<S>(db_conn: &Connection, username: S) -> DatabaseResult<Account>
+    pub fn fetch_local_by_username<S>(
+        db_conn: &Connection,
+        username: S,
+    ) -> QueryResult<Option<Account>>
     where
         S: Into<String>,
     {
@@ -203,7 +200,7 @@ impl Account {
 }
 
 impl Status {
-    pub fn account(&self, db_conn: &Connection) -> DatabaseResult<Account> {
+    pub fn account(&self, db_conn: &Connection) -> QueryResult<Option<Account>> {
         use db::schema::accounts::dsl;
         dsl::accounts
             .find(self.account_id)
@@ -211,7 +208,7 @@ impl Status {
             .optional()
     }
 
-    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> DatabaseResult<Cow<'a, str>> {
+    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Option<Cow<'a, str>>> {
         Ok(Some(
             self.uri
                 .as_ref()
