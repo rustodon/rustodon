@@ -9,7 +9,7 @@ use db;
 use db::models::Account;
 use error::Perhaps;
 use activitypub::{ActivityStreams, AsActivityPub};
-use BASE_URL;
+use {BASE_URL, DOMAIN};
 
 pub fn routes() -> Vec<Route> {
     routes![ap_user_object, webfinger_get_resource, webfinger_host_meta]
@@ -62,9 +62,12 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhap
     let (_, addr) = query
         .resource
         .split_at(query.resource.rfind("acct:").unwrap() + "acct:".len());
-    let (username, _domain) = addr.split('@').collect_tuple().unwrap();
+    let (username, domain) = addr.split('@').collect_tuple().unwrap();
 
-    // TODO: check domain, don't just assume it's local
+    // If the webfinger address had a different domain, 404 out.
+    if domain != DOMAIN.as_str() {
+        return Ok(None)
+    }
 
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
 
