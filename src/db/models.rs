@@ -100,7 +100,6 @@ impl User {
 }
 
 impl Account {
-    // TODO: result
     pub fn fetch_local_by_username<S>(
         db_conn: &Connection,
         username: S,
@@ -131,7 +130,6 @@ impl Account {
             .unwrap_or_else(|| DOMAIN.as_str())
     }
 
-    // TODO: gross, should probably clean up sometime
     pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
         self.uri
             .as_ref()
