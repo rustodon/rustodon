@@ -66,7 +66,7 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhap
 
     // If the webfinger address had a different domain, 404 out.
     if domain != DOMAIN.as_str() {
-        return Ok(None)
+        return Ok(None);
     }
 
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
