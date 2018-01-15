@@ -11,7 +11,6 @@ use diesel::prelude::*;
 use pwhash::bcrypt;
 use db::schema::{accounts, follows, statuses, users};
 use db::Connection;
-use diesel::result::Error as DieselError;
 use {BASE_URL, DOMAIN};
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
