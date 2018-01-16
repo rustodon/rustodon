@@ -28,6 +28,10 @@ script:
   - cargo fmt -- --write-mode=diff
   - diesel database setup --migration-dir=${MIGRATION_DIR}
   - cargo build --release
+  - zip -r latest *
+  - mkdir -p buildartifacts
+  - mv latest.zip buildartifacts/latest.zip
+
 
 deploy:
   - provider: s3
@@ -38,5 +42,16 @@ deploy:
     all_branches: true
     upload-dir: rustodon
     region: ca-central-1
-    on:
+    on: &2
       branch: codedeploy
+    local_dir: buildartifacts
+  - provider: codedeploy
+    bucket: buildartifacts.glitch.social
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    key: rustodon/latest.zip
+    bundle_type: zip
+    application: rustodon
+    deployment-group: rustodon-continuousdelivery
+    region: ca-central-1
+    on: *2
