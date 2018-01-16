@@ -13,7 +13,11 @@ before_install:
   - sudo apt-get install -yqq libpq-dev
 
 env:
-  - MIGRATION_DIR=migrations FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
+  global:
+    - secure: "kn3n05rK2nrLsMrUXCNqCiYtd3plpwfQSrSAkNFuI7A22RHmC2ItvpR01rT++MfR2CPkTlDHt5ONHkbOfDKUGF1seakNokdK6Kj9q/AtnOPW0wGc7XN31BqYS9JNqjoNwLM3/ETJj6JAneoIP+hglzrOiCSzgyoy/BHNQMqIvlw4GhAX3baK/2HsrQqMIHP+IKpObPbvkP3KXtSepbevZhUWdRrqnU18QHV3ZZqXLiVMPXcjb9ulRKkzisP5qVAgyVpmVke0YMV8B0OmXcsGjNQ41lQvluVghvhxOLvjga7qPLZIJ98aoX5ylGSdY7EhHRUjrq/N1je5FeuXgMAMzqaUeJ1CmkdOEFm/7y6kcLnJnJ7206ATWIYx56mYITGNMjyC9p98HIgb3W+E+Lj5X/RNGTcpDx6cmr61hsEk+eRjcbzReMk/6ukmTzqyxBEM8C5s2OeSl30BPJZgZQk7Ahc9SJ/FK3Pi6IuBy50RfnU2CdMaCFip0tg5G1K6kYVUTePKNDavfLZuauYhQgc17B4eXiIUj/Hs2FYlK0FAsJqvBayL0KDqakjFnS2bnz/PZShJJkE8BKWXgVdBPwZ8jSv9Wh31zKBWn4gIRiC7u5bOL0Bqhti7tz9KAVaBJxkDuZPhJgFmuPwR5lsnq/2MOQwlKkhMMGGrEveDhorJdzE="
+    - secure: "BiPfzjONdUm99KHn2T9ezNrU38uDXAQwGh1lpm4IlLkjZ7mr1SLDQ6bE/a/2vohqZwiQ1b0A0x7aCFXZqGgMH3gwJHeQG8UOSPgKDfzZiheOazSuO7ZdeSJyqVw0JjucqzdFpAEMYVxz0tIeGFcXpMtNdCLQaa+muC3zA6SZgdYCW/8lLYGJSuaiwJJ1NocbtxRDqAeVbPXKZ/w7bODJGui3IFK48Cmh1PweKkR7J79gTS2xEKdvGUoKErvxNR34WcwFqjRbE+qhHKnZEdDqg8gaa6GkKKLXKYj0B51VkvHx2AqIlTEChPUf9t0tBzZneIh7KMbW7uM7nmI0So74TiXgd0voM6r9fGLOX3UgYdEQa2QcmT7oCWmkq8WH38zxsv4gqkpK43fC1DUsc+Wa5ap3mTaepysbOA5jMu1vwu+fNv9EdJV6iKd+eOtBDbxqgY9i+Mj27X0qyN0Nq7KXcpsBco9b36yTo/3griUd1aNFIhDYDJY7d2F1LXZs0DwMf0UP/7BE/uVVVr7jnkZ0737v+S/dZHC/BIOZYsMgH2M62r8PCPuFaIRfyhMvAcBeAw4+0bPNrxgucaaBTBmQHY/Ux1F2KTGrLN/YJ1LPGm2QCn6oF+pvQsrSxPPZ0g4ZZBvCTaQNEdRnFIgNNKtsGkCvdJ6iAYbWA+l4iIPrwOw="
+  matrix:
+    - MIGRATION_DIR=migrations FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
 
 before_script:
   - which cargo-install-update || cargo install cargo-update
@@ -24,3 +28,15 @@ script:
   - cargo fmt -- --write-mode=diff
   - diesel database setup --migration-dir=${MIGRATION_DIR}
   - cargo build --release
+
+deploy:
+  - provider: s3
+    bucket: buildartifacts.glitch.social
+    skip_cleanup: true
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    all_branches: true
+    upload-dir: rustodon
+    region: ca-central-1
+    on:
+      branch: codedeploy
