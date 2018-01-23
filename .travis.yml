@@ -42,8 +42,6 @@ deploy:
     all_branches: true
     upload-dir: rustodon
     region: ca-central-1
-    on: &2
-      branch: codedeploy
     local_dir: buildartifacts
   - provider: codedeploy
     bucket: buildartifacts.glitch.social
@@ -54,4 +52,3 @@ deploy:
     application: rustodon
     deployment-group: rustodon-continuousdelivery
     region: ca-central-1
-    on: *2
