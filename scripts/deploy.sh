@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-diesel migration run
+cd /srv/rustodon
+/root/.cargo/bin/diesel migration run
