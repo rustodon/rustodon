@@ -4,4 +4,4 @@ os: linux
 
 files:
   - source: ./
-    destination: /home/ubuntu/rustodon
+    destination: /srv/rustodon
