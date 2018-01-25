@@ -36,4 +36,5 @@ features = ["json"]
 clippy = ">= 0"
 
 [patch.crates-io]
+rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 ring = { git = "https://github.com/SergioBenitez/ring", branch = "v0.11" }
