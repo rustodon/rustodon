@@ -10,6 +10,7 @@ extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
+extern crate maud;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
@@ -29,7 +30,6 @@ mod activitypub;
 
 use std::env;
 use dotenv::dotenv;
-use rocket_contrib::Template;
 
 lazy_static! {
     pub static ref BASE_URL: String = format!("https://{}", env::var("DOMAIN").expect("DOMAIN must be set"));
@@ -46,7 +46,6 @@ fn main() {
         db::init_connection_pool(db_url).expect("Couldn't establish connection to database!");
 
     rocket::ignite()
-        .attach(Template::fairing())
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
         .manage(db_connection_pool) // store the db pool as Rocket managed state
