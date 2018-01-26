@@ -1,0 +1,15 @@
+version: 0.0
+
+os: linux
+
+files:
+  - source: ./
+    destination: /srv/rustodon
+
+hooks:
+  AfterInstall:
+    - location: scripts/deploy.sh
+  ApplicationStop:
+    - location: scripts/staging_stop.sh
+  ApplicationStart:
+    - location: scripts/staging_start.sh
