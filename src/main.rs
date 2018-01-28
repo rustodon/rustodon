@@ -14,6 +14,8 @@ extern crate itertools;
 extern crate lazy_static;
 extern crate r2d2;
 extern crate r2d2_diesel;
+#[macro_use]
+extern crate resopt;
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
@@ -21,8 +23,6 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
-#[macro_use]
-extern crate resopt;
 
 extern crate rustodon_database as db;
 

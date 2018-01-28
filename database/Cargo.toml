@@ -16,4 +16,4 @@ rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 pwhash = "0.1.2"
 chrono = "0.4"
 
-resopt = { path = "../lib/resopt/"}
+resopt = { path = "../lib/resopt/" }
