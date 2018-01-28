@@ -5,8 +5,6 @@
 extern crate chrono;
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate diesel_infer_schema;
 extern crate dotenv;
 extern crate failure;
 #[macro_use]
@@ -14,7 +12,6 @@ extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
-extern crate pwhash;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rocket;
@@ -27,9 +24,10 @@ extern crate serde_json;
 #[macro_use]
 extern crate resopt;
 
+extern crate rustodon_database as db;
+
 #[macro_use]
 mod error;
-mod db;
 mod routes;
 mod activitypub;
 
