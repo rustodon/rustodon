@@ -1,4 +1,4 @@
-#![feature(plugin, nll, custom_derive)]
+#![feature(plugin, nll, custom_derive, proc_macro)]
 #![plugin(rocket_codegen)]
 #![recursion_limit = "128"]
 
@@ -20,8 +20,10 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
+extern crate maud;
 
 extern crate rustodon_database as db;
+
 
 #[macro_use]
 mod error;

@@ -1,4 +1,5 @@
 use rocket::Route;
+use maud::{html, Markup};
 
 use db;
 use db::models::Account;
@@ -16,5 +17,9 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<()> {
 }
 
 #[get("/")]
-pub fn index() -> () {
+pub fn index() -> Markup {
+    html! {
+        h1 "Rustodon"
+        p small "Templated with Maud!"
+    }
 }
