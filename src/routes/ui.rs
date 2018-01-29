@@ -3,6 +3,7 @@ use maud::{html, Markup};
 
 use db;
 use db::models::Account;
+use templates::{Page, PageBuilder};
 use error::Perhaps;
 
 pub fn routes() -> Vec<Route> {
@@ -17,9 +18,12 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<()> {
 }
 
 #[get("/")]
-pub fn index() -> Markup {
-    html! {
-        h1 "Rustodon"
-        p small "Templated with Maud!"
-    }
+pub fn index() -> Page {
+    PageBuilder::default()
+        .content(html! {
+            h1 "Rustodon"
+            p small "Templated with Maud!"
+        })
+        .build()
+        .unwrap()
 }
