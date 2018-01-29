@@ -3,6 +3,8 @@
 #![recursion_limit = "128"]
 
 extern crate chrono;
+#[macro_use]
+extern crate derive_builder;
 extern crate dotenv;
 extern crate failure;
 #[macro_use]
@@ -20,10 +22,8 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
-extern crate maud;
 
 extern crate rustodon_database as db;
-
 
 #[macro_use]
 mod error;

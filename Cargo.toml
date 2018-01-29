@@ -14,6 +14,8 @@ failure_derive = "0.1.1"
 lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
+derive_builder = "0.5.1"
+
 rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 rocket_codegen = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 
