@@ -3,8 +3,6 @@
 #![recursion_limit = "128"]
 
 extern crate chrono;
-#[macro_use]
-extern crate diesel;
 extern crate dotenv;
 extern crate failure;
 #[macro_use]
@@ -12,8 +10,6 @@ extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
-extern crate r2d2;
-extern crate r2d2_diesel;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
