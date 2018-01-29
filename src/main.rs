@@ -39,6 +39,8 @@ lazy_static! {
     pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
 }
 
+pub const GIT_REV: &'static str = include_str!(concat!(env!("OUT_DIR"), "/commit-info.txt"));
+
 fn main() {
     // load environment variables fron .env
     dotenv().ok();

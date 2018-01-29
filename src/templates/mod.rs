@@ -35,6 +35,14 @@ impl Render for Page {
 
             body {
                 (self.content)
+
+                footer {
+                    div {
+                        "Running commit "
+                        a href=(format!("https://github.com/rustodon/rustodon/commit/{}", GIT_REV))
+                            code (GIT_REV)
+                    }
+                }
             }
         }
     }
