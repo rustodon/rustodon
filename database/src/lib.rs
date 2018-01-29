@@ -1,5 +1,21 @@
+#![recursion_limit = "128"]
+
+extern crate chrono;
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate diesel_infer_schema;
+#[macro_use]
+extern crate lazy_static;
+extern crate pwhash;
+extern crate r2d2;
+extern crate r2d2_diesel;
+#[macro_use]
+extern crate resopt;
+extern crate rocket;
+
 use std::ops::Deref;
-use r2d2;
+use std::env;
 use r2d2_diesel::ConnectionManager;
 
 #[cfg(feature = "sqlite")]
@@ -23,6 +39,12 @@ type DieselConnection = SqliteConnection;
 
 #[cfg(all(not(feature = "sqlite"), feature = "postgres"))]
 type DieselConnection = PgConnection;
+
+// TODO: gross hack. find a nicer way to pass these in?
+lazy_static! {
+    pub static ref BASE_URL: String = format!("https://{}", env::var("DOMAIN").expect("DOMAIN must be set"));
+    pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
+}
 
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
 type Pool = r2d2::Pool<ConnectionManager<DieselConnection>>;

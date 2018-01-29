@@ -1,11 +1,3 @@
-use diesel;
-
-enum Error {
-    DBError(diesel::result::Error),
-}
-
-impl From<diesel::result::Error> for Error {
-    fn from(err: diesel::result::Error) -> Error {
-        Error::DBError(err)
-    }
-}
+/// A type which could be nonexistent, existent, or errored;
+/// used for routes which might return {something, a 404, a 500}.
+pub type Perhaps<T> = Result<Option<T>, ::failure::Error>;

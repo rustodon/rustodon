@@ -8,15 +8,15 @@ use std::borrow::Cow;
 use chrono::DateTime;
 use chrono::offset::Utc;
 use diesel::prelude::*;
-use db::schema::{accounts, follows, statuses, users};
-use db::Connection;
 use pwhash::bcrypt;
+use super::schema::{accounts, follows, statuses, users};
+use super::Connection;
 use {BASE_URL, DOMAIN};
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
 /// A uri of None implies a local account.
-#[derive(Identifiable, Queryable, Debug, Serialize, PartialEq)]
+#[derive(Identifiable, Queryable, Debug, PartialEq)]
 #[table_name = "accounts"]
 pub struct Account {
     pub id: i64,
@@ -29,7 +29,7 @@ pub struct Account {
 }
 
 /// Represents a local user, and information required to authenticate that user.
-#[derive(Identifiable, Queryable, Associations, PartialEq, Serialize, Debug)]
+#[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
 #[belongs_to(Account)]
 #[table_name = "users"]
 pub struct User {
@@ -81,41 +81,38 @@ impl User {
         bcrypt::hash(&password.into()).expect("Couldn't hash password!")
     }
 
-    // TODO: should probably be Result<Option<T>>?
-    // requires a bit of thought, because we can't just try_opt! then :(
-    pub fn by_username(db_conn: &Connection, username: String) -> Option<User> {
-        let account = try_opt!({
-            use db::schema::accounts::dsl;
+    pub fn by_username(db_conn: &Connection, username: String) -> QueryResult<Option<User>> {
+        let account = try_resopt!({
+            use super::schema::accounts::dsl;
             dsl::accounts
                 .filter(dsl::username.eq(username))
                 .filter(dsl::domain.is_null())
                 .first::<Account>(&**db_conn)
                 .optional()
-                .unwrap()
         });
 
-        use db::schema::users::dsl;
+        use super::schema::users::dsl;
         dsl::users
             .filter(dsl::account_id.eq(account.id))
             .first::<User>(&**db_conn)
             .optional()
-            .unwrap()
     }
 }
 
 impl Account {
-    // TODO: result
-    pub fn fetch_local_by_username<S>(db_conn: &Connection, username: S) -> Option<Account>
+    pub fn fetch_local_by_username<S>(
+        db_conn: &Connection,
+        username: S,
+    ) -> QueryResult<Option<Account>>
     where
         S: Into<String>,
     {
-        use db::schema::accounts::dsl;
+        use super::schema::accounts::dsl;
         dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .filter(dsl::domain.is_null())
             .first::<Account>(&**db_conn)
             .optional()
-            .unwrap()
     }
 
     pub fn fully_qualified_username(&self) -> String {
@@ -133,7 +130,6 @@ impl Account {
             .unwrap_or_else(|| DOMAIN.as_str())
     }
 
-    // TODO: gross, should probably clean up sometime
     pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
         self.uri
             .as_ref()
@@ -201,24 +197,27 @@ impl Account {
 }
 
 impl Status {
-    pub fn account(&self, db_conn: &Connection) -> QueryResult<Account> {
-        use db::schema::accounts::dsl;
+    pub fn account(&self, db_conn: &Connection) -> QueryResult<Option<Account>> {
+        use super::schema::accounts::dsl;
         dsl::accounts
             .find(self.account_id)
-            .get_result::<Account>(&**db_conn)
+            .first::<Account>(&**db_conn)
+            .optional()
     }
 
-    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Cow<'a, str>> {
-        Ok(self.uri
-            .as_ref()
-            .map(|x| String::as_str(x).into())
-            .unwrap_or(
-                format!(
-                    "{base}/users/{user}/updates/{id}",
-                    base = BASE_URL.as_str(),
-                    user = self.account(db_conn)?.username,
-                    id = self.id
-                ).into(),
-            ))
+    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Option<Cow<'a, str>>> {
+        Ok(Some(
+            self.uri
+                .as_ref()
+                .map(|x| String::as_str(x).into())
+                .unwrap_or(
+                    format!(
+                        "{base}/users/{user}/updates/{id}",
+                        base = BASE_URL.as_str(),
+                        user = try_resopt!(self.account(db_conn)).username,
+                        id = self.id
+                    ).into(),
+                ),
+        ))
     }
 }

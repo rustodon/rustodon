@@ -17,9 +17,9 @@ env:
   - MIGRATION_DIR=migrations_sqlite FEATURES=sqlite   DATABASE_URL=rustodon.sqlite3
 
 before_script:
-  - rustup component add --toolchain nightly rustfmt-preview
   - which cargo-install-update || cargo install cargo-update
   - cargo install-update -i diesel_cli
+  - cargo install --force rustfmt-nightly
 
 script:
   - cargo fmt -- --write-mode=diff
