@@ -3,10 +3,6 @@
 #![recursion_limit = "128"]
 
 extern crate chrono;
-#[macro_use]
-extern crate diesel;
-#[macro_use]
-extern crate diesel_infer_schema;
 extern crate dotenv;
 extern crate failure;
 #[macro_use]
@@ -14,9 +10,8 @@ extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
-extern crate pwhash;
-extern crate r2d2;
-extern crate r2d2_diesel;
+#[macro_use]
+extern crate resopt;
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
@@ -25,9 +20,10 @@ extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
 
+extern crate rustodon_database as db;
+
 #[macro_use]
 mod error;
-mod db;
 mod routes;
 mod activitypub;
 

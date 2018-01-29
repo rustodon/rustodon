@@ -9,14 +9,14 @@ use chrono::DateTime;
 use chrono::offset::Utc;
 use diesel::prelude::*;
 use pwhash::bcrypt;
-use db::schema::{accounts, follows, statuses, users};
-use db::Connection;
+use super::schema::{accounts, follows, statuses, users};
+use super::Connection;
 use {BASE_URL, DOMAIN};
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
 /// A uri of None implies a local account.
-#[derive(Identifiable, Queryable, Debug, Serialize, PartialEq)]
+#[derive(Identifiable, Queryable, Debug, PartialEq)]
 #[table_name = "accounts"]
 pub struct Account {
     pub id: i64,
@@ -29,7 +29,7 @@ pub struct Account {
 }
 
 /// Represents a local user, and information required to authenticate that user.
-#[derive(Identifiable, Queryable, Associations, PartialEq, Serialize, Debug)]
+#[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
 #[belongs_to(Account)]
 #[table_name = "users"]
 pub struct User {
@@ -83,7 +83,7 @@ impl User {
 
     pub fn by_username(db_conn: &Connection, username: String) -> QueryResult<Option<User>> {
         let account = try_resopt!({
-            use db::schema::accounts::dsl;
+            use super::schema::accounts::dsl;
             dsl::accounts
                 .filter(dsl::username.eq(username))
                 .filter(dsl::domain.is_null())
@@ -91,7 +91,7 @@ impl User {
                 .optional()
         });
 
-        use db::schema::users::dsl;
+        use super::schema::users::dsl;
         dsl::users
             .filter(dsl::account_id.eq(account.id))
             .first::<User>(&**db_conn)
@@ -107,7 +107,7 @@ impl Account {
     where
         S: Into<String>,
     {
-        use db::schema::accounts::dsl;
+        use super::schema::accounts::dsl;
         dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .filter(dsl::domain.is_null())
@@ -198,7 +198,7 @@ impl Account {
 
 impl Status {
     pub fn account(&self, db_conn: &Connection) -> QueryResult<Option<Account>> {
-        use db::schema::accounts::dsl;
+        use super::schema::accounts::dsl;
         dsl::accounts
             .find(self.account_id)
             .first::<Account>(&**db_conn)
