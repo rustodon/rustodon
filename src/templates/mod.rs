@@ -3,6 +3,8 @@ use rocket::request::Request;
 use rocket::response::{self, Responder, Response};
 use GIT_REV;
 
+/// Type to store data about a templated page in. Used to insert each page's markup into
+/// a base template which sets up stuff like stylesheets and the general html structure.
 #[derive(Debug, Builder)]
 #[builder(setter(into))]
 pub struct Page {
@@ -11,6 +13,7 @@ pub struct Page {
     content: Markup,
 }
 
+/// Allows returning `Page`s from Rocket routes.
 impl<'r> Responder<'r> for Page {
     fn respond_to(self, req: &Request) -> response::Result<'r> {
         self.render().respond_to(req)
