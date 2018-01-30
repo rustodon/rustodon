@@ -10,7 +10,8 @@ use std::process::Command;
 struct Ignore;
 
 impl<E> From<E> for Ignore
-    where E: Error
+where
+    E: Error,
 {
     fn from(_: E) -> Ignore {
         Ignore
@@ -37,9 +38,10 @@ fn commit_info() -> String {
 }
 
 fn commit_hash() -> Result<String, Ignore> {
-    Ok(try!(String::from_utf8(try!(Command::new("git")
-                                       .args(&["rev-parse", "--short=9", "HEAD"])
-                                       .output())
-                                  .stdout)))
+    Ok(String::from_utf8(
+        Command::new("git")
+            .args(&["rev-parse", "--short=9", "HEAD"])
+            .output()?
+            .stdout,
+    )?)
 }
-
