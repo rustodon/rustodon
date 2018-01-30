@@ -36,7 +36,7 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
             }
         })
         .build()
-        .unwrap();
+        .unwrap(); // note: won't panic since content is provided.
 
     Ok(Some(rendered))
 }
@@ -49,5 +49,5 @@ pub fn index() -> Page {
             p small "Templated with Maud!"
         })
         .build()
-        .unwrap()
+        .unwrap() // note: won't panic since content is provided.
 }
