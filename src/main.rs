@@ -1,8 +1,10 @@
-#![feature(plugin, nll, custom_derive)]
+#![feature(plugin, nll, custom_derive, proc_macro)]
 #![plugin(rocket_codegen)]
 #![recursion_limit = "128"]
 
 extern crate chrono;
+#[macro_use]
+extern crate derive_builder;
 extern crate dotenv;
 extern crate failure;
 #[macro_use]
@@ -10,6 +12,7 @@ extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
+extern crate maud;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
@@ -24,17 +27,19 @@ extern crate rustodon_database as db;
 
 #[macro_use]
 mod error;
+mod templates;
 mod routes;
 mod activitypub;
 
 use std::env;
 use dotenv::dotenv;
-use rocket_contrib::Template;
 
 lazy_static! {
     pub static ref BASE_URL: String = format!("https://{}", env::var("DOMAIN").expect("DOMAIN must be set"));
     pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
 }
+
+pub const GIT_REV: &'static str = include_str!(concat!(env!("OUT_DIR"), "/commit-info.txt"));
 
 fn main() {
     // load environment variables fron .env
@@ -46,7 +51,6 @@ fn main() {
         db::init_connection_pool(db_url).expect("Couldn't establish connection to database!");
 
     rocket::ignite()
-        .attach(Template::fairing())
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
         .manage(db_connection_pool) // store the db pool as Rocket managed state

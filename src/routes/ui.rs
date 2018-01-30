@@ -1,8 +1,9 @@
 use rocket::Route;
-use rocket_contrib::Template;
+use maud::{html, Markup, PreEscaped};
 
 use db;
 use db::models::Account;
+use templates::{Page, PageBuilder};
 use error::Perhaps;
 
 pub fn routes() -> Vec<Route> {
@@ -10,22 +11,43 @@ pub fn routes() -> Vec<Route> {
 }
 
 #[get("/users/<username>", format = "text/html")]
-pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Template> {
+pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
 
-    // We can use a cute hack to remove the need to explicitly write out a context struct,
-    // by using the serde_json helper to construct a `Serialize`-able struct on the fly.
-    let context = json!({
-        "fq_username": account.fully_qualified_username(),
-        "display_name": account.display_name.as_ref().unwrap_or(&account.username),
-        "uri": &account.get_uri(),
-        "bio": account.summary.as_ref().map(String::as_str).unwrap_or("<p></p>"),
-    });
+    let rendered = PageBuilder::default()
+        .title(format!("@{user}", user = account.username))
+        .content(html! {
+            div.h-card {
+                header {
+                    h1 a.u-url.u-uid href=(account.get_uri()) {
+                        span.p-name (account.display_name.as_ref().unwrap_or(&account.username))
+                    }
 
-    Ok(Some(Template::render("user_profile", context)))
+                    div (account.fully_qualified_username())
+                }
+
+                div.p-note {
+                    @if let Some(bio) = account.summary.as_ref() {
+                        (PreEscaped(bio))
+                    } @else {
+                        p {}
+                    }
+                }
+            }
+        })
+        .build()
+        .unwrap(); // note: won't panic since content is provided.
+
+    Ok(Some(rendered))
 }
 
 #[get("/")]
-pub fn index() -> Template {
-    Template::render("index", json!({}))
+pub fn index() -> Page {
+    PageBuilder::default()
+        .content(html! {
+            h1 "Rustodon"
+            p small "Templated with Maud!"
+        })
+        .build()
+        .unwrap() // note: won't panic since content is provided.
 }
