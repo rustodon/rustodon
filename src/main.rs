@@ -3,8 +3,6 @@
 #![recursion_limit = "128"]
 
 extern crate chrono;
-#[macro_use]
-extern crate derive_builder;
 extern crate dotenv;
 extern crate failure;
 #[macro_use]
