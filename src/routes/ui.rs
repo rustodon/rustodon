@@ -1,15 +1,23 @@
 use std::path::{Path, PathBuf};
 use rocket::Route;
-use rocket::response::NamedFile;
+use rocket::request::{FlashMessage, Form};
+use rocket::response::{Flash, NamedFile, Redirect};
 use maud::{html, PreEscaped};
 
 use db;
-use db::models::Account;
+use db::models::{Account, User};
 use templates::Page;
+use failure::Error;
 use error::Perhaps;
 
 pub fn routes() -> Vec<Route> {
-    routes![index, user_page, auth_signin_get, static_files]
+    routes![
+        index,
+        user_page,
+        auth_signin_get,
+        auth_signin_post,
+        static_files
+    ]
 }
 
 #[get("/auth/sign_in")]
@@ -38,6 +46,25 @@ pub struct SigninForm {
     username: String,
     password: String,
 }
+
+#[post("/auth/sign_in", data = "<form>")]
+pub fn auth_signin_post(
+    form: Form<SigninForm>,
+    db_conn: db::Connection,
+) -> Result<Flash<Redirect>, Error> {
+    let form_data = form.get();
+    let user = User::by_username(&db_conn, &form_data.username)?;
+
+    if let Some(user) = user {
+        if user.valid_password(&form_data.password) {
+            return Ok(Flash::success(Redirect::to("/"), "signed in!"));
+        }
+    }
+
+    Ok(Flash::error(
+        Redirect::to("/auth/sign_in"),
+        "wrong password (or username!)",
+    ))
 }
 
 #[get("/users/<username>", format = "text/html")]
@@ -70,8 +97,8 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
 }
 
 #[get("/")]
-pub fn index() -> Page {
-    Page::new().content(html! {
+pub fn index(flash: Option<FlashMessage>) -> Page {
+    Page::new().flash(flash).content(html! {
         header h1 "Rustodon"
 
         div {
