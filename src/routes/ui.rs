@@ -13,24 +13,31 @@ pub fn routes() -> Vec<Route> {
 }
 
 #[get("/auth/sign_in")]
-pub fn auth_signin_get() -> Page {
-    Page::new()
-        .title("sign in")
-        .content(html! {
-            form method="post" {
-                header h2 "sign in"
+pub fn auth_signin_get(flash: Option<FlashMessage>) -> Page {
+    Page::new().title("sign in").flash(flash).content(html! {
+        form method="post" {
+            header h2 "sign in"
 
-                div {
-                    label for="username" "username:"
-                    input type="text" id="username" name="username";
-                }
-
-                div {
-                    label for="password" "password:"
-                    input type="text" id="password" name="password";
-                }
+            div {
+                label for="username" "username:"
+                input type="text" id="username" name="username";
             }
-        })
+
+            div {
+                label for="password" "password:"
+                input type="password" id="password" name="password";
+            }
+
+            button type="submit" "sign in"
+        }
+    })
+}
+
+#[derive(Debug, FromForm)]
+pub struct SigninForm {
+    username: String,
+    password: String,
+}
 }
 
 #[get("/users/<username>", format = "text/html")]
