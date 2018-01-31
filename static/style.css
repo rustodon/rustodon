@@ -40,3 +40,12 @@ code, pre {
 	font-family: 'Nova Mono', monospace;
 }
 
+.flash {
+  border: 2px dashed #afafaf;
+  padding: 1rem;
+}
+
+.flash.error {
+  border-color: #900C3F;
+  background-color: #D29DB2;
+}

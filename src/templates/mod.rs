@@ -1,5 +1,5 @@
 use maud::{self, html, Markup, Render};
-use rocket::request::Request;
+use rocket::request::{FlashMessage, Request};
 use rocket::response::{self, Responder};
 use GIT_REV;
 
@@ -9,6 +9,7 @@ use GIT_REV;
 pub struct Page {
     title:   Option<String>,
     content: Option<Markup>,
+    flash:   Option<FlashMessage>,
 }
 
 impl Page {
@@ -16,6 +17,7 @@ impl Page {
         Self {
             title:   None,
             content: None,
+            flash:   None,
         }
     }
 
@@ -29,6 +31,11 @@ impl Page {
 
     pub fn content(mut self, content: Markup) -> Self {
         self.content = Some(content);
+        self
+    }
+
+    pub fn flash(mut self, flash: Option<FlashMessage>) -> Self {
+        self.flash = flash;
         self
     }
 }
@@ -64,6 +71,10 @@ impl Render for Page {
 
             body {
                 main {
+                    @if let Some(flash) = self.flash.as_ref() {
+                        div class={"flash " (flash.name())} (flash.msg())
+                    }
+
                     @if let Some(content) = self.content.as_ref() {
                         (content)
                     }
