@@ -1,11 +1,11 @@
 use std::path::{Path, PathBuf};
 use rocket::Route;
 use rocket::response::NamedFile;
-use maud::{html, Markup, PreEscaped};
+use maud::{html, PreEscaped};
 
 use db;
 use db::models::Account;
-use templates::{Page, PageBuilder};
+use templates::Page;
 use error::Perhaps;
 
 pub fn routes() -> Vec<Route> {
@@ -16,7 +16,7 @@ pub fn routes() -> Vec<Route> {
 pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
 
-    let rendered = PageBuilder::default()
+    let rendered = Page::new()
         .title(format!("@{user}", user = account.username))
         .content(html! {
             div.h-card {
@@ -36,27 +36,22 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
                     }
                 }
             }
-        })
-        .build()
-        .unwrap(); // note: won't panic since content is provided.
+        });
 
     Ok(Some(rendered))
 }
 
 #[get("/")]
 pub fn index() -> Page {
-    PageBuilder::default()
-        .content(html! {
-            h1 "Rustodon"
+    Page::new().content(html! {
+        h1 "Rustodon"
 
-            div {
-                a href="/auth/sign_in" "sign in!"
-                " | "
-                a href="/auth/sign_up" "sign up?"
-            }
-        })
-        .build()
-        .unwrap() // note: won't panic since content is provided.
+        div {
+            a href="/auth/sign_in" "sign in!"
+            " | "
+            a href="/auth/sign_up" "sign up?"
+        }
+    })
 }
 
 #[get("/static/<path..>")]

@@ -1,16 +1,36 @@
 use maud::{self, html, Markup, Render};
-use rocket::request::{FlashMessage, Request};
-use rocket::response::{self, Responder, Response};
+use rocket::request::Request;
+use rocket::response::{self, Responder};
 use GIT_REV;
 
 /// Type to store data about a templated page in. Used to insert each page's markup into
 /// a base template which sets up stuff like stylesheets and the general html structure.
-#[derive(Debug, Builder)]
-#[builder(setter(into))]
+#[derive(Debug, Default)]
 pub struct Page {
-    #[builder(default = "None")]
-    title: Option<String>,
-    content: Markup,
+    title:   Option<String>,
+    content: Option<Markup>,
+}
+
+impl Page {
+    pub fn new() -> Self {
+        Self {
+            title:   None,
+            content: None,
+        }
+    }
+
+    pub fn title<S>(mut self, title: S) -> Self
+    where
+        S: Into<String>,
+    {
+        self.title = Some(title.into());
+        self
+    }
+
+    pub fn content(mut self, content: Markup) -> Self {
+        self.content = Some(content);
+        self
+    }
 }
 
 /// Allows returning `Page`s from Rocket routes.
@@ -44,7 +64,9 @@ impl Render for Page {
 
             body {
                 main {
-                    (self.content)
+                    @if let Some(content) = self.content.as_ref() {
+                        (content)
+                    }
                 }
 
                 footer {
