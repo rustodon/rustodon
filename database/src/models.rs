@@ -68,17 +68,17 @@ impl User {
     /// Checks if a plaintext password is valid.
     pub fn valid_password<S>(&self, password: S) -> bool
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        bcrypt::verify(&self.encrypted_password, &password.into())
+        bcrypt::verify(password.as_ref(), &self.encrypted_password)
     }
 
     /// Hashes a plaintext password for storage in the database.
     pub fn encrypt_password<S>(password: S) -> String
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        bcrypt::hash(&password.into()).expect("Couldn't hash password!")
+        bcrypt::hash(password.as_ref()).expect("Couldn't hash password!")
     }
 
     pub fn by_username(db_conn: &Connection, username: String) -> QueryResult<Option<User>> {
