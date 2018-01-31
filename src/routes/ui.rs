@@ -9,7 +9,28 @@ use templates::Page;
 use error::Perhaps;
 
 pub fn routes() -> Vec<Route> {
-    routes![index, user_page, static_files]
+    routes![index, user_page, auth_signin_get, static_files]
+}
+
+#[get("/auth/sign_in")]
+pub fn auth_signin_get() -> Page {
+    Page::new()
+        .title("sign in")
+        .content(html! {
+            form method="post" {
+                header h2 "sign in"
+
+                div {
+                    label for="username" "username:"
+                    input type="text" id="username" name="username";
+                }
+
+                div {
+                    label for="password" "password:"
+                    input type="text" id="password" name="password";
+                }
+            }
+        })
 }
 
 #[get("/users/<username>", format = "text/html")]
@@ -44,7 +65,7 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
 #[get("/")]
 pub fn index() -> Page {
     Page::new().content(html! {
-        h1 "Rustodon"
+        header h1 "Rustodon"
 
         div {
             a href="/auth/sign_in" "sign in!"
