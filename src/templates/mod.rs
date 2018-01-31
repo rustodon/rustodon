@@ -39,7 +39,7 @@ impl Render for Page {
 
                 link rel="stylesheet" href="https://fonts.googleapis.com/css\
                     ?family=IM+Fell+Great+Primer:400,400i|Nova+Mono";
-                link rel="stylesheet" href="static/style.css";
+                link rel="stylesheet" href="/static/style.css";
             }
 
             body {
