@@ -81,11 +81,14 @@ impl User {
         bcrypt::hash(password.as_ref()).expect("Couldn't hash password!")
     }
 
-    pub fn by_username(db_conn: &Connection, username: String) -> QueryResult<Option<User>> {
+    pub fn by_username<S>(db_conn: &Connection, username: S) -> QueryResult<Option<User>>
+    where
+        S: AsRef<str>,
+    {
         let account = try_resopt!({
             use super::schema::accounts::dsl;
             dsl::accounts
-                .filter(dsl::username.eq(username))
+                .filter(dsl::username.eq(username.as_ref()))
                 .filter(dsl::domain.is_null())
                 .first::<Account>(&**db_conn)
                 .optional()
