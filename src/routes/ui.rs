@@ -1,3 +1,4 @@
+use std::path::{Path, PathBuf};
 use rocket::Route;
 use rocket::response::NamedFile;
 use maud::{html, Markup, PreEscaped};
@@ -47,7 +48,12 @@ pub fn index() -> Page {
     PageBuilder::default()
         .content(html! {
             h1 "Rustodon"
-            p small "Templated with Maud!"
+
+            div {
+                a href="/auth/sign_in" "sign in!"
+                " | "
+                a href="/auth/sign_up" "sign up?"
+            }
         })
         .build()
         .unwrap() // note: won't panic since content is provided.

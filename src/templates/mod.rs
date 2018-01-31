@@ -1,5 +1,5 @@
 use maud::{self, html, Markup, Render};
-use rocket::request::Request;
+use rocket::request::{Request, FlashMessage};
 use rocket::response::{self, Responder, Response};
 use GIT_REV;
 
@@ -27,6 +27,8 @@ impl Render for Page {
 
             head {
                 meta charset="utf-8";
+                meta name="viewport" content="width=device-width";
+
                 title {
                     @if let Some(title) = self.title.as_ref() {
                         "Rustodon | " (title)
@@ -34,16 +36,22 @@ impl Render for Page {
                         "Rustodon"
                     }
                 }
+
+                link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IM+Fell+Great+Primer:400,400i|Nova+Mono";
+                link rel="stylesheet" href="static/style.css";
             }
 
             body {
-                (self.content)
+                main {
+                    (self.content)
+                }
 
                 footer {
                     div {
                         "Running commit "
                         a href=(format!("https://github.com/rustodon/rustodon/commit/{}", GIT_REV))
                             code (GIT_REV)
+                        "."
                     }
                 }
             }
