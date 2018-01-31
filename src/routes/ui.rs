@@ -1,4 +1,5 @@
 use rocket::Route;
+use rocket::response::NamedFile;
 use maud::{html, Markup, PreEscaped};
 
 use db;
@@ -7,7 +8,7 @@ use templates::{Page, PageBuilder};
 use error::Perhaps;
 
 pub fn routes() -> Vec<Route> {
-    routes![index, user_page]
+    routes![index, user_page, static_files]
 }
 
 #[get("/users/<username>", format = "text/html")]
@@ -50,4 +51,9 @@ pub fn index() -> Page {
         })
         .build()
         .unwrap() // note: won't panic since content is provided.
+}
+
+#[get("/static/<path..>")]
+fn static_files(path: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/").join(path)).ok()
 }
