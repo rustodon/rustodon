@@ -101,15 +101,21 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
 }
 
 #[get("/")]
-pub fn index(flash: Option<FlashMessage>) -> Page {
+pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
     Page::new().flash(flash).content(html! {
         header h1 "Rustodon"
 
         div {
-            a href="/auth/sign_in" "sign in!"
-            " | "
-            a href="/auth/sign_up" "sign up?"
+            @if let None = user {
+                a href="/auth/sign_in" "sign in!"
+                " | "
+                a href="/auth/sign_up" "sign up?"
+            } @else {
+                a href="/auth/sign_out" "sign out."
+            }
         }
+
+        p {"Current user session: " code (format!("{:?}", user))}
     })
 }
 
