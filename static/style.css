@@ -49,3 +49,8 @@ code, pre {
   border-color: #900C3F;
   background-color: #D29DB2;
 }
+
+.flash.success {
+  border-color: #1D8348;
+  background-color: #58D68D;
+}
