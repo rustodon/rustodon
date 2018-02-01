@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 use rocket::Route;
+use rocket::http::{Cookie, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, NamedFile, Redirect};
 use maud::{html, PreEscaped};
@@ -50,6 +51,7 @@ pub struct SigninForm {
 #[post("/auth/sign_in", data = "<form>")]
 pub fn auth_signin_post(
     form: Form<SigninForm>,
+    mut cookies: Cookies,
     db_conn: db::Connection,
 ) -> Result<Flash<Redirect>, Error> {
     let form_data = form.get();
@@ -57,6 +59,8 @@ pub fn auth_signin_post(
 
     if let Some(user) = user {
         if user.valid_password(&form_data.password) {
+            cookies.add_private(Cookie::new("uid", user.id.to_string()));
+
             return Ok(Flash::success(Redirect::to("/"), "signed in!"));
         }
     }
