@@ -9,6 +9,8 @@ use chrono::DateTime;
 use chrono::offset::Utc;
 use diesel::prelude::*;
 use pwhash::bcrypt;
+use rocket::outcome::IntoOutcome;
+use rocket::request::{self, FromRequest, Request};
 use super::schema::{accounts, follows, statuses, users};
 use super::Connection;
 use {BASE_URL, DOMAIN};
@@ -99,6 +101,25 @@ impl User {
             .filter(dsl::account_id.eq(account.id))
             .first::<User>(&**db_conn)
             .optional()
+    }
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for User {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<User, ()> {
+        use rocket::State;
+        let db_conn = request.guard::<Connection>()?;
+
+        request
+            .cookies()
+            .get_private("uid")
+            .and_then(|cookie| cookie.value().parse::<i64>().ok())
+            .and_then(|uid| {
+                use super::schema::users::dsl::*;
+                users.find(uid).first(&*db_conn).optional().unwrap() // TODO: fix
+            })
+            .or_forward(())
     }
 }
 
