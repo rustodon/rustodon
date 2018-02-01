@@ -102,6 +102,12 @@ impl User {
             .first::<User>(&**db_conn)
             .optional()
     }
+
+    pub fn by_id(db_conn: &Connection, uid: i64) -> QueryResult<Option<User>> {
+        use super::schema::users::dsl::*;
+
+        users.find(uid).first(&**db_conn).optional()
+    }
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for User {
