@@ -114,18 +114,22 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<User, ()> {
-        use rocket::State;
+        use rocket::Outcome;
+        use rocket::http::Status;
+
         let db_conn = request.guard::<Connection>()?;
 
-        request
+        let uid = request
             .cookies()
             .get_private("uid")
             .and_then(|cookie| cookie.value().parse::<i64>().ok())
-            .and_then(|uid| {
-                use super::schema::users::dsl::*;
-                users.find(uid).first(&*db_conn).optional().unwrap() // TODO: fix
-            })
-            .or_forward(())
+            .or_forward(())?;
+
+        match User::by_id(&db_conn, uid) {
+            Ok(Some(user)) => Outcome::Success(user),
+            Ok(None) => Outcome::Forward(()),
+            Err(_) => Outcome::Failure((Status::InternalServerError, ())),
+        }
     }
 }
 
