@@ -54,3 +54,22 @@ code, pre {
   border-color: #1D8348;
   background-color: #58D68D;
 }
+
+form.inline {
+  display: inline;
+}
+
+button.link {
+  background: none;
+  border: none;
+  margin: 0; padding: 0;
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 1em;
+  font-family: inherit;
+}
+
+button.link:focus { outline: none; }
+button.link:active { color: red; }
+

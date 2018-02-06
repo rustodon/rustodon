@@ -17,6 +17,7 @@ pub fn routes() -> Vec<Route> {
         user_page,
         auth_signin_get,
         auth_signin_post,
+        auth_signout,
         static_files
     ]
 }
@@ -71,6 +72,15 @@ pub fn auth_signin_post(
     ))
 }
 
+#[post("/auth/sign_out")]
+pub fn auth_signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
+    if user.is_some() {
+        cookies.remove_private(Cookie::named("uid"));
+    }
+
+    Redirect::to("/")
+}
+
 #[get("/users/<username>", format = "text/html")]
 pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
@@ -111,7 +121,10 @@ pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
                 " | "
                 a href="/auth/sign_up" "sign up?"
             } @else {
-                a href="/auth/sign_out" "sign out."
+                form.inline method="post" action="/auth/sign_out" {
+                    input type="hidden" name="stub"
+                    button.link type="submit" name="submit" "sign out."
+                }
             }
         }
 
