@@ -1,9 +1,12 @@
+use itertools::Itertools;
 use std::path::{Path, PathBuf};
+use std::borrow::Cow;
 use rocket::Route;
 use rocket::http::{Cookie, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, NamedFile, Redirect};
 use maud::{html, PreEscaped};
+use validator::Validate;
 
 use db;
 use db::models::{Account, User};
@@ -18,6 +21,8 @@ pub fn routes() -> Vec<Route> {
         auth_signin_get,
         auth_signin_post,
         auth_signout,
+        auth_signup_get,
+        auth_signup_post,
         static_files
     ]
 }
@@ -79,6 +84,76 @@ pub fn auth_signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
     }
 
     Redirect::to("/")
+}
+
+#[derive(FromForm, Validate, Debug)]
+pub struct SignupForm {
+    #[validate(length(min = "1", max = "32"))]
+    username: String,
+    #[validate(email)]
+    email: String,
+    #[validate(length(min = "3", max = "64",
+                      message = "Password must be between 3 and 64 characters long."))]
+    password: String,
+}
+
+#[get("/auth/sign_up")]
+pub fn auth_signup_get(flash: Option<FlashMessage>) -> Page {
+    Page::new().title("sign up").flash(flash).content(html! {
+        header h2 "sign up"
+
+        form method="post" {
+            div {
+                label for="username" "username:"
+                input type="text" id="username" name="username";
+            }
+
+            div {
+                label for="email" "email:"
+                input type="email" id="email" name="email";
+            }
+
+            div {
+                label for="password" "password:"
+                input type="password" id="password" name="password";
+            }
+
+            button type="submit" "sign up"
+        }
+    })
+}
+
+#[post("/auth/sign_up", data = "<form>")]
+pub fn auth_signup_post(
+    form: Form<SignupForm>,
+    db_conn: db::Connection,
+) -> Result<Flash<Redirect>, Error> {
+    let form_data = form.get();
+
+    let signup_data = match form_data.validate() {
+        Ok(v) => v,
+        Err(errs) => {
+            let errs = errs.inner();
+
+            // concatenate the error descriptions, with commas between them.
+            // TODO: make this less ugly :(
+            let error_desc = errs
+                .iter()
+                .flat_map(|(_, errs)| errs)
+                .map(|e| {
+                    let msg = e.message.to_owned();
+                    msg.unwrap_or(Cow::Borrowed("unknown error"))
+                })
+                .join(", ");
+
+            return Ok(Flash::error(
+                Redirect::to("/auth/sign_up"),
+                error_desc
+            ));
+        },
+    };
+
+    Ok(Flash::success(Redirect::to("/"), "signed up!"))
 }
 
 #[get("/users/<username>", format = "text/html")]
