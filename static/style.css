@@ -55,8 +55,10 @@ code, pre {
   background-color: #58D68D;
 }
 
-form.inline {
-  display: inline;
+form.inline { display: inline; }
+
+form input {
+  margin: 0.1em 0;
 }
 
 button.link {
