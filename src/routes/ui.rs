@@ -25,9 +25,9 @@ pub fn routes() -> Vec<Route> {
 #[get("/auth/sign_in")]
 pub fn auth_signin_get(flash: Option<FlashMessage>) -> Page {
     Page::new().title("sign in").flash(flash).content(html! {
-        form method="post" {
-            header h2 "sign in"
+        header h2 "sign in"
 
+        form method="post" {
             div {
                 label for="username" "username:"
                 input type="text" id="username" name="username";
