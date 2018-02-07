@@ -137,8 +137,7 @@ pub fn auth_signup_post(
 
             // concatenate the error descriptions, with commas between them.
             // TODO: make this less ugly :(
-            let error_desc = errs
-                .iter()
+            let error_desc = errs.iter()
                 .flat_map(|(_, errs)| errs)
                 .map(|e| {
                     let msg = e.message.to_owned();
@@ -146,10 +145,7 @@ pub fn auth_signup_post(
                 })
                 .join(", ");
 
-            return Ok(Flash::error(
-                Redirect::to("/auth/sign_up"),
-                error_desc
-            ));
+            return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
         },
     };
 
