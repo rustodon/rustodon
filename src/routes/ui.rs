@@ -9,7 +9,7 @@ use maud::{html, PreEscaped};
 use validator::Validate;
 
 use db;
-use db::models::{Account, User};
+use db::models::{Account, NewAccount, NewUser, User};
 use templates::Page;
 use failure::Error;
 use error::Perhaps;
@@ -130,24 +130,37 @@ pub fn auth_signup_post(
 ) -> Result<Flash<Redirect>, Error> {
     let form_data = form.get();
 
-    let signup_data = match form_data.validate() {
-        Ok(v) => v,
-        Err(errs) => {
-            let errs = errs.inner();
+    if let Err(errs) = form_data.validate() {
+        let errs = errs.inner();
 
-            // concatenate the error descriptions, with commas between them.
-            // TODO: make this less ugly :(
-            let error_desc = errs.iter()
-                .flat_map(|(_, errs)| errs)
-                .map(|e| {
-                    let msg = e.message.to_owned();
-                    msg.unwrap_or(Cow::Borrowed("unknown error"))
-                })
-                .join(", ");
+        // concatenate the error descriptions, with commas between them.
+        // TODO: make this less ugly :(
+        let error_desc = errs.iter()
+            .flat_map(|(_, errs)| errs)
+            .map(|e| {
+                let msg = e.message.to_owned();
+                msg.unwrap_or(Cow::Borrowed("unknown error"))
+            })
+            .join(", ");
 
-            return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
-        },
-    };
+        return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
+    }
+
+    let account = NewAccount {
+        domain: None,
+        uri:    None,
+
+        username: form_data.username.to_owned(),
+
+        display_name: None,
+        summary: None,
+    }.insert(&db_conn)?;
+
+    NewUser {
+        email: form_data.email.to_owned(),
+        encrypted_password: User::encrypt_password(&form_data.password),
+        account_id: account.id,
+    }.insert(&db_conn)?;
 
     Ok(Flash::success(Redirect::to("/"), "signed up!"))
 }

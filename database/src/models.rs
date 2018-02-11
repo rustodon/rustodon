@@ -7,6 +7,7 @@
 use std::borrow::Cow;
 use chrono::DateTime;
 use chrono::offset::Utc;
+use diesel;
 use diesel::prelude::*;
 use pwhash::bcrypt;
 use rocket::outcome::IntoOutcome;
@@ -64,6 +65,45 @@ pub struct Follow {
     pub id: i64,
     pub source_id: i64,
     pub target_id: i64,
+}
+
+#[derive(Insertable, Debug)]
+#[table_name = "users"]
+pub struct NewUser {
+    pub email: String,
+    pub encrypted_password: String,
+
+    pub account_id: i64,
+}
+
+impl NewUser {
+    pub fn insert(self, conn: &Connection) -> QueryResult<User> {
+        use super::schema::users::dsl::*;
+
+        diesel::insert_into(users).values(&self).get_result(&**conn)
+    }
+}
+
+#[derive(Insertable, Debug)]
+#[table_name = "accounts"]
+pub struct NewAccount {
+    pub uri:    Option<String>,
+    pub domain: Option<String>,
+
+    pub username: String,
+
+    pub display_name: Option<String>,
+    pub summary: Option<String>,
+}
+
+impl NewAccount {
+    pub fn insert(self, conn: &Connection) -> QueryResult<Account> {
+        use super::schema::accounts::dsl::*;
+
+        diesel::insert_into(accounts)
+            .values(&self)
+            .get_result(&**conn)
+    }
 }
 
 impl User {
