@@ -25,6 +25,9 @@ fn main() {
         .unwrap()
         .write_all(commit_info().as_bytes())
         .unwrap();
+
+    Command::new("sass").args(&["style/main.scss", "static/style.css"])
+        .status().unwrap();
 }
 
 // Try to get hash and date of the last commit on a best effort basis. If anything goes wrong
