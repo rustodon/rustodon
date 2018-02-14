@@ -8,7 +8,7 @@ use rocket::response::{Flash, NamedFile, Redirect};
 use maud::{html, PreEscaped};
 use validator::Validate;
 
-use db;
+use db::{self, DieselConnection};
 use db::models::{Account, NewAccount, NewUser, User};
 use templates::Page;
 use failure::Error;
@@ -146,21 +146,23 @@ pub fn auth_signup_post(
         return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
     }
 
-    let account = NewAccount {
-        domain: None,
-        uri:    None,
+    (*db_conn).transaction::<_, _, _>(|| {
+        let account = NewAccount {
+            domain: None,
+            uri:    None,
 
-        username: form_data.username.to_owned(),
+            username: form_data.username.to_owned(),
 
-        display_name: None,
-        summary: None,
-    }.insert(&db_conn)?;
+            display_name: None,
+            summary: None,
+        }.insert(&db_conn)?;
 
-    NewUser {
-        email: form_data.email.to_owned(),
-        encrypted_password: User::encrypt_password(&form_data.password),
-        account_id: account.id,
-    }.insert(&db_conn)?;
+        NewUser {
+            email: form_data.email.to_owned(),
+            encrypted_password: User::encrypt_password(&form_data.password),
+            account_id: account.id,
+        }.insert(&db_conn)
+    })?;
 
     Ok(Flash::success(Redirect::to("/"), "signed up!"))
 }
