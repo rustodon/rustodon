@@ -3,7 +3,10 @@ language: rust
 rust:
   - nightly
 
-cache: cargo
+cache:
+  cargo: true
+  directories:
+    - /home/travis/.rvm
 
 services:
   - postgresql
@@ -11,6 +14,8 @@ services:
 before_install:
   - sudo apt-get update -yqq
   - sudo apt-get install -yqq libpq-dev
+  - rvm install 2.5.0
+  - gem install sass
 
 env:
   global:
