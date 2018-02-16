@@ -1,0 +1,50 @@
+// it's 2018. please tell me that nobody is using box-sizing != border-box.
+* { box-sizing: border-box; }
+
+body {
+  // aesthetics
+  color: $text_color;
+  background-color: $background_color;
+
+  font-family: 'IM Fell Great Primer', serif;
+  font-size: 1em;
+}
+
+code, pre {
+  font-family: 'Nova Mono', monospace;
+}
+
+.flash {
+  border: 2px dashed #afafaf;
+  padding: 1rem;
+}
+
+.flash.error {
+  border-color: #900C3F;
+  background-color: #D29DB2;
+}
+
+.flash.success {
+  border-color: #1D8348;
+  background-color: #58D68D;
+}
+
+form.inline { display: inline; }
+
+form input {
+  margin: 0.1em 0;
+}
+
+button.link {
+  background: none;
+  border: none;
+  margin: 0; padding: 0;
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 1em;
+  font-family: inherit;
+}
+
+button.link:focus { outline: none; }
+button.link:active { color: red; }
