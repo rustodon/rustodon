@@ -20,6 +20,9 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
+extern crate validator;
+#[macro_use]
+extern crate validator_derive;
 
 extern crate rustodon_database as db;
 

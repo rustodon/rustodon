@@ -21,6 +21,7 @@ use diesel::pg::PgConnection;
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
 use rocket::http::Status;
+pub use diesel::connection::Connection as DieselConnection;
 
 pub mod schema;
 pub mod models;
