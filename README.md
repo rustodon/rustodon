@@ -19,6 +19,8 @@ On some operating systems, you may need to separately install the Postgres clien
 
 * Debian/Ubuntu: `apt install libpq-dev libmysqlclient-dev`
 
+Sass/SCSS is used to make stylesheeting a bit nicer, so you'll have to install Ruby via your favourite method and `gem install sass`.
+
 To set up a new database in Postgres and run all the migrations, first install the Diesel CLI:
 ```
 $ cargo install diesel_cli

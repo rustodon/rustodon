@@ -5,7 +5,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::{self, Command};
 
 struct Ignore;
 
@@ -19,11 +19,21 @@ where
 }
 
 fn main() {
+    if let Err(_) = Command::new("sass").status() {
+        eprintln!("build error: sass compiler not installed. please run `gem install sass`.");
+        process::exit(1);
+    }
+
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
 
     File::create(out_dir.join("commit-info.txt"))
         .unwrap()
         .write_all(commit_info().as_bytes())
+        .unwrap();
+
+    Command::new("sass")
+        .args(&["style/main.scss", "static/style.css"])
+        .status()
         .unwrap();
 }
 
