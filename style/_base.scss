@@ -6,35 +6,56 @@ body {
   color: $text_color;
   background-color: $background_color;
 
-  font-family: 'IM Fell Great Primer', serif;
+  font-family: $base_font;
   font-size: 1em;
 }
 
+// show focus outlines on everything!! tab accessibility~
+:focus {
+  outline: $focused_color auto 1px;
+}
+
+a:active { color: $active_color; }
+
 code, pre {
-  font-family: 'Nova Mono', monospace;
+  font-family: $mono_font;
 }
 
-.flash {
-  border: 2px dashed #afafaf;
-  padding: 1rem;
+// restyle inputs so they look consistent across browsers
+input {
+  color: $text_color;
+  background-color: white;
+  border: 1px solid $border_color;
+  padding: 1px 0px;
+
+  // fix for built-in browser styles
+  &:focus { outline-offset: 0; }
 }
 
-.flash.error {
-  border-color: #900C3F;
-  background-color: #D29DB2;
-}
+// restyle buttons so they look consistent across browsers
+button {
+  font-family: inherit;
+  font-size: 1em;
+  color: $text_color;
+  background-color: $background_color;
 
-.flash.success {
-  border-color: #1D8348;
-  background-color: #58D68D;
+  border: 1px solid $border_color;
+  display: inline-block;
+  padding: 1px 6px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 form.inline { display: inline; }
 
+// space out form inputs a bit
 form input {
   margin: 0.1em 0;
 }
 
+// turn buttons with the .link class into links
+// (so we can use inline forms as Links Whomst POST)
 button.link {
   background: none;
   border: none;
@@ -43,8 +64,21 @@ button.link {
   cursor: pointer;
   text-decoration: underline;
   font-size: 1em;
-  font-family: inherit;
+
+  &:active { color: $active_color; }
 }
 
-button.link:focus { outline: none; }
-button.link:active { color: red; }
+.flash {
+  border: 2px dashed $border_color;
+  padding: 1rem;
+
+  &.error {
+    border-color: #900C3F;
+    background-color: #D29DB2;
+  }
+
+  &.success {
+    border-color: #1D8348;
+    background-color: #58D68D;
+  }
+}

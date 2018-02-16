@@ -1,6 +1,11 @@
 $text_color: #050505;
 $border_color: #afafaf;
 $background_color: #fefefe;
+$focused_color: #a8a;
+$active_color: #a0a;
+
+$base_font: 'IM Fell Great Primer', serif;
+$mono_font: 'Nova Mono', monospace;
 
 @import 'base';
 @import 'layout';
