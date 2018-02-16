@@ -748,6 +748,7 @@ dependencies = [
  "pwhash 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2-diesel 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "regex 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "resopt 0.1.0",
  "rocket 0.3.6 (git+https://github.com/SergioBenitez/Rocket?branch=v0.3)",
 ]

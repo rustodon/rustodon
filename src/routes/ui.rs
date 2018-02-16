@@ -9,7 +9,7 @@ use maud::{html, PreEscaped};
 use validator::Validate;
 
 use db::{self, DieselConnection};
-use db::models::{Account, NewAccount, NewUser, User};
+use db::models::{validators, Account, NewAccount, NewUser, User};
 use templates::Page;
 use failure::Error;
 use error::Perhaps;
@@ -89,6 +89,8 @@ pub fn auth_signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
 #[derive(FromForm, Validate, Debug)]
 pub struct SignupForm {
     #[validate(length(min = "1", max = "32"))]
+    #[validate(regex(path = "validators::VALID_USERNAME_RE",
+                     message = "Username must consist of {A-Z, a-z, 0-9, _}."))]
     username: String,
     #[validate(email)]
     email: String,

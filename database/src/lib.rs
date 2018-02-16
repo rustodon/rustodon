@@ -10,6 +10,7 @@ extern crate lazy_static;
 extern crate pwhash;
 extern crate r2d2;
 extern crate r2d2_diesel;
+extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;

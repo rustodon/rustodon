@@ -295,3 +295,11 @@ impl Status {
         ))
     }
 }
+
+pub mod validators {
+    use regex::Regex;
+
+    lazy_static! {
+        pub static ref VALID_USERNAME_RE: Regex = Regex::new(r"^[[:alnum:]_]+$").unwrap();
+    }
+}
