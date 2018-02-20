@@ -286,7 +286,7 @@ impl Status {
                 .map(|x| String::as_str(x).into())
                 .unwrap_or(
                     format!(
-                        "{base}/users/{user}/updates/{id}",
+                        "{base}/users/{user}/statuses/{id}",
                         base = BASE_URL.as_str(),
                         user = try_resopt!(self.account(db_conn)).username,
                         id = self.id
