@@ -32,7 +32,7 @@ before_script:
 script:
   - cargo fmt -- --write-mode=diff
   - diesel database setup --migration-dir=${MIGRATION_DIR}
-  - cargo build --release
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release; else cargo build; fi
   - zip -r0 latest target/release/rustodon static/ migrations/ scripts/ appspec.yml
   - mkdir -p buildartifacts
   - mv latest.zip buildartifacts/latest.zip
