@@ -19,12 +19,17 @@ failure_derive = "0.1.1"
 lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
+
 rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 rocket_codegen = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
+validator = "0.6.3"
+validator_derive = "0.6.1"
+
+maud = { version = "0.17.2", features = ["rocket"] }
 
 [dependencies.rustodon_database]
 path = "database/"
@@ -33,10 +38,11 @@ path = "database/"
 git = "https://github.com/SergioBenitez/Rocket"
 branch = "v0.3"
 default-features = false
-features = ["json", "tera_templates"]
+features = ["json"]
 
 [dev-dependencies]
 clippy = ">= 0"
 
 [patch.crates-io]
+rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
 ring = { git = "https://github.com/SergioBenitez/ring", branch = "v0.11" }

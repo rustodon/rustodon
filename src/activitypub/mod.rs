@@ -8,7 +8,7 @@ use db::models::Account;
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
 /// Implements `Responder`, so we can return this from Rocket routes
-/// and have Content-Type and friends be handled ✨automagically✨
+/// and have Content-Type and friends be handled ✨automagically✨.
 pub struct ActivityStreams<T = Value>(pub T);
 
 impl<T> Responder<'static> for ActivityStreams<T>

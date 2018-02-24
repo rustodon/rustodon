@@ -1,0 +1,28 @@
+html {
+  // make html and body fill (at least) 100% of the height of the page.
+  height: 100%;
+}
+
+body {
+  // normalize
+  margin: 0;
+
+  // sticky footer via flexbox
+  display: flex;
+  flex-direction: column;
+  height: 100vh; // work around a silly ie11 issue
+}
+
+main {
+  // sticky footer via flexbox
+  flex: 1 0 auto;
+
+  padding: 1rem; // let the content breathe
+}
+
+footer {
+  flex-shrink: 0; // prevent flexbox shrinkage (looking @ u, blink flexbox)
+
+  border-top: 1px solid $border_color; // set the footer off
+  padding: 1rem; // let the content breathe
+}

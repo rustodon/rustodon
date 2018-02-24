@@ -7,8 +7,11 @@
 use std::borrow::Cow;
 use chrono::DateTime;
 use chrono::offset::Utc;
+use diesel;
 use diesel::prelude::*;
 use pwhash::bcrypt;
+use rocket::outcome::IntoOutcome;
+use rocket::request::{self, FromRequest, Request};
 use super::schema::{accounts, follows, statuses, users};
 use super::Connection;
 use {BASE_URL, DOMAIN};
@@ -64,28 +67,70 @@ pub struct Follow {
     pub target_id: i64,
 }
 
+#[derive(Insertable, Debug)]
+#[table_name = "users"]
+pub struct NewUser {
+    pub email: String,
+    pub encrypted_password: String,
+
+    pub account_id: i64,
+}
+
+impl NewUser {
+    pub fn insert(self, conn: &Connection) -> QueryResult<User> {
+        use super::schema::users::dsl::*;
+
+        diesel::insert_into(users).values(&self).get_result(&**conn)
+    }
+}
+
+#[derive(Insertable, Debug)]
+#[table_name = "accounts"]
+pub struct NewAccount {
+    pub uri:    Option<String>,
+    pub domain: Option<String>,
+
+    pub username: String,
+
+    pub display_name: Option<String>,
+    pub summary: Option<String>,
+}
+
+impl NewAccount {
+    pub fn insert(self, conn: &Connection) -> QueryResult<Account> {
+        use super::schema::accounts::dsl::*;
+
+        diesel::insert_into(accounts)
+            .values(&self)
+            .get_result(&**conn)
+    }
+}
+
 impl User {
     /// Checks if a plaintext password is valid.
     pub fn valid_password<S>(&self, password: S) -> bool
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        bcrypt::verify(&self.encrypted_password, &password.into())
+        bcrypt::verify(password.as_ref(), &self.encrypted_password)
     }
 
     /// Hashes a plaintext password for storage in the database.
     pub fn encrypt_password<S>(password: S) -> String
     where
-        S: Into<String>,
+        S: AsRef<str>,
     {
-        bcrypt::hash(&password.into()).expect("Couldn't hash password!")
+        bcrypt::hash(password.as_ref()).expect("Couldn't hash password!")
     }
 
-    pub fn by_username(db_conn: &Connection, username: String) -> QueryResult<Option<User>> {
+    pub fn by_username<S>(db_conn: &Connection, username: S) -> QueryResult<Option<User>>
+    where
+        S: AsRef<str>,
+    {
         let account = try_resopt!({
             use super::schema::accounts::dsl;
             dsl::accounts
-                .filter(dsl::username.eq(username))
+                .filter(dsl::username.eq(username.as_ref()))
                 .filter(dsl::domain.is_null())
                 .first::<Account>(&**db_conn)
                 .optional()
@@ -96,6 +141,35 @@ impl User {
             .filter(dsl::account_id.eq(account.id))
             .first::<User>(&**db_conn)
             .optional()
+    }
+
+    pub fn by_id(db_conn: &Connection, uid: i64) -> QueryResult<Option<User>> {
+        use super::schema::users::dsl::*;
+
+        users.find(uid).first(&**db_conn).optional()
+    }
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for User {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<User, ()> {
+        use rocket::Outcome;
+        use rocket::http::Status;
+
+        let db_conn = request.guard::<Connection>()?;
+
+        let uid = request
+            .cookies()
+            .get_private("uid")
+            .and_then(|cookie| cookie.value().parse::<i64>().ok())
+            .or_forward(())?;
+
+        match User::by_id(&db_conn, uid) {
+            Ok(Some(user)) => Outcome::Success(user),
+            Ok(None) => Outcome::Forward(()),
+            Err(_) => Outcome::Failure((Status::InternalServerError, ())),
+        }
     }
 }
 
@@ -212,12 +286,20 @@ impl Status {
                 .map(|x| String::as_str(x).into())
                 .unwrap_or(
                     format!(
-                        "{base}/users/{user}/updates/{id}",
+                        "{base}/users/{user}/statuses/{id}",
                         base = BASE_URL.as_str(),
                         user = try_resopt!(self.account(db_conn)).username,
                         id = self.id
                     ).into(),
                 ),
         ))
+    }
+}
+
+pub mod validators {
+    use regex::Regex;
+
+    lazy_static! {
+        pub static ref VALID_USERNAME_RE: Regex = Regex::new(r"^[[:alnum:]_]+$").unwrap();
     }
 }

@@ -2,6 +2,11 @@
 
 [![Build Status](https://travis-ci.org/rustodon/rustodon.svg?branch=master)](https://travis-ci.org/rustodon/rustodon)
 
+Rustodon is an [Mastodon](https://joinmastodon.org)-compatible _federated social microblogging server_. It utilizes [_ActivityPub_](http://activitypub.rocks) to _federate_ with a constellation of _other servers_, connecting their communities with yours.
+
+## Current Status
+Don't use this in production. Don't use it in testing, either. It currently implements nothing more than a bare framework to allow user creation and outwards user federation.
+
 ## Hacking on the code
 Rustodon depends on libraries (looking at you, Diesel and Rocket) that require bleeding-edge nightly rustc features. Ideally, install Rust via [`rustup`](https://www.rustup.rs/) and set an override in the Rustodon directory with
 ```
@@ -18,6 +23,8 @@ This environment variable could alternatively be added to the `.env` file (you c
 On some operating systems, you may need to separately install the Postgres client library, as well as the MySQL library (even if we won't ever use it):
 
 * Debian/Ubuntu: `apt install libpq-dev libmysqlclient-dev`
+
+Sass/SCSS is used to make stylesheeting a bit nicer, so you'll have to install Ruby via your favourite method and `gem install sass`.
 
 To set up a new database in Postgres and run all the migrations, first install the Diesel CLI:
 ```

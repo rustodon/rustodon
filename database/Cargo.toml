@@ -9,6 +9,7 @@ sqlite = ["diesel/sqlite", "diesel_infer_schema/sqlite"]
 
 [dependencies]
 lazy_static = "1.0"
+regex = "0.2"
 
 diesel = { version = "1.0.0", features = ["chrono"] }
 diesel_infer_schema = { version = "1.0.0" }

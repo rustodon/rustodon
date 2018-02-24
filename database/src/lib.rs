@@ -10,6 +10,7 @@ extern crate lazy_static;
 extern crate pwhash;
 extern crate r2d2;
 extern crate r2d2_diesel;
+extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
@@ -27,6 +28,7 @@ use diesel::pg::PgConnection;
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
 use rocket::http::Status;
+pub use diesel::connection::Connection as DieselConnection;
 
 pub mod schema;
 pub mod models;
@@ -35,10 +37,10 @@ pub mod models;
 compile_error!("sqlite and postgres features cannot be simultaneously selected");
 
 #[cfg(all(feature = "sqlite", not(feature = "postgres")))]
-type DieselConnection = SqliteConnection;
+type DbConnection = SqliteConnection;
 
 #[cfg(all(not(feature = "sqlite"), feature = "postgres"))]
-type DieselConnection = PgConnection;
+type DbConnection = PgConnection;
 
 // TODO: gross hack. find a nicer way to pass these in?
 lazy_static! {
@@ -47,17 +49,17 @@ lazy_static! {
 }
 
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
-type Pool = r2d2::Pool<ConnectionManager<DieselConnection>>;
+type Pool = r2d2::Pool<ConnectionManager<DbConnection>>;
 
 /// Type alias for the pooled connection.
-type PooledConnection = r2d2::PooledConnection<ConnectionManager<DieselConnection>>;
+type PooledConnection = r2d2::PooledConnection<ConnectionManager<DbConnection>>;
 
 /// Initializes a new connection pool for the database at `url`.
 pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::Error>
 where
     S: Into<String>,
 {
-    let manager = ConnectionManager::<DieselConnection>::new(url);
+    let manager = ConnectionManager::<DbConnection>::new(url);
 
     r2d2::Pool::builder().build(manager)
 }
@@ -85,11 +87,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for Connection {
     }
 }
 
-/// A convenient way to use a `&db::Connection` as a `&DieselConnection`.
+/// A convenient way to use a `&db::Connection` as a `&DbConnection`.
 ///
 /// Just allows deref-ing the inner `PooledConnection`.
 impl Deref for Connection {
-    type Target = DieselConnection;
+    type Target = DbConnection;
 
     fn deref(&self) -> &Self::Target {
         &self.0

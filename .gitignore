@@ -2,3 +2,6 @@
 **/*.rs.bk
 .idea
 *.sqlite*
+.sass-cache/
+static/style.css
+static/style.css.map
