@@ -77,10 +77,10 @@ pub struct NewUser {
 }
 
 impl NewUser {
-    pub fn insert(self, conn: &Connection) -> QueryResult<User> {
+    pub fn insert(self, conn: &Connection) -> QueryResult<usize> {
         use super::schema::users::dsl::*;
 
-        diesel::insert_into(users).values(&self).get_result(&**conn)
+        diesel::insert_into(users).values(&self).execute(&**conn)
     }
 }
 
@@ -97,12 +97,12 @@ pub struct NewAccount {
 }
 
 impl NewAccount {
-    pub fn insert(self, conn: &Connection) -> QueryResult<Account> {
+    pub fn insert(self, conn: &Connection) -> QueryResult<usize> {
         use super::schema::accounts::dsl::*;
 
         diesel::insert_into(accounts)
             .values(&self)
-            .get_result(&**conn)
+            .execute(&**conn)
     }
 }
 
