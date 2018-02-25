@@ -26,6 +26,7 @@ pub use diesel::connection::Connection as DieselConnection;
 
 pub mod schema;
 pub mod models;
+pub mod snowflake;
 
 // TODO: gross hack. find a nicer way to pass these in?
 lazy_static! {
