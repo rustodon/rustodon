@@ -215,8 +215,6 @@ pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
                 }
             }
         }
-
-        p {"Current user session: " code (format!("{:?}", user))}
     })
 }
 
