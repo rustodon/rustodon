@@ -180,7 +180,9 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
                 header {
                     span.p-name (account.display_name.as_ref().unwrap_or(&account.username))
 
-                    span.fq-username a.url.u-uid href=(account.get_uri()) (account.fully_qualified_username())
+                    span.fq-username {
+                        a.url.u-uid href=(account.get_uri()) (account.fully_qualified_username())
+                    }
                 }
 
                 div.p-note {
