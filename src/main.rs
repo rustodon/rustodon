@@ -30,7 +30,6 @@ extern crate rustodon_database as db;
 mod error;
 mod templates;
 mod routes;
-mod fairings;
 mod activitypub;
 
 use std::env;
@@ -57,6 +56,5 @@ fn main() {
         .mount("/", routes::ap::routes())
         .manage(db_connection_pool) // store the db pool as Rocket managed state
                                     // (this lets us use the db::Connection guard)
-        .attach(fairings::SnowflakeInitFairing{})
         .launch();
 }

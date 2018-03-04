@@ -5,6 +5,7 @@ extern crate chrono;
 extern crate diesel;
 #[macro_use]
 extern crate diesel_infer_schema;
+extern crate flaken;
 #[macro_use]
 extern crate lazy_static;
 extern crate pwhash;
@@ -14,6 +15,7 @@ extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
+
 
 use std::ops::Deref;
 use std::env;
@@ -26,7 +28,6 @@ pub use diesel::connection::Connection as DieselConnection;
 
 pub mod schema;
 pub mod models;
-pub mod snowflake;
 
 // TODO: gross hack. find a nicer way to pass these in?
 lazy_static! {
