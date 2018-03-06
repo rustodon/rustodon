@@ -14,7 +14,12 @@ use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
 use super::schema::{accounts, follows, statuses, users};
 use super::Connection;
+use flaken::Flaken;
 use {BASE_URL, DOMAIN};
+
+pub fn make_id() -> i64 {
+    Flaken::default().next() as i64
+}
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
@@ -70,6 +75,7 @@ pub struct Follow {
 #[derive(Insertable, Debug)]
 #[table_name = "users"]
 pub struct NewUser {
+    pub id: i64,
     pub email: String,
     pub encrypted_password: String,
 
@@ -87,6 +93,7 @@ impl NewUser {
 #[derive(Insertable, Debug)]
 #[table_name = "accounts"]
 pub struct NewAccount {
+    pub id: i64,
     pub uri:    Option<String>,
     pub domain: Option<String>,
 
