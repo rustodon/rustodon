@@ -90,6 +90,16 @@ pub struct NewAccount {
     pub summary: Option<String>,
 }
 
+/// Represents a new status for insertion into the database.
+#[derive(Insertable, Debug)]
+#[table_name = "statuses"]
+pub struct NewStatus {
+    pub text: String,
+    pub content_warning: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub account_id: i64,
+}
+
 impl NewUser {
     pub fn insert(self, conn: &Connection) -> QueryResult<User> {
         use super::schema::users::dsl::*;
@@ -103,6 +113,16 @@ impl NewAccount {
         use super::schema::accounts::dsl::*;
 
         diesel::insert_into(accounts)
+            .values(&self)
+            .get_result(&**conn)
+    }
+}
+
+impl NewStatus {
+    pub fn insert(self, conn: &Connection) -> QueryResult<Status> {
+        use super::schema::statuses::dsl::*;
+
+        diesel::insert_into(statuses)
             .values(&self)
             .get_result(&**conn)
     }
