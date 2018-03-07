@@ -67,6 +67,7 @@ pub struct Follow {
     pub target_id: i64,
 }
 
+/// Represents a new user for insertion into the database.
 #[derive(Insertable, Debug)]
 #[table_name = "users"]
 pub struct NewUser {
@@ -76,14 +77,7 @@ pub struct NewUser {
     pub account_id: i64,
 }
 
-impl NewUser {
-    pub fn insert(self, conn: &Connection) -> QueryResult<User> {
-        use super::schema::users::dsl::*;
-
-        diesel::insert_into(users).values(&self).get_result(&**conn)
-    }
-}
-
+/// Represents a new account for insertion into the database.
 #[derive(Insertable, Debug)]
 #[table_name = "accounts"]
 pub struct NewAccount {
@@ -94,6 +88,14 @@ pub struct NewAccount {
 
     pub display_name: Option<String>,
     pub summary: Option<String>,
+}
+
+impl NewUser {
+    pub fn insert(self, conn: &Connection) -> QueryResult<User> {
+        use super::schema::users::dsl::*;
+
+        diesel::insert_into(users).values(&self).get_result(&**conn)
+    }
 }
 
 impl NewAccount {
