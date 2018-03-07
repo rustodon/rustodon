@@ -47,6 +47,10 @@ button {
   cursor: pointer;
 }
 
+form {
+  margin-top: 1em;
+}
+
 form.inline { display: inline; }
 
 // space out form inputs a bit
@@ -81,4 +85,10 @@ button.link {
     border-color: #1D8348;
     background-color: #58D68D;
   }
+}
+
+textarea {
+  font: 1em $mono_font;
+  background-color: $background_color;
+  border: 1px solid $border_color;
 }
