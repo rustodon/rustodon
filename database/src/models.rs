@@ -150,6 +150,13 @@ impl User {
 
         users.find(uid).first(&**db_conn).optional()
     }
+
+    pub fn get_account(self, db_conn: &Connection) -> QueryResult<Account> {
+        use super::schema::accounts::dsl::*;
+
+        accounts.find(self.account_id).first(&**db_conn).optional()
+            .map(|x| x.expect("All users should have an account!"))
+    }
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for User {
