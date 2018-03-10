@@ -7,7 +7,7 @@ use maud::{html, PreEscaped};
 use chrono::offset::Utc;
 
 use db;
-use db::models::{Account, User, NewStatus};
+use db::models::{Account, NewStatus, User};
 use templates::Page;
 use failure::Error;
 use error::Perhaps;

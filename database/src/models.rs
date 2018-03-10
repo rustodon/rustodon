@@ -174,7 +174,10 @@ impl User {
     pub fn get_account(self, db_conn: &Connection) -> QueryResult<Account> {
         use super::schema::accounts::dsl::*;
 
-        accounts.find(self.account_id).first(&**db_conn).optional()
+        accounts
+            .find(self.account_id)
+            .first(&**db_conn)
+            .optional()
             .map(|x| x.expect("All users should have an account!"))
     }
 }
