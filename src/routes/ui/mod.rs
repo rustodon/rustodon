@@ -87,13 +87,23 @@ pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
 
         div {
             @if let None = user {
-                a href="/auth/sign_in" "sign in!"
-                " | "
-                a href="/auth/sign_up" "sign up?"
+                div {
+                    a href="/auth/sign_in" "sign in!"
+                    " | "
+                    a href="/auth/sign_up" "sign up?"
+                }
             } @else {
-                form.inline method="post" action="/auth/sign_out" {
-                    input type="hidden" name="stub"
-                    button.link type="submit" name="submit" "sign out."
+                div {
+                    form.inline method="post" action="/auth/sign_out" {
+                        input type="hidden" name="stub"
+                        button.link type="submit" name="submit" "sign out."
+                    }
+                }
+
+                form method="post" action="/statuses/create" {
+                    div textarea name="content" {}
+
+                    button type="submit" "post"
                 }
             }
         }
