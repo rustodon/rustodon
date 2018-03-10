@@ -1,12 +1,15 @@
 use std::path::{Path, PathBuf};
+use std::default::Default;
 use rocket::Route;
-use rocket::request::FlashMessage;
-use rocket::response::NamedFile;
+use rocket::request::{FlashMessage, Form};
+use rocket::response::{NamedFile, Redirect};
 use maud::{html, PreEscaped};
+use chrono::offset::Utc;
 
 use db;
-use db::models::{Account, User};
+use db::models::{Account, User, NewStatus};
 use templates::Page;
+use failure::Error;
 use error::Perhaps;
 
 mod auth;
@@ -20,8 +23,32 @@ pub fn routes() -> Vec<Route> {
         auth::signout,
         auth::signup_get,
         auth::signup_post,
+        create_status,
         static_files
     ]
+}
+
+#[derive(Debug, FromForm)]
+pub struct CreateStatusForm {
+    content: String,
+}
+
+#[post("/statuses/create", data = "<form>")]
+pub fn create_status(
+    user: User,
+    db_conn: db::Connection,
+    form: Form<CreateStatusForm>,
+) -> Result<Redirect, Error> {
+    let form_data = form.get();
+
+    let status = NewStatus {
+        created_at: Utc::now(),
+        text: form_data.content.to_owned(),
+        content_warning: None,
+        account_id: user.account_id,
+    }.insert(&db_conn)?;
+
+    Ok(Redirect::to("/"))
 }
 
 #[get("/users/<username>", format = "text/html")]
