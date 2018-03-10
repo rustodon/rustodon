@@ -75,6 +75,22 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
                     }
                 }
             }
+
+            section.statuses {
+                header h2 "Posts"
+                @for status in account.recent_statuses(&db_conn, 10)? {
+                    div.status {
+                        header {
+                            span {
+                                ("published at ")
+                                time datetime=(status.created_at.to_rfc3339())
+                                    (status.created_at.format("%H:%M %d %a %b %y"))
+                            }
+                        }
+                        div.content (status.text)
+                    }
+                }
+            }
         });
 
     Ok(Some(rendered))
