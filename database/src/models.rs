@@ -40,7 +40,7 @@ pub struct User {
     pub email: String,
     pub encrypted_password: String,
 
-    account_id: i64,
+    pub account_id: i64,
 }
 
 /// Represents a post.
@@ -296,6 +296,15 @@ impl Account {
                     user = self.username
                 ).into()
             })
+    }
+
+    pub fn recent_statuses(&self, db_conn: &Connection, n: usize) -> QueryResult<Vec<Status>> {
+        use super::schema::statuses::dsl::*;
+        statuses
+            .filter(account_id.eq(self.id))
+            .order(id.desc())
+            .limit(n as i64)
+            .get_results::<Status>(&**db_conn)
     }
 }
 
