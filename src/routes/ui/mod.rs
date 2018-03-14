@@ -1,5 +1,4 @@
 use std::path::{Path, PathBuf};
-use std::default::Default;
 use rocket::Route;
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{NamedFile, Redirect};
@@ -81,11 +80,11 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
                 @for status in account.recent_statuses(&db_conn, 10)? {
                     div.status {
                         header {
-                            span {
+                            a href=(try_resopt!(status.get_uri(&db_conn))) { span {
                                 ("published at ")
                                 time datetime=(status.created_at.to_rfc3339())
                                     (status.created_at.format("%H:%M %d %a %b %y"))
-                            }
+                            }}
                         }
                         div.content (status.text)
                     }
