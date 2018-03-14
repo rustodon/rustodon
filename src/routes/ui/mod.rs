@@ -6,7 +6,7 @@ use maud::{html, PreEscaped};
 use chrono::offset::Utc;
 
 use db;
-use db::models::{Account, NewStatus, User};
+use db::models::{Account, Status, NewStatus, User};
 use templates::Page;
 use failure::Error;
 use error::Perhaps;
@@ -17,12 +17,13 @@ pub fn routes() -> Vec<Route> {
     routes![
         index,
         user_page,
+        status_page,
+        create_status,
         auth::signin_get,
         auth::signin_post,
         auth::signout,
         auth::signup_get,
         auth::signup_post,
-        create_status,
         static_files
     ]
 }
@@ -48,6 +49,29 @@ pub fn create_status(
     }.insert(&db_conn)?;
 
     Ok(Redirect::to("/"))
+}
+
+#[get("/users/<username>/statuses/<status_id>", format = "text/html")]
+pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) -> Perhaps<Page> {
+    let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
+    let status = try_resopt!(Status::by_account_and_id(&db_conn, account.id, status_id as i64));
+
+    let rendered = Page::new()
+        .title(format!("@{user}: {id}", user=account.username, id=status.id))
+        .content(html! {
+            div.status {
+                header {
+                    span {
+                        ("published at ")
+                        time datetime=(status.created_at.to_rfc3339())
+                                    (status.created_at.format("%H:%M %d %a %b %y"))
+                    }
+                    div.content (status.text)
+                }
+            }
+        });
+
+    Ok(Some(rendered))
 }
 
 #[get("/users/<username>", format = "text/html")]
