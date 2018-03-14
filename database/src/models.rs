@@ -320,6 +320,15 @@ impl Status {
             .optional()
     }
 
+    pub fn by_account_and_id(db_conn: &Connection, account_id: i64, id: i64) -> QueryResult<Option<Status>> {
+        use super::schema::statuses::dsl;
+        dsl::statuses
+            .find(id)
+            .filter(dsl::account_id.eq(account_id))
+            .first::<Status>(&**db_conn)
+            .optional()
+    }
+
     pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Option<Cow<'a, str>>> {
         Ok(Some(
             self.uri
