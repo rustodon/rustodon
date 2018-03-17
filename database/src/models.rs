@@ -312,12 +312,11 @@ impl Account {
 }
 
 impl Status {
-    pub fn account(&self, db_conn: &Connection) -> QueryResult<Option<Account>> {
+    pub fn account(&self, db_conn: &Connection) -> QueryResult<Account> {
         use super::schema::accounts::dsl;
         dsl::accounts
             .find(self.account_id)
             .first::<Account>(&**db_conn)
-            .optional()
     }
 
     pub fn by_account_and_id(db_conn: &Connection, account_id: i64, id: i64) -> QueryResult<Option<Status>> {
