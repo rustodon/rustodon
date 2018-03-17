@@ -21,7 +21,9 @@ pub fn ap_user_object(
     _ag: ActivityGuard,
     db_conn: db::Connection,
 ) -> Perhaps<ActivityStreams> {
-    Ok(Account::fetch_local_by_username(&db_conn, username)?.map(|acct| acct.as_activitypub()))
+    let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
+
+    Ok(Some(account.as_activitypub(&db_conn)?))
 }
 
 /// A type representing the parameters of a WebFinger query.

@@ -1,9 +1,11 @@
 use serde::Serialize;
 use serde_json::{self, Value};
-use rocket::http::{Accept, ContentType, MediaType, Status};
+use rocket::http::{self, Accept, ContentType, MediaType};
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::{self, Content, Responder};
-use db::models::Account;
+use failure::Error;
+use db;
+use db::models::{Account, Status};
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
@@ -24,7 +26,7 @@ where
             .map_err(|e| {
                 // TODO: logging (what happens if the Value won't serialize?)
                 // the code i cribbed this from did some internal Rocket thing.
-                Status::InternalServerError
+                http::Status::InternalServerError
             })
     }
 }
@@ -67,12 +69,15 @@ fn is_as(accept: &Accept) -> bool {
 /// Trait implemented by structs which can serialize to
 /// ActivityPub-compliant ActivityStreams2 JSON-LD.
 pub trait AsActivityPub {
-    fn as_activitypub(&self) -> ActivityStreams;
+    fn as_activitypub(&self, db: &db::Connection) -> Result<ActivityStreams, Error>;
 }
 
 impl AsActivityPub for Account {
-    fn as_activitypub(&self) -> ActivityStreams<serde_json::Value> {
-        ActivityStreams(json!({
+    fn as_activitypub(
+        &self,
+        _: &db::Connection,
+    ) -> Result<ActivityStreams<serde_json::Value>, Error> {
+        Ok(ActivityStreams(json!({
             "@context": "https://www.w3.org/ns/activitystreams",
             "type": "Person",
             "id": self.get_uri(),
@@ -86,7 +91,7 @@ impl AsActivityPub for Account {
             "preferredUsername": self.username,
             "name": self.display_name.as_ref().map(String::as_str).unwrap_or(""),
             "summary": self.summary.as_ref().map(String::as_str).unwrap_or("<p></p>"),
-        }))
+        })))
     }
 }
 
