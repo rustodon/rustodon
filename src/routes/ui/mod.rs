@@ -6,7 +6,7 @@ use maud::{html, PreEscaped};
 use chrono::offset::Utc;
 
 use db;
-use db::models::{Account, Status, NewStatus, User};
+use db::models::{Account, NewStatus, Status, User};
 use templates::Page;
 use failure::Error;
 use error::Perhaps;
@@ -41,7 +41,7 @@ pub fn create_status(
 ) -> Result<Redirect, Error> {
     let form_data = form.get();
 
-    let status = NewStatus {
+    let _status = NewStatus {
         created_at: Utc::now(),
         text: form_data.content.to_owned(),
         content_warning: None,
@@ -54,10 +54,18 @@ pub fn create_status(
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
 pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) -> Perhaps<Page> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
-    let status = try_resopt!(Status::by_account_and_id(&db_conn, account.id, status_id as i64));
+    let status = try_resopt!(Status::by_account_and_id(
+        &db_conn,
+        account.id,
+        status_id as i64
+    ));
 
     let rendered = Page::new()
-        .title(format!("@{user}: {id}", user=account.username, id=status.id))
+        .title(format!(
+            "@{user}: {id}",
+            user = account.username,
+            id = status.id
+        ))
         .content(html! {
             div.status {
                 header {

@@ -319,7 +319,11 @@ impl Status {
             .first::<Account>(&**db_conn)
     }
 
-    pub fn by_account_and_id(db_conn: &Connection, account_id: i64, id: i64) -> QueryResult<Option<Status>> {
+    pub fn by_account_and_id(
+        db_conn: &Connection,
+        account_id: i64,
+        id: i64,
+    ) -> QueryResult<Option<Status>> {
         use super::schema::statuses::dsl;
         dsl::statuses
             .find(id)
