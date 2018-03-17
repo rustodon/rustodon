@@ -328,20 +328,19 @@ impl Status {
             .optional()
     }
 
-    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Option<Cow<'a, str>>> {
-        Ok(Some(
-            self.uri
-                .as_ref()
-                .map(|x| String::as_str(x).into())
-                .unwrap_or(
-                    format!(
-                        "{base}/users/{user}/statuses/{id}",
-                        base = BASE_URL.as_str(),
-                        user = try_resopt!(self.account(db_conn)).username,
-                        id = self.id
-                    ).into(),
-                ),
-        ))
+    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Cow<'a, str>> {
+        let uri = self.uri.as_ref().map(|x| String::as_str(x).into());
+        match uri {
+            Some(x) => Ok(x),
+            None => {
+                return Ok(format!(
+                    "{base}/users/{user}/statuses/{id}",
+                    base = BASE_URL.as_str(),
+                    user = self.account(db_conn)?.username,
+                    id = self.id
+                ).into())
+            },
+        }
     }
 }
 
