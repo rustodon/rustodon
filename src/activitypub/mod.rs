@@ -95,6 +95,25 @@ impl AsActivityPub for Account {
     }
 }
 
+impl AsActivityPub for Status {
+    fn as_activitypub(
+        &self,
+        conn: &db::Connection,
+    ) -> Result<ActivityStreams<serde_json::Value>, Error> {
+        Ok(ActivityStreams(json!({
+            "@context": ["https://www.w3.org/ns/activitystreams", {"sensitive": "as:sensitive"}],
+            "type": "Note",
+            "id": self.get_uri(conn)?,
+            "attributedTo": self.account(conn)?.get_uri(),
+
+            "content": self.text,
+            "summary": self.content_warning,
+            "sensitive": self.content_warning.is_some(),
+            "published": self.created_at.to_rfc3339(),
+        })))
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
