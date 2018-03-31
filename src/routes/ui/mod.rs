@@ -17,6 +17,7 @@ pub fn routes() -> Vec<Route> {
     routes![
         index,
         user_page,
+        user_page_paginated,
         status_page,
         create_status,
         auth::signin_get,
@@ -82,8 +83,24 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
     Ok(Some(rendered))
 }
 
+#[derive(FromForm)]
+pub struct UserPageParams {
+    max_id: Option<i64>,
+}
+
+// This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
+// If you don't like this, please complain over there.
 #[get("/users/<username>", format = "text/html")]
 pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
+    user_page_paginated(username, UserPageParams { max_id: None }, db_conn)
+}
+
+#[get("/users/<username>?<params>", format = "text/html")]
+pub fn user_page_paginated(
+    username: String,
+    params: UserPageParams,
+    db_conn: db::Connection,
+) -> Perhaps<Page> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
 
     let rendered = Page::new()
@@ -109,7 +126,8 @@ pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
 
             section.statuses {
                 header h2 "Posts"
-                @for status in account.recent_statuses(&db_conn, 10)? {
+
+                @for status in account.statuses_before_id(&db_conn, params.max_id, 10)? {
                     div.status {
                         header {
                             a href=(status.get_uri(&db_conn)?) { span {

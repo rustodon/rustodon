@@ -301,11 +301,21 @@ impl Account {
             })
     }
 
-    pub fn recent_statuses(&self, db_conn: &Connection, n: usize) -> QueryResult<Vec<Status>> {
+    pub fn statuses_before_id(
+        &self,
+        db_conn: &Connection,
+        max_id: Option<i64>,
+        n: usize,
+    ) -> QueryResult<Vec<Status>> {
         use super::schema::statuses::dsl::*;
-        statuses
-            .filter(account_id.eq(self.id))
-            .order(id.desc())
+        let mut query = statuses
+            .filter(account_id.eq(self.id)).into_boxed();
+
+        if let Some(max_id) = max_id {
+            query = query.filter(id.lt(max_id))
+        }
+
+        query.order(id.desc())
             .limit(n as i64)
             .get_results::<Status>(&**db_conn)
     }
