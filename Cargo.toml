@@ -15,8 +15,8 @@ lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
 
-rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
-rocket_codegen = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
+rocket = "0.3.6"
+rocket_codegen = "0.3.6"
 
 serde = "1.0"
 serde_derive = "1.0"
@@ -30,14 +30,10 @@ maud = { version = "0.17.2", features = ["rocket"] }
 path = "database/"
 
 [dependencies.rocket_contrib]
-git = "https://github.com/SergioBenitez/Rocket"
-branch = "v0.3"
+version = "0.3.6"
 default-features = false
 features = ["json"]
 
 [dev-dependencies]
 clippy = ">= 0"
 
-[patch.crates-io]
-rocket = { git = "https://github.com/SergioBenitez/Rocket", branch = "v0.3" }
-ring = { git = "https://github.com/SergioBenitez/ring", branch = "v0.11" }
