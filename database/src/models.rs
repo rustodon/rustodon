@@ -309,16 +309,31 @@ impl Account {
         n: usize,
     ) -> QueryResult<Vec<Status>> {
         use super::schema::statuses::dsl::*;
-        let mut query = statuses
-            .filter(account_id.eq(self.id)).into_boxed();
+        let mut query = statuses.filter(account_id.eq(self.id)).into_boxed();
 
         if let Some(max_id) = max_id {
             query = query.filter(id.lt(max_id))
         }
 
-        query.order(id.desc())
+        query
+            .order(id.desc())
             .limit(n as i64)
             .get_results::<Status>(&**db_conn)
+    }
+
+    pub fn status_id_bounds(&self, db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
+        use super::schema::statuses::dsl::*;
+        use diesel::dsl::sql;
+        // Yes, this is gross and we don't like having to use sql() either.
+        // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
+        statuses
+            .select(sql("min(id), max(id)"))
+            .filter(account_id.eq(self.id))
+            .first::<(Option<i64>, Option<i64>)>(&**db_conn)
+            .map(|result| match result {
+                (Some(x), Some(y)) => Some((x, y)),
+                _ => None,
+            })
     }
 }
 
