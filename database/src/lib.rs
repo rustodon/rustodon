@@ -1,6 +1,7 @@
 #![recursion_limit = "128"]
 
 extern crate chrono;
+extern crate chrono_humanize;
 #[macro_use]
 extern crate diesel;
 #[macro_use]

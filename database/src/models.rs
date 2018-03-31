@@ -7,6 +7,7 @@
 use std::borrow::Cow;
 use chrono::DateTime;
 use chrono::offset::Utc;
+use chrono_humanize::Humanize;
 use diesel;
 use diesel::prelude::*;
 use pwhash::bcrypt;
@@ -340,6 +341,10 @@ impl Status {
             .filter(dsl::account_id.eq(account_id))
             .first::<Status>(&**db_conn)
             .optional()
+    }
+
+    pub fn humanized_age(&self) -> String {
+        self.created_at.humanize()
     }
 
     pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Cow<'a, str>> {
