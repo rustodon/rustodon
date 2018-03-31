@@ -71,9 +71,8 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
             div.status {
                 header {
                     span {
-                        ("published at ")
-                        time datetime=(status.created_at.to_rfc3339())
-                                    (status.created_at.format("%H:%M %d %a %b %y"))
+                        ("published: ")
+                        time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
                     }
                     div.content (status.text)
                 }
@@ -131,9 +130,8 @@ pub fn user_page_paginated(
                     div.status {
                         header {
                             a href=(status.get_uri(&db_conn)?) { span {
-                                ("published at ")
-                                time datetime=(status.created_at.to_rfc3339())
-                                    (status.created_at.format("%H:%M %d %a %b %y"))
+                                ("published: ")
+                                time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
                             }}
                         }
                         div.content (status.text)
