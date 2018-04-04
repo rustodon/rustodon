@@ -22,6 +22,22 @@ pub struct IdGenerator {
     flaken: Flaken,
 }
 
+/// Constructs an IdGenerator, which can be used to provide one or more snowflake IDs
+/// for a database transaction.
+///
+/// Example use:
+///
+/// ```
+/// let mut id_gen = id_generator();
+///
+/// let modelA = ModelA {
+///     id: id_gen.next();
+/// };
+///
+/// let modelB = ModelB {
+///     id: id_gen.next();
+/// };
+/// ```
 pub fn id_generator() -> IdGenerator {
     IdGenerator {
         flaken: Flaken::default()
@@ -114,6 +130,7 @@ pub struct NewAccount {
 #[derive(Insertable, Debug)]
 #[table_name = "statuses"]
 pub struct NewStatus {
+    pub id: i64,
     pub text: String,
     pub content_warning: Option<String>,
     pub created_at: DateTime<Utc>,

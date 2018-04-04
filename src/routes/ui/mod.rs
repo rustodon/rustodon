@@ -6,7 +6,7 @@ use maud::{html, PreEscaped};
 use chrono::offset::Utc;
 
 use db;
-use db::models::{Account, NewStatus, Status, User};
+use db::models::{Account, NewStatus, Status, User, id_generator};
 use templates::Page;
 use failure::Error;
 use error::Perhaps;
@@ -43,6 +43,7 @@ pub fn create_status(
     let form_data = form.get();
 
     let _status = NewStatus {
+        id: id_generator().next(),
         created_at: Utc::now(),
         text: form_data.content.to_owned(),
         content_warning: None,
