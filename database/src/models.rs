@@ -17,8 +17,20 @@ use super::Connection;
 use flaken::Flaken;
 use {BASE_URL, DOMAIN};
 
-pub fn make_id() -> i64 {
-    Flaken::default().next() as i64
+pub struct IdGenerator {
+    flaken: Flaken,
+}
+
+pub fn id_generator() -> IdGenerator {
+    IdGenerator {
+        flaken: Flaken::default()
+    }
+}
+
+impl IdGenerator {
+    pub fn next(&mut self) -> i64 {
+        self.flaken.next() as i64
+    }
 }
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.

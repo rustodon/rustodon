@@ -9,7 +9,7 @@ use maud::{html, PreEscaped};
 use validator::Validate;
 
 use db::{self, DieselConnection};
-use db::models::{validators, Account, NewAccount, NewUser, User, make_id};
+use db::models::{validators, Account, NewAccount, NewUser, User, id_generator};
 use templates::Page;
 use failure::Error;
 use error::Perhaps;
@@ -149,8 +149,10 @@ pub fn auth_signup_post(
     }
 
     (*db_conn).transaction::<_, _, _>(|| {
+        let mut id_gen = id_generator();
+
         let account = NewAccount {
-            id: make_id(),
+            id: id_gen.next(),
             domain: None,
             uri:    None,
 
@@ -161,7 +163,7 @@ pub fn auth_signup_post(
         }.insert(&db_conn)?;
 
         NewUser {
-            id: make_id(),
+            id: id_gen.next(),
             email: form_data.email.to_owned(),
             encrypted_password: User::encrypt_password(&form_data.password),
             account_id: account.id,
