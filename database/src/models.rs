@@ -4,18 +4,18 @@
 //! The ordering must match that in the generated schema, which
 //! you can obtain with `diesel print-schema`.
 
-use std::borrow::Cow;
+use super::Connection;
+use super::schema::{accounts, follows, statuses, users};
 use chrono::DateTime;
 use chrono::offset::Utc;
 use chrono_humanize::Humanize;
 use diesel;
 use diesel::prelude::*;
+use flaken::Flaken;
 use pwhash::bcrypt;
 use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
-use super::schema::{accounts, follows, statuses, users};
-use super::Connection;
-use flaken::Flaken;
+use std::borrow::Cow;
 use {BASE_URL, DOMAIN};
 
 pub struct IdGenerator {
@@ -40,7 +40,7 @@ pub struct IdGenerator {
 /// ```
 pub fn id_generator() -> IdGenerator {
     IdGenerator {
-        flaken: Flaken::default()
+        flaken: Flaken::default(),
     }
 }
 
@@ -117,7 +117,7 @@ pub struct NewUser {
 #[table_name = "accounts"]
 pub struct NewAccount {
     pub id: i64,
-    pub uri:    Option<String>,
+    pub uri: Option<String>,
     pub domain: Option<String>,
 
     pub username: String,

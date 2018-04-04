@@ -1,13 +1,13 @@
 use itertools::Itertools;
 use rocket::Route;
-use rocket::response::Content;
 use rocket::http::ContentType;
+use rocket::response::Content;
 use rocket_contrib::Json;
 
+use activitypub::{ActivityGuard, ActivityStreams, AsActivityPub};
 use db;
 use db::models::{Account, Status};
 use error::Perhaps;
-use activitypub::{ActivityGuard, ActivityStreams, AsActivityPub};
 use {BASE_URL, DOMAIN};
 
 pub fn routes() -> Vec<Route> {

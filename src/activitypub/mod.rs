@@ -1,11 +1,11 @@
-use serde::Serialize;
-use serde_json::{self, Value};
+use db;
+use db::models::{Account, Status};
+use failure::Error;
 use rocket::http::{self, Accept, ContentType, MediaType};
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::{self, Content, Responder};
-use failure::Error;
-use db;
-use db::models::{Account, Status};
+use serde::Serialize;
+use serde_json::{self, Value};
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
