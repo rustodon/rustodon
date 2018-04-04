@@ -1,34 +1,18 @@
 use itertools::Itertools;
-use std::path::{Path, PathBuf};
 use std::borrow::Cow;
-use rocket::Route;
-use rocket::http::{Cookie, Cookies};
+use rocket::response::{Flash, Redirect};
 use rocket::request::{FlashMessage, Form};
-use rocket::response::{Flash, NamedFile, Redirect};
-use maud::{html, PreEscaped};
+use rocket::http::{Cookie, Cookies};
+use maud::html;
+use failure::Error;
 use validator::Validate;
 
 use db::{self, DieselConnection};
-use db::models::{validators, Account, NewAccount, NewUser, User, id_generator};
+use db::models::{validators, NewAccount, NewUser, User, id_generator};
 use templates::Page;
-use failure::Error;
-use error::Perhaps;
-
-pub fn routes() -> Vec<Route> {
-    routes![
-        index,
-        user_page,
-        auth_signin_get,
-        auth_signin_post,
-        auth_signout,
-        auth_signup_get,
-        auth_signup_post,
-        static_files
-    ]
-}
 
 #[get("/auth/sign_in")]
-pub fn auth_signin_get(flash: Option<FlashMessage>) -> Page {
+pub fn signin_get(flash: Option<FlashMessage>) -> Page {
     Page::new().title("sign in").flash(flash).content(html! {
         header h2 "sign in"
 
@@ -55,7 +39,7 @@ pub struct SigninForm {
 }
 
 #[post("/auth/sign_in", data = "<form>")]
-pub fn auth_signin_post(
+pub fn signin_post(
     form: Form<SigninForm>,
     mut cookies: Cookies,
     db_conn: db::Connection,
@@ -78,7 +62,7 @@ pub fn auth_signin_post(
 }
 
 #[post("/auth/sign_out")]
-pub fn auth_signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
+pub fn signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
     if user.is_some() {
         cookies.remove_private(Cookie::named("uid"));
     }
@@ -100,7 +84,7 @@ pub struct SignupForm {
 }
 
 #[get("/auth/sign_up")]
-pub fn auth_signup_get(flash: Option<FlashMessage>) -> Page {
+pub fn signup_get(flash: Option<FlashMessage>) -> Page {
     Page::new().title("sign up").flash(flash).content(html! {
         header h2 "sign up"
 
@@ -126,7 +110,7 @@ pub fn auth_signup_get(flash: Option<FlashMessage>) -> Page {
 }
 
 #[post("/auth/sign_up", data = "<form>")]
-pub fn auth_signup_post(
+pub fn signup_post(
     form: Form<SignupForm>,
     db_conn: db::Connection,
 ) -> Result<Flash<Redirect>, Error> {
@@ -171,60 +155,4 @@ pub fn auth_signup_post(
     })?;
 
     Ok(Flash::success(Redirect::to("/"), "signed up!"))
-}
-
-#[get("/users/<username>", format = "text/html")]
-pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
-    let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
-
-    let rendered = Page::new()
-        .title(format!("@{user}", user = account.username))
-        .content(html! {
-            div.h-card {
-                header {
-                    h1 a.u-url.u-uid href=(account.get_uri()) {
-                        span.p-name (account.display_name.as_ref().unwrap_or(&account.username))
-                    }
-
-                    div (account.fully_qualified_username())
-                }
-
-                div.p-note {
-                    @if let Some(bio) = account.summary.as_ref() {
-                        (PreEscaped(bio))
-                    } @else {
-                        p {}
-                    }
-                }
-            }
-        });
-
-    Ok(Some(rendered))
-}
-
-#[get("/")]
-pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
-    Page::new().flash(flash).content(html! {
-        header h1 "Rustodon"
-
-        div {
-            @if let None = user {
-                a href="/auth/sign_in" "sign in!"
-                " | "
-                a href="/auth/sign_up" "sign up?"
-            } @else {
-                form.inline method="post" action="/auth/sign_out" {
-                    input type="hidden" name="stub"
-                    button.link type="submit" name="submit" "sign out."
-                }
-            }
-        }
-
-        p {"Current user session: " code (format!("{:?}", user))}
-    })
-}
-
-#[get("/static/<path..>")]
-fn static_files(path: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static/").join(path)).ok()
 }
