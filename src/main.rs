@@ -28,15 +28,18 @@ extern crate rustodon_database as db;
 
 #[macro_use]
 mod error;
-mod templates;
-mod routes;
 mod activitypub;
+mod routes;
+mod templates;
 
-use std::env;
 use dotenv::dotenv;
+use std::env;
 
 lazy_static! {
-    pub static ref BASE_URL: String = format!("https://{}", env::var("DOMAIN").expect("DOMAIN must be set"));
+    pub static ref BASE_URL: String = format!(
+        "https://{}",
+        env::var("DOMAIN").expect("DOMAIN must be set")
+    );
     pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
 }
 

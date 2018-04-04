@@ -1,14 +1,14 @@
-use itertools::Itertools;
-use std::borrow::Cow;
-use rocket::response::{Flash, Redirect};
-use rocket::request::{FlashMessage, Form};
-use rocket::http::{Cookie, Cookies};
-use maud::html;
 use failure::Error;
+use itertools::Itertools;
+use maud::html;
+use rocket::http::{Cookie, Cookies};
+use rocket::request::{FlashMessage, Form};
+use rocket::response::{Flash, Redirect};
+use std::borrow::Cow;
 use validator::Validate;
 
-use db::{self, DieselConnection};
 use db::models::{validators, NewAccount, NewUser, User};
+use db::{self, DieselConnection};
 use templates::Page;
 
 #[get("/auth/sign_in")]

@@ -1,15 +1,15 @@
-use std::path::{Path, PathBuf};
+use chrono::offset::Utc;
+use maud::{html, PreEscaped};
 use rocket::Route;
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{NamedFile, Redirect};
-use maud::{html, PreEscaped};
-use chrono::offset::Utc;
+use std::path::{Path, PathBuf};
 
 use db;
 use db::models::{Account, NewStatus, Status, User};
-use templates::Page;
-use failure::Error;
 use error::Perhaps;
+use failure::Error;
+use templates::Page;
 
 mod auth;
 

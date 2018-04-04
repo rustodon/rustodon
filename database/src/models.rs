@@ -4,7 +4,8 @@
 //! The ordering must match that in the generated schema, which
 //! you can obtain with `diesel print-schema`.
 
-use std::borrow::Cow;
+use super::Connection;
+use super::schema::{accounts, follows, statuses, users};
 use chrono::DateTime;
 use chrono::offset::Utc;
 use chrono_humanize::Humanize;
@@ -13,8 +14,7 @@ use diesel::prelude::*;
 use pwhash::bcrypt;
 use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
-use super::schema::{accounts, follows, statuses, users};
-use super::Connection;
+use std::borrow::Cow;
 use {BASE_URL, DOMAIN};
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
