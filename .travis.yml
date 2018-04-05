@@ -3,6 +3,10 @@ language: rust
 rust:
   - nightly
 
+addons:
+  config:
+    retries: true
+
 cache:
   cargo: true
   directories:
