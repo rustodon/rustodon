@@ -4,8 +4,6 @@
 //! The ordering must match that in the generated schema, which
 //! you can obtain with `diesel print-schema`.
 
-use super::schema::{accounts, follows, statuses, users};
-use super::Connection;
 use chrono::offset::Utc;
 use chrono::DateTime;
 use chrono_humanize::Humanize;
@@ -15,7 +13,11 @@ use pwhash::bcrypt;
 use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
 use std::borrow::Cow;
+
+
 use {BASE_URL, DOMAIN};
+use ::Connection;
+use ::schema::{accounts, follows, statuses, users};
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
@@ -400,14 +402,5 @@ impl Status {
                 ).into())
             },
         }
-    }
-}
-
-pub mod validators {
-    use regex::Regex;
-
-    lazy_static! {
-        /// During registrations, usernames must be matched by this regex to be considered valid.
-        pub static ref VALID_USERNAME_RE: Regex = Regex::new(r"^[[:alnum:]_]+$").unwrap();
     }
 }

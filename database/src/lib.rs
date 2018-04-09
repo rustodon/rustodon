@@ -30,6 +30,7 @@ use std::ops::Deref;
 
 pub mod models;
 pub mod schema;
+pub mod validators;
 
 // TODO: gross hack. find a nicer way to pass these in?
 lazy_static! {
