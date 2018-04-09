@@ -14,11 +14,10 @@ use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
 use std::borrow::Cow;
 
-
+use sanitize;
+use schema::{accounts, follows, statuses, users};
+use Connection;
 use {BASE_URL, DOMAIN};
-use ::Connection;
-use ::schema::{accounts, follows, statuses, users};
-use ::sanitize;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///

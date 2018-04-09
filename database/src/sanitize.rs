@@ -1,4 +1,4 @@
-use ammonia::{Builder};
+use ammonia::Builder;
 
 pub fn summary(summary: String) -> String {
     let allowed_tags = hashset!["p", "br"];
