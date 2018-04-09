@@ -1,5 +1,6 @@
 #![recursion_limit = "128"]
 
+extern crate ammonia;
 extern crate chrono;
 extern crate chrono_humanize;
 #[macro_use]
@@ -15,6 +16,8 @@ extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
+#[macro_use]
+extern crate maplit;
 
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
