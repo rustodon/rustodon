@@ -18,6 +18,7 @@ use std::borrow::Cow;
 use {BASE_URL, DOMAIN};
 use ::Connection;
 use ::schema::{accounts, follows, statuses, users};
+use ::sanitize;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
@@ -357,6 +358,20 @@ impl Account {
                 (Some(x), Some(y)) => Some((x, y)),
                 _ => None,
             })
+    }
+
+    pub fn set_summary(
+        &self,
+        db_conn: &Connection,
+        new_summary: Option<String>,
+    ) -> QueryResult<()> {
+        use super::schema::accounts::dsl::summary;
+
+        let new_summary = new_summary.map(sanitize::summary);
+        diesel::update(self)
+            .set(summary.eq(new_summary))
+            .execute(&**db_conn)
+            .and(Ok(()))
     }
 }
 
