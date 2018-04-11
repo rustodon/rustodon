@@ -29,7 +29,7 @@ env:
     - MIGRATION_DIR=migrations FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
 
 before_script:
-  - rustup component add --toolchain nightly rustfmt-preview
+  - rustup component add rustfmt-preview
   - which cargo-install-update || cargo install cargo-update
   - cargo install-update -i diesel_cli
 
