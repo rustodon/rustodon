@@ -1,7 +1,7 @@
 language: rust
 
 rust:
-  - nightly
+  - 1.26.0-nightly
 
 addons:
   config:
