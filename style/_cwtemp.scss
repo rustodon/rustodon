@@ -1,0 +1,19 @@
+// this should work, but stops the links from triggering, so
+//
+// .hidebutton:focus, .showbutton:focus {
+//   display: none;
+// }
+//
+// .hidebutton, .showbutton {
+//   display: block;
+// }
+
+// note that this recycles the same id for all sensitive posts, so it will need
+// revisiting when a list view is added.
+#sensitive-content {
+  display: none;
+}
+
+#sensitive-content:target {
+  display: block;
+}
