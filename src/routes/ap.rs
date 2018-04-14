@@ -1,7 +1,7 @@
 use itertools::Itertools;
-use rocket::Route;
 use rocket::http::ContentType;
 use rocket::response::Content;
+use rocket::Route;
 use rocket_contrib::Json;
 
 use activitypub::{ActivityGuard, ActivityStreams, AsActivityPub};

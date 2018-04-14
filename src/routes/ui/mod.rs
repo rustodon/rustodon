@@ -1,8 +1,8 @@
 use chrono::offset::Utc;
 use maud::{html, PreEscaped};
-use rocket::Route;
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{NamedFile, Redirect};
+use rocket::Route;
 use std::path::{Path, PathBuf};
 
 use db;
@@ -82,24 +82,16 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
     Ok(Some(rendered))
 }
 
-#[derive(FromForm)]
+#[derive(FromForm, Debug)]
 pub struct UserPageParams {
-    max_id:  Option<i64>,
-    back_to: Option<i64>,
+    max_id: Option<i64>,
 }
 
 // This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
 // If you don't like this, please complain over there.
 #[get("/users/<username>", format = "text/html")]
 pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
-    user_page_paginated(
-        username,
-        UserPageParams {
-            max_id:  None,
-            back_to: None,
-        },
-        db_conn,
-    )
+    user_page_paginated(username, UserPageParams { max_id: None }, db_conn)
 }
 
 #[get("/users/<username>?<params>", format = "text/html")]
@@ -109,9 +101,7 @@ pub fn user_page_paginated(
     db_conn: db::Connection,
 ) -> Perhaps<Page> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
-    let statuses = account.statuses_before_id(&db_conn, params.max_id, 10)?;
-    let status_bounds = account.status_id_bounds(&db_conn)?;
-    let cur_max_id = params.max_id.or(status_bounds.map(|b| b.1));
+    let statuses: Vec<Status> = account.statuses_before_id(&db_conn, params.max_id, 10)?;
 
     let rendered = Page::new()
         .title(format!("@{user}", user = account.username))
@@ -152,14 +142,10 @@ pub fn user_page_paginated(
 
                 nav.pagination {
                     @if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
+                        @let bounds = account.status_id_bounds(&db_conn)?;
                         // unwrap is safe since we already know we have statuses
-                        @if prev_page_max_id > status_bounds.unwrap().0 {
-                            a href=(format!("?max_id={}&back_to={}",
-                                prev_page_max_id, cur_max_id.unwrap())) rel="next" "⇐"
-                        }
-
-                        @if let Some(back_to) = params.back_to {
-                            a href=(format!("?max_id={}", back_to)) rel="prev" "⇒"
+                        @if prev_page_max_id > bounds.unwrap().0 {
+                            a href=(format!("?max_id={}", prev_page_max_id)) rel="next" "⇐ older posts"
                         }
                     }
                 }

@@ -4,10 +4,10 @@
 //! The ordering must match that in the generated schema, which
 //! you can obtain with `diesel print-schema`.
 
-use super::Connection;
 use super::schema::{accounts, follows, statuses, users};
-use chrono::DateTime;
+use super::Connection;
 use chrono::offset::Utc;
+use chrono::DateTime;
 use chrono_humanize::Humanize;
 use diesel;
 use diesel::prelude::*;
@@ -194,8 +194,8 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<User, ()> {
-        use rocket::Outcome;
         use rocket::http::Status;
+        use rocket::Outcome;
 
         let db_conn = request.guard::<Connection>()?;
 
