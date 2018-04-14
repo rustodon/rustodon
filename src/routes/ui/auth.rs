@@ -73,13 +73,20 @@ pub fn signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
 #[derive(FromForm, Validate, Debug)]
 pub struct SignupForm {
     #[validate(length(min = "1", max = "32"))]
-    #[validate(regex(path = "validators::VALID_USERNAME_RE",
-                     message = "Username must consist of {A-Z, a-z, 0-9, _}."))]
+    #[validate(
+        regex(
+            path = "validators::VALID_USERNAME_RE",
+            message = "Username must consist of {A-Z, a-z, 0-9, _}."
+        )
+    )]
     username: String,
     #[validate(email)]
     email: String,
-    #[validate(length(min = "3", max = "64",
-                      message = "Password must be between 3 and 64 characters long."))]
+    #[validate(
+        length(
+            min = "3", max = "64", message = "Password must be between 3 and 64 characters long."
+        )
+    )]
     password: String,
 }
 
