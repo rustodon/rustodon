@@ -1,5 +1,5 @@
 use chrono::offset::Utc;
-use maud::{html, PreEscaped};
+use maud::{html, Markup, PreEscaped};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{NamedFile, Redirect};
 use rocket::Route;
@@ -32,6 +32,7 @@ pub fn routes() -> Vec<Route> {
 #[derive(Debug, FromForm)]
 pub struct CreateStatusForm {
     content: String,
+    content_warning: String,
 }
 
 #[post("/statuses/create", data = "<form>")]
@@ -42,14 +43,56 @@ pub fn create_status(
 ) -> Result<Redirect, Error> {
     let form_data = form.get();
 
+    // convert CW to option if present, so we get proper nulls in DB
+    let content_warning: Option<String> = if form_data.content_warning.len() > 0 {
+        Some(form_data.content_warning.to_owned())
+    } else {
+        None
+    };
+
     let _status = NewStatus {
         created_at: Utc::now(),
         text: form_data.content.to_owned(),
-        content_warning: None,
+        content_warning: content_warning,
         account_id: user.account_id,
     }.insert(&db_conn)?;
 
     Ok(Redirect::to("/"))
+}
+
+fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Result<Markup, Error> {
+    let meta_line = html !{
+        span {
+            ("published: ")
+            time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
+        }
+    };
+
+    let rendered = html! {
+        div.status {
+            header {
+                @if link {
+                    a href=(status.get_uri(db_conn)?) (meta_line)
+                } @else {
+                    (meta_line)
+                }
+            }
+            div {
+                @if let Some(cw) = &status.content_warning {
+                    @let collapse_id = format!("collapsible-{}", status.id);
+
+                    span (cw)
+                    input.collapse--toggle id=(collapse_id) type="checkbox";
+                    label.collapse--lbl-toggle for=(collapse_id) tabindex="0" { "Toggle CW" }
+                    div.content.collapse--content (status.text)
+                } @else {
+                    div.content (status.text)
+                }
+            }
+        }
+    };
+
+    Ok(rendered)
 }
 
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
@@ -67,17 +110,7 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
             user = account.username,
             id = status.id
         ))
-        .content(html! {
-            div.status {
-                header {
-                    span {
-                        ("published: ")
-                        time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
-                    }
-                    div.content (status.text)
-                }
-            }
-        });
+        .content(render_status(&db_conn, &status, false)?);
 
     Ok(Some(rendered))
 }
@@ -128,16 +161,7 @@ pub fn user_page_paginated(
                 header h2 "Posts"
 
                 @for status in &statuses {
-                    div.status {
-                        header {
-                            a href=(status.get_uri(&db_conn)?) { span {
-                                ("published: ")
-                                time datetime=(status.created_at.to_rfc3339())
-                                    (status.humanized_age())
-                            }}
-                        }
-                        div.content (status.text)
-                    }
+                    (render_status(&db_conn, status, true)?)
                 }
 
                 nav.pagination {
@@ -176,6 +200,7 @@ pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
                 }
 
                 form method="post" action="/statuses/create" {
+                    div input name="content_warning" placeholder="content warning" {}
                     div textarea name="content" {}
 
                     button type="submit" "post"
