@@ -1,8 +1,8 @@
 use chrono::offset::Utc;
-use maud::{html, PreEscaped};
-use rocket::Route;
+use maud::{html, Markup, PreEscaped};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{NamedFile, Redirect};
+use rocket::Route;
 use std::path::{Path, PathBuf};
 
 use db;
@@ -32,6 +32,7 @@ pub fn routes() -> Vec<Route> {
 #[derive(Debug, FromForm)]
 pub struct CreateStatusForm {
     content: String,
+    content_warning: String,
 }
 
 #[post("/statuses/create", data = "<form>")]
@@ -42,15 +43,57 @@ pub fn create_status(
 ) -> Result<Redirect, Error> {
     let form_data = form.get();
 
+    // convert CW to option if present, so we get proper nulls in DB
+    let content_warning: Option<String> = if form_data.content_warning.len() > 0 {
+        Some(form_data.content_warning.to_owned())
+    } else {
+        None
+    };
+
     let _status = NewStatus {
         id: id_generator().next(),
         created_at: Utc::now(),
         text: form_data.content.to_owned(),
-        content_warning: None,
+        content_warning: content_warning,
         account_id: user.account_id,
     }.insert(&db_conn)?;
 
     Ok(Redirect::to("/"))
+}
+
+fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Result<Markup, Error> {
+    let meta_line = html !{
+        span {
+            ("published: ")
+            time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
+        }
+    };
+
+    let rendered = html! {
+        div.status {
+            header {
+                @if link {
+                    a href=(status.get_uri(db_conn)?) (meta_line)
+                } @else {
+                    (meta_line)
+                }
+            }
+            div {
+                @if let Some(cw) = &status.content_warning {
+                    @let collapse_id = format!("collapsible-{}", status.id);
+
+                    span (cw)
+                    input.collapse--toggle id=(collapse_id) type="checkbox";
+                    label.collapse--lbl-toggle for=(collapse_id) tabindex="0" { "Toggle CW" }
+                    div.content.collapse--content (status.text)
+                } @else {
+                    div.content (status.text)
+                }
+            }
+        }
+    };
+
+    Ok(rendered)
 }
 
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
@@ -68,39 +111,21 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
             user = account.username,
             id = status.id
         ))
-        .content(html! {
-            div.status {
-                header {
-                    span {
-                        ("published: ")
-                        time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
-                    }
-                    div.content (status.text)
-                }
-            }
-        });
+        .content(render_status(&db_conn, &status, false)?);
 
     Ok(Some(rendered))
 }
 
-#[derive(FromForm)]
+#[derive(FromForm, Debug)]
 pub struct UserPageParams {
-    max_id:  Option<i64>,
-    back_to: Option<i64>,
+    max_id: Option<i64>,
 }
 
 // This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
 // If you don't like this, please complain over there.
 #[get("/users/<username>", format = "text/html")]
 pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
-    user_page_paginated(
-        username,
-        UserPageParams {
-            max_id:  None,
-            back_to: None,
-        },
-        db_conn,
-    )
+    user_page_paginated(username, UserPageParams { max_id: None }, db_conn)
 }
 
 #[get("/users/<username>?<params>", format = "text/html")]
@@ -110,9 +135,7 @@ pub fn user_page_paginated(
     db_conn: db::Connection,
 ) -> Perhaps<Page> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
-    let statuses = account.statuses_before_id(&db_conn, params.max_id, 10)?;
-    let status_bounds = account.status_id_bounds(&db_conn)?;
-    let cur_max_id = params.max_id.or(status_bounds.map(|b| b.1));
+    let statuses: Vec<Status> = account.statuses_before_id(&db_conn, params.max_id, 10)?;
 
     let rendered = Page::new()
         .title(format!("@{user}", user = account.username))
@@ -139,28 +162,15 @@ pub fn user_page_paginated(
                 header h2 "Posts"
 
                 @for status in &statuses {
-                    div.status {
-                        header {
-                            a href=(status.get_uri(&db_conn)?) { span {
-                                ("published: ")
-                                time datetime=(status.created_at.to_rfc3339())
-                                    (status.humanized_age())
-                            }}
-                        }
-                        div.content (status.text)
-                    }
+                    (render_status(&db_conn, status, true)?)
                 }
 
                 nav.pagination {
                     @if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
+                        @let bounds = account.status_id_bounds(&db_conn)?;
                         // unwrap is safe since we already know we have statuses
-                        @if prev_page_max_id > status_bounds.unwrap().0 {
-                            a href=(format!("?max_id={}&back_to={}",
-                                prev_page_max_id, cur_max_id.unwrap())) rel="next" "⇐"
-                        }
-
-                        @if let Some(back_to) = params.back_to {
-                            a href=(format!("?max_id={}", back_to)) rel="prev" "⇒"
+                        @if prev_page_max_id > bounds.unwrap().0 {
+                            a href=(format!("?max_id={}", prev_page_max_id)) rel="next" "⇐ older posts"
                         }
                     }
                 }
@@ -191,6 +201,7 @@ pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
                 }
 
                 form method="post" action="/statuses/create" {
+                    div input name="content_warning" placeholder="content warning" {}
                     div textarea name="content" {}
 
                     button type="submit" "post"

@@ -13,7 +13,7 @@ flaken = "0.2.2"
 r2d2 = "0.8.1"
 r2d2-diesel = "1.0.0"
 
-rocket = "0.3.6"
+rocket = "0.3.8"
 
 pwhash = "0.1.2"
 chrono = "0.4"

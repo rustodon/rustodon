@@ -15,24 +15,31 @@ lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
 
-rocket = "0.3.6"
-rocket_codegen = "0.3.6"
+rocket = "0.3.8"
+rocket_codegen = "0.3.8"
 
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-validator = "0.6.3"
-validator_derive = "0.6.1"
-
-maud = { version = "0.17.2", features = ["rocket"] }
+# TODO: switch this back to a normal dep when https://github.com/Keats/validator/pull/46 is merged
+# and there's a new release.
+validator = { git = "https://github.com/rustodon/validator.git", branch = "fix_path_parsing_regex" }
+validator_derive = { git = "https://github.com/rustodon/validator.git", branch = "fix_path_parsing_regex" }
 
 [dependencies.rustodon_database]
 path = "database/"
 
 [dependencies.rocket_contrib]
-version = "0.3.6"
+version = "0.3.8"
 default-features = false
 features = ["json"]
+
+# TODO: switch this back to a normal dep when https://github.com/lfairy/maud/pull/122 is merged
+# and there's a new release.
+[dependencies.maud]
+git = "https://github.com/anxiousmodernman/maud.git"
+branch = "121_proc_macro"
+features = ["rocket"]
 
 [dev-dependencies]
 clippy = ">= 0"

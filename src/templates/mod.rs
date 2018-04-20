@@ -1,7 +1,7 @@
-use GIT_REV;
 use maud::{self, html, Markup, Render};
 use rocket::request::{FlashMessage, Request};
 use rocket::response::{self, Responder};
+use GIT_REV;
 
 /// Type to store data about a templated page in. Used to insert each page's markup into
 /// a base template which sets up stuff like stylesheets and the general html structure.
@@ -88,6 +88,8 @@ impl Render for Page {
                         "."
                     }
                 }
+
+                script src="/static/js/accessibility.js" {}
             }
         }
     }
