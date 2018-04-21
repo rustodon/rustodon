@@ -39,7 +39,7 @@ lazy_static! {
 }
 
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
-pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 /// Type alias for the pooled connection.
 type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
