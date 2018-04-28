@@ -17,7 +17,6 @@ resopt = { path = "lib/resopt/" }
 
 rocket = "0.3.8"
 rocket_codegen = "0.3.8"
-maud = { version = "0.17.3", features = ["rocket"] }
 
 serde = "1.0"
 serde_derive = "1.0"
@@ -33,6 +32,11 @@ path = "database/"
 version = "0.3.8"
 default-features = false
 features = ["json"]
+
+[dependencies.maud]
+git = "https://github.com/rustodon/maud.git"
+branch = "125_syntax_interned_strings"
+features = ["rocket"]
 
 [dev-dependencies]
 clippy = ">= 0"
