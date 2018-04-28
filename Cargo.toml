@@ -17,14 +17,14 @@ resopt = { path = "lib/resopt/" }
 
 rocket = "0.3.8"
 rocket_codegen = "0.3.8"
+maud = { version = "0.17.3", features = ["rocket"] }
 
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-# TODO: switch this back to a normal dep when https://github.com/Keats/validator/pull/46 is merged
-# and there's a new release.
-validator = { git = "https://github.com/rustodon/validator.git", branch = "fix_path_parsing_regex" }
-validator_derive = { git = "https://github.com/rustodon/validator.git", branch = "fix_path_parsing_regex" }
+# TODO: switch this back to a normal dep when @keats actually pushes the new release to crates.io
+validator = { git = "https://github.com/keats/validator.git" }
+validator_derive = { git = "https://github.com/keats/validator.git" }
 
 [dependencies.rustodon_database]
 path = "database/"
@@ -33,13 +33,6 @@ path = "database/"
 version = "0.3.8"
 default-features = false
 features = ["json"]
-
-# TODO: switch this back to a normal dep when https://github.com/lfairy/maud/pull/122 is merged
-# and there's a new release.
-[dependencies.maud]
-git = "https://github.com/anxiousmodernman/maud.git"
-branch = "121_proc_macro"
-features = ["rocket"]
 
 [dev-dependencies]
 clippy = ">= 0"

@@ -421,26 +421,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "maud"
-version = "0.17.2"
-source = "git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro#0f453a5568305496b963c3825e97a356291fd449"
+version = "0.17.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "maud_htmlescape 0.17.0 (git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro)",
- "maud_macros 0.17.2 (git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro)",
+ "maud_htmlescape 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "maud_macros 0.17.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "maud_htmlescape"
 version = "0.17.0"
-source = "git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro#0f453a5568305496b963c3825e97a356291fd449"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "maud_macros"
-version = "0.17.2"
-source = "git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro#0f453a5568305496b963c3825e97a356291fd449"
+version = "0.17.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "literalext 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "maud_htmlescape 0.17.0 (git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro)",
+ "maud_htmlescape 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -769,7 +769,7 @@ dependencies = [
  "failure_derive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.7.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "maud 0.17.2 (git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro)",
+ "maud 0.17.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "resopt 0.1.0",
  "rocket 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_codegen 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -778,8 +778,8 @@ dependencies = [
  "serde 1.0.38 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.38 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
- "validator 0.6.3 (git+https://github.com/rustodon/validator.git?branch=fix_path_parsing_regex)",
- "validator_derive 0.6.4 (git+https://github.com/rustodon/validator.git?branch=fix_path_parsing_regex)",
+ "validator 0.6.3 (git+https://github.com/keats/validator.git)",
+ "validator_derive 0.6.5 (git+https://github.com/keats/validator.git)",
 ]
 
 [[package]]
@@ -1027,7 +1027,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "validator"
 version = "0.6.3"
-source = "git+https://github.com/rustodon/validator.git?branch=fix_path_parsing_regex#56a5a34c8653f6475d00ca99c22f50d255a0669d"
+source = "git+https://github.com/keats/validator.git#4658e5303d3dc5aa3579119b0d0724cab3e98308"
 dependencies = [
  "card-validate 2.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "idna 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1041,13 +1041,13 @@ dependencies = [
 
 [[package]]
 name = "validator_derive"
-version = "0.6.4"
-source = "git+https://github.com/rustodon/validator.git?branch=fix_path_parsing_regex#56a5a34c8653f6475d00ca99c22f50d255a0669d"
+version = "0.6.5"
+source = "git+https://github.com/keats/validator.git#4658e5303d3dc5aa3579119b0d0724cab3e98308"
 dependencies = [
  "if_chain 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "quote 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 0.12.15 (registry+https://github.com/rust-lang/crates.io-index)",
- "validator 0.6.3 (git+https://github.com/rustodon/validator.git?branch=fix_path_parsing_regex)",
+ "quote 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 0.13.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "validator 0.6.3 (git+https://github.com/keats/validator.git)",
 ]
 
 [[package]]
@@ -1152,9 +1152,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum log 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)" = "e19e8d5c34a3e0e2223db8e060f9e8264aeeb5c5fc64a4ee9965c062211c024b"
 "checksum log 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "89f010e843f2b1a31dbd316b3b8d443758bc634bed37aabade59c686d644e0a2"
 "checksum matches 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "100aabe6b8ff4e4a7e32c1c13523379802df0772b82466207ac25b013f193376"
-"checksum maud 0.17.2 (git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro)" = "<none>"
-"checksum maud_htmlescape 0.17.0 (git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro)" = "<none>"
-"checksum maud_macros 0.17.2 (git+https://github.com/anxiousmodernman/maud.git?branch=121_proc_macro)" = "<none>"
+"checksum maud 0.17.3 (registry+https://github.com/rust-lang/crates.io-index)" = "0503d6431e4738b233e2c3571bfd130afa9256991bd58e86346bc040c53fde62"
+"checksum maud_htmlescape 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d0fb85bccffc42302ad1e1ed8679f6a39d1317f775a37fbc3f79bdfbe054bfb7"
+"checksum maud_macros 0.17.3 (registry+https://github.com/rust-lang/crates.io-index)" = "10dbbfa73e7043b8452393e06d6e9cf9196c0bc87e842ebafbbd0b5bdef4bfd3"
 "checksum memchr 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "148fab2e51b4f1cfc66da2a7c32981d1d3c083a803978268bb11fe4b86925e7a"
 "checksum memchr 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "796fba70e76612589ed2ce7f45282f5af869e0fdd7cc6199fa1aa1f1d591ba9d"
 "checksum memoffset 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0f9dc261e2b62d7a622bf416ea3c5245cdd5d9a7fcc428c0d06804dfce1775b3"
@@ -1223,8 +1223,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum untrusted 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f392d7819dbe58833e26872f5f6f0d68b7bbbe90fc3667e98731c4a15ad9a7ae"
 "checksum url 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f808aadd8cfec6ef90e4a14eb46f24511824d1ac596b9682703c87056c8678b7"
 "checksum utf8-ranges 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "662fab6525a98beff2921d7f61a39e7d59e0b425ebc7d0d9e66d316e55124122"
-"checksum validator 0.6.3 (git+https://github.com/rustodon/validator.git?branch=fix_path_parsing_regex)" = "<none>"
-"checksum validator_derive 0.6.4 (git+https://github.com/rustodon/validator.git?branch=fix_path_parsing_regex)" = "<none>"
+"checksum validator 0.6.3 (git+https://github.com/keats/validator.git)" = "<none>"
+"checksum validator_derive 0.6.5 (git+https://github.com/keats/validator.git)" = "<none>"
 "checksum vcpkg 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "7ed0f6789c8a85ca41bbc1c9d175422116a9869bd1cf31bb08e1493ecce60380"
 "checksum version_check 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "6b772017e347561807c1aa192438c5fd74242a670a6cffacc40f2defd1dc069d"
 "checksum void 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
