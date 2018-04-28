@@ -100,16 +100,20 @@ impl AsActivityPub for Status {
         &self,
         conn: &db::Connection,
     ) -> Result<ActivityStreams<serde_json::Value>, Error> {
+        let account = self.account(conn)?;
         Ok(ActivityStreams(json!({
             "@context": ["https://www.w3.org/ns/activitystreams", {"sensitive": "as:sensitive"}],
             "type": "Note",
             "id": self.get_uri(conn)?,
-            "attributedTo": self.account(conn)?.get_uri(),
+            "attributedTo": account.get_uri(),
 
             "content": self.text,
             "summary": self.content_warning,
             "sensitive": self.content_warning.is_some(),
             "published": self.created_at.to_rfc3339(),
+
+            "to": ["https://www.w3.org/ns/activitystreams#Public"],
+            "cc": [account.get_followers_endpoint()],
         })))
     }
 }
