@@ -34,8 +34,7 @@ default-features = false
 features = ["json"]
 
 [dependencies.maud]
-git = "https://github.com/rustodon/maud.git"
-branch = "125_syntax_interned_strings"
+version = "0.17.4"
 features = ["rocket"]
 
 [dev-dependencies]

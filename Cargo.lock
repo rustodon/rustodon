@@ -421,26 +421,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "maud"
-version = "0.17.3"
-source = "git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings#6dd35c779554c119e8688d0cd0291af79a1c425c"
+version = "0.17.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "maud_htmlescape 0.17.0 (git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings)",
- "maud_macros 0.17.3 (git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings)",
+ "maud_htmlescape 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "maud_macros 0.17.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "maud_htmlescape"
 version = "0.17.0"
-source = "git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings#6dd35c779554c119e8688d0cd0291af79a1c425c"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "maud_macros"
-version = "0.17.3"
-source = "git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings#6dd35c779554c119e8688d0cd0291af79a1c425c"
+version = "0.17.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "literalext 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "maud_htmlescape 0.17.0 (git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings)",
+ "maud_htmlescape 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -769,7 +769,7 @@ dependencies = [
  "failure_derive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.7.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "maud 0.17.3 (git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings)",
+ "maud 0.17.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "resopt 0.1.0",
  "rocket 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_codegen 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1151,9 +1151,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum log 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)" = "e19e8d5c34a3e0e2223db8e060f9e8264aeeb5c5fc64a4ee9965c062211c024b"
 "checksum log 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "89f010e843f2b1a31dbd316b3b8d443758bc634bed37aabade59c686d644e0a2"
 "checksum matches 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "100aabe6b8ff4e4a7e32c1c13523379802df0772b82466207ac25b013f193376"
-"checksum maud 0.17.3 (git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings)" = "<none>"
-"checksum maud_htmlescape 0.17.0 (git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings)" = "<none>"
-"checksum maud_macros 0.17.3 (git+https://github.com/rustodon/maud.git?branch=125_syntax_interned_strings)" = "<none>"
+"checksum maud 0.17.4 (registry+https://github.com/rust-lang/crates.io-index)" = "f3c21bdc98e6ef16d5c8d814510e267b6f34e4a69ba30298d21d9c26d0912392"
+"checksum maud_htmlescape 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d0fb85bccffc42302ad1e1ed8679f6a39d1317f775a37fbc3f79bdfbe054bfb7"
+"checksum maud_macros 0.17.4 (registry+https://github.com/rust-lang/crates.io-index)" = "12857e896ee72e913b7afee8a29543b4658908615e51079ffa98d6e299de08db"
 "checksum memchr 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "148fab2e51b4f1cfc66da2a7c32981d1d3c083a803978268bb11fe4b86925e7a"
 "checksum memchr 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "796fba70e76612589ed2ce7f45282f5af869e0fdd7cc6199fa1aa1f1d591ba9d"
 "checksum memoffset 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0f9dc261e2b62d7a622bf416ea3c5245cdd5d9a7fcc428c0d06804dfce1775b3"
