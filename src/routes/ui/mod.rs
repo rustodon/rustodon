@@ -6,7 +6,7 @@ use rocket::Route;
 use std::path::{Path, PathBuf};
 
 use db;
-use db::models::{Account, NewStatus, Status, User};
+use db::models::{id_generator, Account, NewStatus, Status, User};
 use error::Perhaps;
 use failure::Error;
 use templates::Page;
@@ -18,6 +18,8 @@ pub fn routes() -> Vec<Route> {
         index,
         user_page,
         user_page_paginated,
+        settings_profile,
+        settings_profile_update,
         status_page,
         create_status,
         auth::signin_get,
@@ -51,6 +53,7 @@ pub fn create_status(
     };
 
     let _status = NewStatus {
+        id: id_generator().next(),
         created_at: Utc::now(),
         text: form_data.content.to_owned(),
         content_warning: content_warning,
@@ -149,7 +152,7 @@ pub fn user_page_paginated(
                 }
 
                 div.p-note {
-                    @if let Some(bio) = account.summary.as_ref() {
+                    @if let Some(bio) = account.safe_summary() {
                         (PreEscaped(bio))
                     } @else {
                         p {}
@@ -179,6 +182,47 @@ pub fn user_page_paginated(
     Ok(Some(rendered))
 }
 
+#[get("/settings/profile")]
+pub fn settings_profile(db_conn: db::Connection, user: User) -> Result<Page, Error> {
+    let account = user.get_account(&db_conn)?;
+
+    let rendered = Page::new().title("edit your profile").content(html! {
+        header h2 "Edit your profile"
+
+        form method="post" action="/settings/profile" {
+            div textarea name="summary" {(account.summary.as_ref().map(String::as_ref).unwrap_or(""))}
+
+            button type="submit" "update"
+        }
+    });
+
+    Ok(rendered)
+}
+
+#[derive(Debug, FromForm)]
+pub struct UpdateProfileForm {
+    summary: String,
+}
+
+#[post("/settings/profile", data = "<form>")]
+pub fn settings_profile_update(
+    db_conn: db::Connection,
+    user: User,
+    form: Form<UpdateProfileForm>,
+) -> Result<Redirect, Error> {
+    let form_data = form.get();
+    let account = user.get_account(&db_conn)?;
+
+    // `as &str` defeat an incorrect deref coercion (due to the second match arm)
+    let new_summary = match &form_data.summary as &str {
+        "" => None,
+        x => Some(x.to_string()),
+    };
+    account.set_summary(&db_conn, new_summary)?;
+
+    Ok(Redirect::to("/settings/profile"))
+}
+
 #[get("/")]
 pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
     Page::new().flash(flash).content(html! {
@@ -193,6 +237,8 @@ pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
                 }
             } @else {
                 div {
+                    a href="/settings/profile" "edit my profile"
+                    " | "
                     form.inline method="post" action="/auth/sign_out" {
                         input type="hidden" name="stub"
                         button.link type="submit" name="submit" "sign out."

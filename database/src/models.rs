@@ -4,18 +4,72 @@
 //! The ordering must match that in the generated schema, which
 //! you can obtain with `diesel print-schema`.
 
-use super::schema::{accounts, follows, statuses, users};
-use super::Connection;
 use chrono::offset::Utc;
 use chrono::DateTime;
 use chrono_humanize::Humanize;
 use diesel;
 use diesel::prelude::*;
+use flaken::Flaken;
 use pwhash::bcrypt;
 use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
+use sanitize;
+use schema::{accounts, follows, statuses, users};
 use std::borrow::Cow;
+use std::cell::Cell;
+use std::sync::Mutex;
+use Connection;
 use {BASE_URL, DOMAIN};
+
+pub struct IdGenerator {
+    flaken: Flaken,
+}
+
+/// Constructs an IdGenerator, which can be used to provide one or more snowflake IDs
+/// for a database transaction.
+///
+/// Example use:
+///
+/// ```
+/// let mut id_gen = id_generator();
+///
+/// let modelA = ModelA {
+///     id: id_gen.next();
+/// };
+///
+/// let modelB = ModelB {
+///     id: id_gen.next();
+/// };
+/// ```
+pub fn id_generator() -> IdGenerator {
+    IdGenerator {
+        flaken: Flaken::default().node(node_id()),
+    }
+}
+
+lazy_static! {
+    static ref THREAD_COUNTER: Mutex<u64> = Mutex::new(0);
+}
+
+thread_local! {
+    static THREAD_ID: Cell<u64> = Cell::new(0);
+}
+
+/// Generates a node ID for the IdGenerator.
+fn node_id() -> u64 {
+    THREAD_ID.with(|f| {
+        let mut g = THREAD_COUNTER.lock().unwrap();
+        *g += 1;
+        f.set(*g);
+        f.get()
+    })
+}
+
+impl IdGenerator {
+    pub fn next(&mut self) -> i64 {
+        self.flaken.next() as i64
+    }
+}
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
@@ -72,6 +126,7 @@ pub struct Follow {
 #[derive(Insertable, Debug)]
 #[table_name = "users"]
 pub struct NewUser {
+    pub id: i64,
     pub email: String,
     pub encrypted_password: String,
 
@@ -82,7 +137,8 @@ pub struct NewUser {
 #[derive(Insertable, Debug)]
 #[table_name = "accounts"]
 pub struct NewAccount {
-    pub uri:    Option<String>,
+    pub id: i64,
+    pub uri: Option<String>,
     pub domain: Option<String>,
 
     pub username: String,
@@ -95,6 +151,7 @@ pub struct NewAccount {
 #[derive(Insertable, Debug)]
 #[table_name = "statuses"]
 pub struct NewStatus {
+    pub id: i64,
     pub text: String,
     pub content_warning: Option<String>,
     pub created_at: DateTime<Utc>,
@@ -356,6 +413,23 @@ impl Account {
                 _ => None,
             })
     }
+
+    pub fn set_summary(
+        &self,
+        db_conn: &Connection,
+        new_summary: Option<String>,
+    ) -> QueryResult<()> {
+        use super::schema::accounts::dsl::summary;
+
+        diesel::update(self)
+            .set(summary.eq(new_summary))
+            .execute(&**db_conn)
+            .and(Ok(()))
+    }
+
+    pub fn safe_summary(&self) -> Option<String> {
+        self.summary.as_ref().map(sanitize::summary)
+    }
 }
 
 impl Status {
@@ -400,14 +474,5 @@ impl Status {
                 ).into())
             },
         }
-    }
-}
-
-pub mod validators {
-    use regex::Regex;
-
-    lazy_static! {
-        /// During registrations, usernames must be matched by this regex to be considered valid.
-        pub static ref VALID_USERNAME_RE: Regex = Regex::new(r"^[[:alnum:]_]+$").unwrap();
     }
 }
