@@ -151,7 +151,7 @@ pub fn user_page_paginated(
                 }
 
                 div.p-note {
-                    @if let Some(bio) = account.summary.as_ref() {
+                    @if let Some(bio) = account.safe_summary() {
                         (PreEscaped(bio))
                     } @else {
                         p {}

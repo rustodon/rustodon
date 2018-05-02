@@ -366,11 +366,14 @@ impl Account {
     ) -> QueryResult<()> {
         use super::schema::accounts::dsl::summary;
 
-        let new_summary = new_summary.map(sanitize::summary);
         diesel::update(self)
             .set(summary.eq(new_summary))
             .execute(&**db_conn)
             .and(Ok(()))
+    }
+
+    pub fn safe_summary(&self) -> Option<String> {
+        self.summary.as_ref().map(sanitize::summary)
     }
 }
 
