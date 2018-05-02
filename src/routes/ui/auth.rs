@@ -6,8 +6,8 @@ use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, Redirect};
 use std::borrow::Cow;
 use validator::Validate;
-
-use db::models::{id_generator, validators, NewAccount, NewUser, User};
+use db::models::{id_generator, NewAccount, NewUser, User};
+use db::validators;
 use db::{self, DieselConnection};
 use templates::Page;
 
