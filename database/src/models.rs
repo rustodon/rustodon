@@ -13,11 +13,11 @@ use flaken::Flaken;
 use pwhash::bcrypt;
 use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
+use sanitize;
+use schema::{accounts, follows, statuses, users};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::sync::Mutex;
-use sanitize;
-use schema::{accounts, follows, statuses, users};
 use Connection;
 use {BASE_URL, DOMAIN};
 

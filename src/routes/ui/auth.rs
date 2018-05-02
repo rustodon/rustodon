@@ -1,3 +1,6 @@
+use db::models::{id_generator, NewAccount, NewUser, User};
+use db::validators;
+use db::{self, DieselConnection};
 use failure::Error;
 use itertools::Itertools;
 use maud::html;
@@ -5,11 +8,8 @@ use rocket::http::{Cookie, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, Redirect};
 use std::borrow::Cow;
-use validator::Validate;
-use db::models::{id_generator, NewAccount, NewUser, User};
-use db::validators;
-use db::{self, DieselConnection};
 use templates::Page;
+use validator::Validate;
 
 #[get("/auth/sign_in")]
 pub fn signin_get(flash: Option<FlashMessage>) -> Page {
