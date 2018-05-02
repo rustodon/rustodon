@@ -7,7 +7,8 @@ use rocket::response::{Flash, Redirect};
 use std::borrow::Cow;
 use validator::Validate;
 
-use db::models::{validators, NewAccount, NewUser, User};
+use db::models::{NewAccount, NewUser, User};
+use db::validators;
 use db::{self, DieselConnection};
 use templates::Page;
 

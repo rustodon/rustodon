@@ -1,5 +1,6 @@
 #![recursion_limit = "128"]
 
+extern crate ammonia;
 extern crate chrono;
 extern crate chrono_humanize;
 #[macro_use]
@@ -15,6 +16,8 @@ extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
+#[macro_use]
+extern crate maplit;
 
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
@@ -26,7 +29,9 @@ use std::env;
 use std::ops::Deref;
 
 pub mod models;
+mod sanitize;
 pub mod schema;
+pub mod validators;
 
 // TODO: gross hack. find a nicer way to pass these in?
 lazy_static! {
