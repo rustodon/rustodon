@@ -36,6 +36,7 @@ before_script:
 script:
   - cargo fmt -- --write-mode=diff
   - diesel database setup --migration-dir=${MIGRATION_DIR}
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release; else cargo build; fi
 
 after_success: ./scripts/after_success.sh
 
