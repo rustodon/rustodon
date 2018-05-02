@@ -1,3 +1,6 @@
+use db::models::{id_generator, NewAccount, NewUser, User};
+use db::validators;
+use db::{self, DieselConnection};
 use failure::Error;
 use itertools::Itertools;
 use maud::html;
@@ -5,12 +8,8 @@ use rocket::http::{Cookie, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, Redirect};
 use std::borrow::Cow;
-use validator::Validate;
-
-use db::models::{NewAccount, NewUser, User};
-use db::validators;
-use db::{self, DieselConnection};
 use templates::Page;
+use validator::Validate;
 
 #[get("/auth/sign_in")]
 pub fn signin_get(flash: Option<FlashMessage>) -> Page {
@@ -141,9 +140,12 @@ pub fn signup_post(
     }
 
     (*db_conn).transaction::<_, _, _>(|| {
+        let mut id_gen = id_generator();
+
         let account = NewAccount {
+            id: id_gen.next(),
             domain: None,
-            uri:    None,
+            uri: None,
 
             username: form_data.username.to_owned(),
 
@@ -152,6 +154,7 @@ pub fn signup_post(
         }.insert(&db_conn)?;
 
         NewUser {
+            id: id_gen.next(),
             email: form_data.email.to_owned(),
             encrypted_password: User::encrypt_password(&form_data.password),
             account_id: account.id,

@@ -6,7 +6,7 @@ use rocket::Route;
 use std::path::{Path, PathBuf};
 
 use db;
-use db::models::{Account, NewStatus, Status, User};
+use db::models::{id_generator, Account, NewStatus, Status, User};
 use error::Perhaps;
 use failure::Error;
 use templates::Page;
@@ -53,6 +53,7 @@ pub fn create_status(
     };
 
     let _status = NewStatus {
+        id: id_generator().next(),
         created_at: Utc::now(),
         text: form_data.content.to_owned(),
         content_warning: content_warning,
