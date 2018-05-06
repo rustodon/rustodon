@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["The Rustodon team"]
 
 [workspace]
-members = ['database/', 'lib/resopt/']
+members = ['database/', 'lib/resopt/', 'lib/posticle/']
 
 [dependencies]
 chrono = "0.4"
