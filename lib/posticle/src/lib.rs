@@ -48,7 +48,12 @@ pub fn entities(text: &str) -> Vec<Entity> {
 
 /// Given `text`, extract all [URL](EntityKind::Url) entities.
 pub fn url_entities(text: &str) -> Vec<Entity> {
-    return vec![];
+    regexes::RE_URL.find_iter(text).map(|mat| {
+        Entity {
+            kind: EntityKind::Url,
+            range: (mat.start(), mat.end()),
+        }
+    }).collect()
 }
 
 #[cfg(test)]
@@ -77,10 +82,6 @@ mod test {
                     .iter()
                     .map(|s| s.as_str().expect("non-string found in 'expected'"))
                     .collect::<HashSet<_>>();
-
-                println!("desc: {}", description);
-                println!("text: {}", text);
-                println!("expected: {:?}", expected);
 
                 let actual = url_entities(text)
                     .into_iter()
