@@ -39,9 +39,16 @@ lazy_static! {
         middle=*VALID_DOMAIN_MIDDLE_CHARS,
     );
 
-    /// Matches things that _look_ like TLDs (using the very naive heuristic of "two or more valid characters").
+    /// Matches things that _look_ like TLDs (as per RFC 3696).
     static ref SYNTACTICALLY_VALID_TLD: String = format!(
-        "{}{{2,}}", *VALID_DOMAIN_EXTREMA_CHARS);
+        r"(?:{extremum}?[^{punctuation}{ctrl}{invalid}{space}\d]({middle}{{1,60}}{extremum}|{extremum})?)",
+        extremum=*VALID_DOMAIN_EXTREMA_CHARS,
+        middle=*VALID_DOMAIN_MIDDLE_CHARS,
+        punctuation = PUNCTUATION,
+        ctrl = CTRL_CHARS,
+        invalid = INVALID_CHARS,
+        space = UNICODE_SPACES
+    );
 
     /// Matches domains.
     static ref VALID_DOMAIN: String = format!(r"(?:(?:{part}\.)*{part}\.{tld})",
@@ -134,11 +141,20 @@ mod test {
         assert!(re.is_match("fr"));
         assert!(re.is_match("space"));
         assert!(re.is_match("한국"));
+        assert!(re.is_match("한"));
+        assert!(re.is_match("x"));
+        assert!(re.is_match("a-b"));
+        assert!(re.is_match("c3"));
+        assert!(re.is_match("4xn4--4ff-----f4"));
+        assert!(re.is_match("xn--mgberp4a5d4ar"));
+        assert!(re.is_match("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
 
-        assert!(!re.is_match("x"));
-        assert!(!re.is_match("한"));
         assert!(!re.is_match("-"));
         assert!(!re.is_match("_"));
+        assert!(!re.is_match("-a"));
+        assert!(!re.is_match("a-"));
+        assert!(!re.is_match("33"));
+        assert!(!re.is_match("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
     }
 
     #[test]
