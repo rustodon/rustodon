@@ -31,14 +31,17 @@ pub struct IdGenerator {
 /// Example use:
 ///
 /// ```
+/// # use rustodon_database::models::id_generator;
+/// # struct ModelA { id: i64 }
+/// # struct ModelB { id: i64 }
 /// let mut id_gen = id_generator();
 ///
 /// let modelA = ModelA {
-///     id: id_gen.next();
+///     id: id_gen.next(),
 /// };
 ///
 /// let modelB = ModelB {
-///     id: id_gen.next();
+///     id: id_gen.next(),
 /// };
 /// ```
 pub fn id_generator() -> IdGenerator {
