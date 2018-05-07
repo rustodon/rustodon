@@ -12,6 +12,7 @@ static PUNCTUATION_NO_HYPHEN: &str = r##"_!"#$%&'()*+,./:;<=>?@\[\]^`{|}~"##;
 static PUNCTUATION_NO_HYPHEN_UNDERSCORE: &str = r##"!"#$%&'()*+,./:;<=>?@\[\]^`{|}~"##;
 static VALID_QUERY_STRING: &str =
     r##"(?:[-a-zA-Z0-9!?*'\(\);:&=+$/%#\[\]_\.,~|@]*[a-zA-Z0-9_&=#/])"##;
+static HASHTAG_SPECIAL_CHARS: &str = "_\u{200c}\u{200d}\u{a67e}\u{05be}\u{05f3}\u{05f4}\u{ff5e}\u{301c}\u{309b}\u{309c}\u{30a0}\u{30fb}\u{3003}\u{0f0b}\u{0f0c}\u{00b7}";
 
 lazy_static! {
     /// Matches characters which can validly start or end a domain segment.
@@ -100,8 +101,23 @@ lazy_static! {
         query = VALID_QUERY_STRING
     );
 
+    /// Matches a hashtag.
+    static ref VALID_HASHTAG: String = format!(concat!(
+        "(",
+            "[#]",
+            r"([\p{{L}}\p{{M}}\p{{Nd}}{special}]*[\p{{L}}\p{{M}}][\p{{L}}\p{{M}}\p{{Nd}}{special}])",
+        ")"),
+        special=HASHTAG_SPECIAL_CHARS
+    );
+
     /// Matches a URL.
     pub static ref RE_URL: Regex = RegexBuilder::new(&*VALID_URL)
+        .case_insensitive(true)
+        .build()
+        .unwrap();
+
+    /// Matches a hashtag.
+    pub static ref RE_HASHTAG: Regex = RegexBuilder::new(&*VALID_HASHTAG)
         .case_insensitive(true)
         .build()
         .unwrap();
@@ -110,6 +126,13 @@ lazy_static! {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn parses_hashtag() {
+        let re = Regex::new(&format!("^{}$", *VALID_HASHTAG)).unwrap();
+        assert!(re.is_match("#rustodon"));
+        assert!(re.is_match("#文字化け"));
+    }
 
     #[test]
     fn parses_domain() {
