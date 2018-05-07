@@ -10,11 +10,12 @@ static LATIN_ACCENTS: &str = "\u{00C0}-\u{00D6}\u{00D8}-\u{00F6}\u{00F8}-\u{00FF
 static PUNCTUATION: &str = r##"-_!"#$%&'()*+,./:;<=>?@\[\]^`{|}~"##;
 static PUNCTUATION_NO_HYPHEN: &str = r##"_!"#$%&'()*+,./:;<=>?@\[\]^`{|}~"##;
 static PUNCTUATION_NO_HYPHEN_UNDERSCORE: &str = r##"!"#$%&'()*+,./:;<=>?@\[\]^`{|}~"##;
-static VALID_QUERY_STRING: &str = r##"(?:[-a-zA-Z0-9!?*'\(\);:&=+$/%#\[\]_\.,~|@]*[a-zA-Z0-9_&=#/])"##;
+static VALID_QUERY_STRING: &str =
+    r##"(?:[-a-zA-Z0-9!?*'\(\);:&=+$/%#\[\]_\.,~|@]*[a-zA-Z0-9_&=#/])"##;
 
 lazy_static! {
-    /// Matches characters which can validly start or end a domain.
-    pub static ref VALID_DOMAIN_EXTREMA_CHARS: String = format!(
+    /// Matches characters which can validly start or end a domain segment.
+    static ref VALID_DOMAIN_EXTREMA_CHARS: String = format!(
         "[^{punctuation}{ctrl}{invalid}{space}]",
         punctuation = PUNCTUATION,
         ctrl = CTRL_CHARS,
@@ -22,8 +23,8 @@ lazy_static! {
         space = UNICODE_SPACES
     );
 
-    /// Matches characters which are valid in the middle of a domain.
-    pub static ref VALID_DOMAIN_MIDDLE_CHARS: String = format!(
+    /// Matches characters which are valid in the middle of a domain segment.
+    static ref VALID_DOMAIN_MIDDLE_CHARS: String = format!(
         "[^{punctuation}{ctrl}{invalid}{space}]",
         punctuation = PUNCTUATION_NO_HYPHEN,
         ctrl = CTRL_CHARS,
@@ -31,30 +32,68 @@ lazy_static! {
         space = UNICODE_SPACES
     );
 
-    pub static ref VALID_DOMAIN_PART: String = format!(
+    /// Matches a valid domain segment.
+    static ref VALID_DOMAIN_SEGMENT: String = format!(
         "(?:{extremum}(?:{middle}*{extremum})?)",
         extremum=*VALID_DOMAIN_EXTREMA_CHARS,
         middle=*VALID_DOMAIN_MIDDLE_CHARS,
     );
 
-    pub static ref SYNTACTICALLY_VALID_TLD: String = format!(
+    /// Matches things that _look_ like TLDs (using the very naive heuristic of "two or more valid characters").
+    static ref SYNTACTICALLY_VALID_TLD: String = format!(
         "{}{{2,}}", *VALID_DOMAIN_EXTREMA_CHARS);
 
-    pub static ref VALID_DOMAIN: String = format!(r"(?:(?:{part}\.)*{part}\.{tld})",
-        part=*VALID_DOMAIN_PART, tld=*SYNTACTICALLY_VALID_TLD);
+    /// Matches domains.
+    static ref VALID_DOMAIN: String = format!(r"(?:(?:{part}\.)*{part}\.{tld})",
+        part=*VALID_DOMAIN_SEGMENT, tld=*SYNTACTICALLY_VALID_TLD);
 
-    pub static ref VALID_URL: String = format!(concat!("(",
-            "(https?://)",                                   // scheme
-            "({domain})",                                    // domain
-            "(?::([0-9]+))?",                               // port
-            // "(/{path}*)?",
-           r"(\?{query})?",
+    /// Matches characters valid in a path segment.
+    static ref VALID_PATH_CHARS: String = format!(r"[^{space}\(\)\?]", space=UNICODE_SPACES);
+    /// Matches characters valid at the end of a path segment.
+    static ref VALID_PATH_ENDING_CHARS: String = format!(
+        r"[^{space}\(\)\?!\*';:=,\.\$%\[\]~&\|@]|(?:{balanced_parens})",
+        space=UNICODE_SPACES,
+        balanced_parens=*VALID_PATH_BALANCED_PARENS,
+    );
+
+    static ref VALID_PATH_BALANCED_PARENS: String = format!(concat!(
+        r"\(",
+            "(?:",
+                "{path_char}+",
+            "|",
+                r"(?:\({path_char}+\))",
+            ")",
+        r"\)"),
+        path_char=*VALID_PATH_CHARS,
+    );
+
+    /// Matches a valid segment of a path.
+    static ref VALID_PATH_SEGMENT: String = format!(concat!(
+        "(?:",
+            "(?:{path_char}*(?:{balanced_parens}{path_char}*)*{path_ending_char})",
+        "|",
+            "(?:{path_char}+/)",
+        ")"),
+        path_char=*VALID_PATH_CHARS,
+        path_ending_char=*VALID_PATH_ENDING_CHARS,
+        balanced_parens=*VALID_PATH_BALANCED_PARENS
+    );
+
+    /// Matches a URL.
+    static ref VALID_URL: String = format!(concat!(
+        "(",                                     // $1 - whole match
+            "(https?://)",                       // $2 - scheme
+            "({domain})",                        // $3 - domain
+            "(?::([0-9]+))?",                    // $4 - port
+            "(/{path}*)?",                       // $5 - path
+           r"(\?{query})?",                      // $6 - query
         ")"),
         domain = *VALID_DOMAIN,
-        // path = *VALID_PATH_PART,
+        path = *VALID_PATH_SEGMENT,
         query = VALID_QUERY_STRING
     );
 
+    /// Matches a URL.
     pub static ref RE_URL: Regex = RegexBuilder::new(&*VALID_URL)
         .case_insensitive(true)
         .build()
@@ -79,7 +118,7 @@ mod test {
 
     #[test]
     fn parses_domain_part() {
-        let re = Regex::new(&format!("^{}$", *VALID_DOMAIN_PART)).unwrap();
+        let re = Regex::new(&format!("^{}$", *VALID_DOMAIN_SEGMENT)).unwrap();
         assert!(re.is_match("github"));
         assert!(re.is_match("destroy-capitalism"));
 
@@ -103,8 +142,8 @@ mod test {
     }
 
     #[test]
-    fn foo() {
-        let _ = *RE_URL;
-        assert!(false);
+    fn re_url_builds() {
+        use lazy_static::initialize;
+        initialize(&RE_URL);
     }
 }
