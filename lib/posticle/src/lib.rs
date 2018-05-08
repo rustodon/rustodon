@@ -1,3 +1,4 @@
+#![feature(nll)]
 extern crate regex;
 #[macro_use]
 extern crate lazy_static;
@@ -32,6 +33,11 @@ impl Entity {
     pub fn substr<'a>(&self, text: &'a str) -> &'a str {
         &text[self.range.0..self.range.1]
     }
+
+    /// Returns `true` if this entity overlaps with some `other` entity.
+    pub fn overlaps_with(&self, other: &Entity) -> bool {
+        self.range.0 <= other.range.1 && other.range.0 <= self.range.1
+    }
 }
 
 /// Given `text`, extract all [Entities](Entity)
@@ -40,20 +46,32 @@ pub fn entities(text: &str) -> Vec<Entity> {
         return Vec::new();
     }
 
-    let mut results = url_entities(text);
+    let mut results = extract_urls(text);
+    results.extend(extract_hashtags(text, &results));
 
     results.sort();
     results
 }
 
 /// Given `text`, extract all [URL](EntityKind::Url) entities.
-pub fn url_entities(text: &str) -> Vec<Entity> {
-    regexes::RE_URL.find_iter(text).map(|mat| {
-        Entity {
-            kind: EntityKind::Url,
+pub fn extract_urls(text: &str) -> Vec<Entity> {
+    regexes::RE_URL
+        .find_iter(text)
+        .map(|mat| Entity {
+            kind:  EntityKind::Url,
             range: (mat.start(), mat.end()),
-        }
-    }).collect()
+        })
+        .collect()
+}
+
+/// Given `text` and some `existing` entities, extract all [Hashtag](EntityKind::Hashtag) entities
+/// which do not overlap with the `existing` ones.
+pub fn extract_hashtags(text: &str, existing: &[Entity]) -> Vec<Entity> {
+    regexes::RE_HASHTAG.find_iter(text).map(|mat| Entity {
+        kind:  EntityKind::Hashtag,
+        range: (mat.start(), mat.end()),
+    })
+    .filter(|en| existing.iter().all(|existing_en| !en.overlaps_with(existing_en))).collect()
 }
 
 #[cfg(test)]
@@ -83,7 +101,7 @@ mod test {
                     .map(|s| s.as_str().expect("non-string found in 'expected'"))
                     .collect::<HashSet<_>>();
 
-                let actual = url_entities(text)
+                let actual = extract_urls(text)
                     .into_iter()
                     .map(|e| e.substr(text))
                     .collect::<HashSet<_>>();
