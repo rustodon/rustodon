@@ -110,6 +110,18 @@ lazy_static! {
         special=HASHTAG_SPECIAL_CHARS
     );
 
+    static ref VALID_MENTION: String = format!(concat!(
+        "(",
+            "[@]",
+            "([[:alnum:]_]{{1,32}})",
+            "(:?",
+                "[@]",
+                "{domain}",
+            ")?",
+        ")"),
+        domain=*VALID_DOMAIN
+    );
+
     /// Matches a URL.
     pub static ref RE_URL: Regex = RegexBuilder::new(&*VALID_URL)
         .case_insensitive(true)
@@ -121,11 +133,25 @@ lazy_static! {
         .case_insensitive(true)
         .build()
         .unwrap();
+
+    /// Matches a mention.
+    pub static ref RE_MENTION: Regex = RegexBuilder::new(&*VALID_MENTION)
+        .case_insensitive(true)
+        .build()
+        .unwrap();
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn parses_mention() {
+        let re = Regex::new(&format!("^{}$", *VALID_MENTION)).unwrap();
+        assert!(re.is_match("@noot"));
+        assert!(re.is_match("@noot@noot.social"));
+        assert!(re.is_match("@no_ot3@noot.social"));
+    }
 
     #[test]
     fn parses_hashtag() {
