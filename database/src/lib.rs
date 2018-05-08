@@ -20,9 +20,9 @@ extern crate rocket;
 #[macro_use]
 extern crate maplit;
 
-use std::ops::Deref;
-use std::env;
 use r2d2_diesel::ConnectionManager;
+use std::env;
+use std::ops::Deref;
 
 #[cfg(feature = "sqlite")]
 use diesel::sqlite::SqliteConnection;

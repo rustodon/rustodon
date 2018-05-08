@@ -173,9 +173,7 @@ impl NewAccount {
     pub fn insert(self, conn: &Connection) -> QueryResult<usize> {
         use super::schema::accounts::dsl::*;
 
-        diesel::insert_into(accounts)
-            .values(&self)
-            .execute(&**conn)
+        diesel::insert_into(accounts).values(&self).execute(&**conn)
     }
 }
 
