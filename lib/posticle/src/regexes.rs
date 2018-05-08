@@ -162,7 +162,10 @@ mod test {
 
     #[test]
     fn parses_url() {
-        let re = RegexBuilder::new(&format!("^{}$", *VALID_URL)).case_insensitive(true).build().unwrap();
+        let re = RegexBuilder::new(&format!("^{}$", *VALID_URL))
+            .case_insensitive(true)
+            .build()
+            .unwrap();
         assert!(re.is_match("http://example.com"));
         assert!(re.is_match("https://example.com/path/to/resource?search=foo&lang=en"));
         assert!(re.is_match("http://example.com/#!/heck"));
@@ -174,10 +177,13 @@ mod test {
         assert!(re.is_match("http://example.com/الكلمات_العربية"));
 
         // gnarlies
-        assert!(re.is_match("http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook"));
+        assert!(re.is_match(
+            "http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook"
+        ));
         assert!(re.is_match("http://example.com?foo=$bar.;baz?BAZ&c=d-#top/?stories"));
-        assert!(re.is_match("https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-"));
-
+        assert!(re.is_match(
+            "https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-"
+        ));
 
         assert!(!re.is_match("ftp://www.example.com/"));
         assert!(!re.is_match("http://www.-domain4352.com/"));

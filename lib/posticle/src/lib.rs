@@ -70,23 +70,36 @@ pub fn extract_urls(text: &str) -> Vec<Entity> {
 /// Given `text` and some `existing` entities, extract all [Hashtag](EntityKind::Hashtag) entities
 /// which do not overlap with the `existing` ones.
 pub fn extract_hashtags(text: &str, existing: &[Entity]) -> Vec<Entity> {
-    regexes::RE_HASHTAG.find_iter(text).map(|mat| Entity {
-        kind:  EntityKind::Hashtag,
-        range: (mat.start(), mat.end()),
-    })
-    .filter(|en| existing.iter().all(|existing_en| !en.overlaps_with(existing_en))).collect()
+    regexes::RE_HASHTAG
+        .find_iter(text)
+        .map(|mat| Entity {
+            kind:  EntityKind::Hashtag,
+            range: (mat.start(), mat.end()),
+        })
+        .filter(|en| {
+            existing
+                .iter()
+                .all(|existing_en| !en.overlaps_with(existing_en))
+        })
+        .collect()
 }
 
 /// Given `text` and some `existing` entities, extract all [Mention](EntityKind::Mention) entities
 /// which do not overlap with the `existing` ones.
 pub fn extract_mentions(text: &str, existing: &[Entity]) -> Vec<Entity> {
-    regexes::RE_MENTION.find_iter(text).map(|mat| Entity {
-        kind:  EntityKind::Mention,
-        range: (mat.start(), mat.end()),
-    })
-    .filter(|en| existing.iter().all(|existing_en| !en.overlaps_with(existing_en))).collect()
+    regexes::RE_MENTION
+        .find_iter(text)
+        .map(|mat| Entity {
+            kind:  EntityKind::Mention,
+            range: (mat.start(), mat.end()),
+        })
+        .filter(|en| {
+            existing
+                .iter()
+                .all(|existing_en| !en.overlaps_with(existing_en))
+        })
+        .collect()
 }
-
 
 #[cfg(test)]
 mod test {
