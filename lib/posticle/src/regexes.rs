@@ -11,7 +11,7 @@ static PUNCTUATION: &str = r##"-_!"#$%&'()*+,./:;<=>?@\[\]^`{|}~"##;
 static PUNCTUATION_NO_HYPHEN: &str = r##"_!"#$%&'()*+,./:;<=>?@\[\]^`{|}~"##;
 static PUNCTUATION_NO_HYPHEN_UNDERSCORE: &str = r##"!"#$%&'()*+,./:;<=>?@\[\]^`{|}~"##;
 static VALID_QUERY_STRING: &str =
-    r##"(?:[-a-zA-Z0-9!?*'\(\);:&=+$/%#\[\]_\.,~|@]*[a-zA-Z0-9_&=#/])"##;
+    r##"(?:[-a-zA-Z0-9!?*'\(\);:&=+$/%#\[\]_\.,~|@]*[a-zA-Z0-9_&=#/\-])"##;
 static HASHTAG_SPECIAL_CHARS: &str = "_\u{200c}\u{200d}\u{a67e}\u{05be}\u{05f3}\u{05f4}\u{ff5e}\u{301c}\u{309b}\u{309c}\u{30a0}\u{30fb}\u{3003}\u{0f0b}\u{0f0c}\u{00b7}";
 
 lazy_static! {
@@ -27,7 +27,7 @@ lazy_static! {
     /// Matches characters which are valid in the middle of a domain segment.
     static ref VALID_DOMAIN_MIDDLE_CHARS: String = format!(
         "[^{punctuation}{ctrl}{invalid}{space}]",
-        punctuation = PUNCTUATION_NO_HYPHEN,
+        punctuation = PUNCTUATION_NO_HYPHEN_UNDERSCORE,
         ctrl = CTRL_CHARS,
         invalid = INVALID_CHARS,
         space = UNICODE_SPACES
@@ -135,10 +135,39 @@ mod test {
     }
 
     #[test]
+    fn parses_url() {
+        let re = RegexBuilder::new(&format!("^{}$", *VALID_URL)).case_insensitive(true).build().unwrap();
+        assert!(re.is_match("http://example.com"));
+        assert!(re.is_match("https://example.com/path/to/resource?search=foo&lang=en"));
+        assert!(re.is_match("http://example.com/#!/heck"));
+        assert!(re.is_match("HTTPS://www.ExaMPLE.COM/index.html"));
+        assert!(re.is_match("https://example.com:8080/"));
+        assert!(re.is_match("http://test_underscore.example.com"));
+        assert!(re.is_match("http://☃.net/"));
+        assert!(re.is_match("http://example.com/Русские_слова"));
+        assert!(re.is_match("http://example.com/الكلمات_العربية"));
+
+        // gnarlies
+        assert!(re.is_match("http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook"));
+        assert!(re.is_match("http://example.com?foo=$bar.;baz?BAZ&c=d-#top/?stories"));
+        assert!(re.is_match("https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-"));
+
+
+        assert!(!re.is_match("ftp://www.example.com/"));
+        assert!(!re.is_match("http://www.-domain4352.com/"));
+        assert!(!re.is_match("http://www.domain4352-.com/"));
+        assert!(!re.is_match("http://☃-.net/"));
+        assert!(!re.is_match("http://%e2%98%83.net/"));
+        assert!(!re.is_match("http://example.com/#anchor "));
+    }
+
+    #[test]
     fn parses_domain() {
         let re = Regex::new(&format!("^{}$", *VALID_DOMAIN)).unwrap();
         assert!(re.is_match("activitypub.rocks"));
         assert!(re.is_match("rustodon.glitch.social"));
+        assert!(re.is_match("文字化け.com"));
+        assert!(re.is_match("xn--08jt06hdvfb2k.com"));
 
         assert!(!re.is_match(".github.com"));
         assert!(!re.is_match("github.com."));
@@ -151,6 +180,8 @@ mod test {
         let re = Regex::new(&format!("^{}$", *VALID_DOMAIN_SEGMENT)).unwrap();
         assert!(re.is_match("github"));
         assert!(re.is_match("destroy-capitalism"));
+        assert!(re.is_match("hnng_bepis"));
+        assert!(re.is_match("文字化け"));
 
         assert!(!re.is_match("-oops"));
         assert!(!re.is_match("oops-"));
