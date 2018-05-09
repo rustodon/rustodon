@@ -110,6 +110,72 @@ mod test {
     const TLDS_YAML: &'static str = include_str!("../vendor/test/tlds.yml");
 
     #[test]
+    fn extracts_nothing() {
+        assert_eq!(entities("a string without at signs"), vec![]);
+    }
+
+    #[test]
+    fn extracts_mentions() {
+        assert_eq!(
+            entities("@mention"),
+            vec![Entity {
+                kind:  EntityKind::Mention,
+                range: (0, 8),
+            }]
+        );
+        assert_eq!(
+            entities("@mention@domain.place"),
+            vec![Entity {
+                kind:  EntityKind::Mention,
+                range: (0, 21),
+            }]
+        );
+    }
+
+    #[test]
+    fn extracts_hashtags() {
+        assert_eq!(
+            entities("#hashtag"),
+            vec![Entity {
+                kind:  EntityKind::Hashtag,
+                range: (0, 8),
+            }]
+        );
+    }
+
+    #[test]
+    fn extracts_urls() {
+        assert_eq!(
+            entities("https://example.com"),
+            vec![Entity {
+                kind:  EntityKind::Url,
+                range: (0, 19),
+            }]
+        );
+    }
+
+    #[test]
+    fn extracts_all() {
+        assert_eq!(
+            entities("#hashtag https://example.com @mention"),
+            vec![
+                Entity {
+                    kind:  EntityKind::Url,
+                    range: (9, 28),
+                },
+                Entity {
+                    kind:  EntityKind::Hashtag,
+                    range: (0, 8),
+                },
+                Entity {
+                    kind:  EntityKind::Mention,
+                    range: (29, 37),
+                },
+            ]
+        );
+    }
+
+    #[test]
     fn all_tlds_parse() {
         let tests = yaml_rust::YamlLoader::load_from_str(TLDS_YAML).unwrap();
         let tests = tests.first().unwrap();
