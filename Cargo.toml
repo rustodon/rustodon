@@ -14,6 +14,8 @@ failure_derive = "0.1.1"
 lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
+posticle = { path = "lib/posticle/" }
+
 
 rocket = "0.3.10"
 rocket_codegen = "0.3.10"
