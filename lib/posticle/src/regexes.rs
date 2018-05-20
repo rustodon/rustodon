@@ -89,12 +89,12 @@ lazy_static! {
 
     /// Matches a URL.
     static ref VALID_URL: String = format!(concat!(
-        "(",                                     // $1 - whole match
-            "(https?://)",                       // $2 - scheme
-            "({domain})",                        // $3 - domain
-            "(?::([0-9]+))?",                    // $4 - port
-            "(/{path}*)?",                       // $5 - path
-           r"(\?{query})?",                      // $6 - query
+        "(?:",
+            "(https?://)",                       // $1 - scheme
+            "({domain})",                        // $2 - domain
+            "(?::([0-9]+))?",                    // $3 - port
+            "(/{path}*)?",                       // $4 - path
+           r"(\?{query})?",                      // $5 - query
         ")"),
         domain = *VALID_DOMAIN,
         path = *VALID_PATH_SEGMENT,
@@ -111,12 +111,12 @@ lazy_static! {
     );
 
     static ref VALID_MENTION: String = format!(concat!(
-        "(",
+        "(?:",
             "[@]",
-            "([[:alnum:]_]{{1,32}})",
-            "(:?",
+            "([[:alnum:]_]{{1,32}})",       // $1 - username
+            "(?:",
                 "[@]",
-                "{domain}",
+                "({domain})",               // $2 - domain
             ")?",
         ")"),
         domain=*VALID_DOMAIN

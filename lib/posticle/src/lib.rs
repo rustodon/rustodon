@@ -17,8 +17,8 @@ pub enum EntityKind {
     Url,
     /// A hashtag.
     Hashtag,
-    /// A mention.
-    Mention,
+    /// A mention; the inner data is `(username, optional domain)`.
+    Mention(String, Option<String>),
 }
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -88,10 +88,15 @@ pub fn extract_hashtags(text: &str, existing: &[Entity]) -> Vec<Entity> {
 /// which do not overlap with the `existing` ones.
 pub fn extract_mentions(text: &str, existing: &[Entity]) -> Vec<Entity> {
     regexes::RE_MENTION
-        .find_iter(text)
-        .map(|mat| Entity {
-            kind:  EntityKind::Mention,
-            range: (mat.start(), mat.end()),
+        .captures_iter(text)
+        .map(|capt| {
+            let whole = capt.get(0).unwrap();
+            let user = capt[1].to_string();
+            let domain = capt.get(2).map(|s| s.as_str().to_string());
+            Entity {
+                kind:  EntityKind::Mention(user, domain),
+                range: (whole.start(), whole.end()),
+            }
         })
         .filter(|en| {
             existing
@@ -119,14 +124,14 @@ mod test {
         assert_eq!(
             entities("@mention"),
             vec![Entity {
-                kind:  EntityKind::Mention,
+                kind:  EntityKind::Mention("mention".to_string(), None),
                 range: (0, 8),
             }]
         );
         assert_eq!(
             entities("@mention@domain.place"),
             vec![Entity {
-                kind:  EntityKind::Mention,
+                kind:  EntityKind::Mention("mention".to_string(), Some("domain.place".to_string())),
                 range: (0, 21),
             }]
         );
@@ -168,7 +173,7 @@ mod test {
                     range: (9, 28),
                 },
                 Entity {
-                    kind:  EntityKind::Mention,
+                    kind:  EntityKind::Mention("mention".to_string(), None),
                     range: (29, 37),
                 },
             ]
