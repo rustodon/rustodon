@@ -10,6 +10,7 @@ use db::models::{id_generator, Account, NewStatus, Status, User};
 use error::Perhaps;
 use failure::Error;
 use templates::Page;
+use transform;
 
 mod auth;
 
@@ -152,8 +153,9 @@ pub fn user_page_paginated(
                 }
 
                 div.p-note {
-                    @if let Some(bio) = account.safe_summary() {
-                        (PreEscaped(bio))
+                    @if let Some(raw_bio) = account.summary.as_ref().map(String::as_str)
+                    {
+                        (PreEscaped(transform::bio(raw_bio, &db_conn)?))
                     } @else {
                         p {}
                     }

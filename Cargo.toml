@@ -7,15 +7,17 @@ authors = ["The Rustodon team"]
 members = ['database/', 'lib/resopt/', 'lib/posticle/']
 
 [dependencies]
+ammonia = "1.1.0"
 chrono = "0.4"
 dotenv = "0.10"
+maplit = "1.0"
 failure = "0.1.1"
 failure_derive = "0.1.1"
 lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
 posticle = { path = "lib/posticle/" }
-
+regex = "1.0.0"
 
 rocket = "0.3.10"
 rocket_codegen = "0.3.10"

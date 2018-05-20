@@ -1,6 +1,5 @@
 #![recursion_limit = "128"]
 
-extern crate ammonia;
 extern crate chrono;
 extern crate chrono_humanize;
 #[macro_use]
@@ -30,7 +29,6 @@ use std::env;
 use std::ops::Deref;
 
 pub mod models;
-mod sanitize;
 pub mod schema;
 pub mod validators;
 

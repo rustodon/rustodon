@@ -6,6 +6,7 @@ use rocket::request::{self, FromRequest, Request};
 use rocket::response::{self, Content, Responder};
 use serde::Serialize;
 use serde_json::{self, Value};
+use transform;
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
@@ -75,7 +76,7 @@ pub trait AsActivityPub {
 impl AsActivityPub for Account {
     fn as_activitypub(
         &self,
-        _: &db::Connection,
+        conn: &db::Connection,
     ) -> Result<ActivityStreams<serde_json::Value>, Error> {
         Ok(ActivityStreams(json!({
             "@context": "https://www.w3.org/ns/activitystreams",
@@ -90,7 +91,7 @@ impl AsActivityPub for Account {
 
             "preferredUsername": self.username,
             "name": self.display_name.as_ref().map(String::as_str).unwrap_or(""),
-            "summary": self.safe_summary().unwrap_or_else(|| "<p></p>".to_string()),
+            "summary": transform::bio(self.summary.as_ref().map(String::as_str).unwrap_or_else(|| "<p></p>"), conn)?,
         })))
     }
 }
