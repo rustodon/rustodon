@@ -10,7 +10,7 @@ extern crate pretty_assertions;
 
 mod regexes;
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 /// Tags a given [Entity]'s semantic kind.
 pub enum EntityKind {
     /// A URL.
@@ -21,7 +21,7 @@ pub enum EntityKind {
     Mention,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 /// Represents an entity extracted from a given string of text.
 ///
 /// The entity is described by its `kind` and the `range` of indices it occupies within the string.
@@ -52,7 +52,7 @@ pub fn entities(text: &str) -> Vec<Entity> {
     results.extend(extract_hashtags(text, &results));
     results.extend(extract_mentions(text, &results));
 
-    results.sort();
+    results.sort_by(|a, b| a.range.cmp(&b.range));
     results
 }
 
@@ -160,12 +160,12 @@ mod test {
             entities("#hashtag https://example.com @mention"),
             vec![
                 Entity {
-                    kind:  EntityKind::Url,
-                    range: (9, 28),
-                },
-                Entity {
                     kind:  EntityKind::Hashtag,
                     range: (0, 8),
+                },
+                Entity {
+                    kind:  EntityKind::Url,
+                    range: (9, 28),
                 },
                 Entity {
                     kind:  EntityKind::Mention,
