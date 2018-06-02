@@ -295,10 +295,17 @@ impl Account {
         domain: Option<impl Into<String>>,
     ) -> QueryResult<Option<Account>> {
         use super::schema::accounts::dsl;
-        dsl::accounts
-            .filter(dsl::username.eq(username.into()))
-            .filter(dsl::domain.is_not_distinct_from(domain.map(Into::into)))
-            .first::<Account>(&**db_conn)
+        let mut query = dsl::accounts
+            .filter(dsl::username.eq(username.into())).into_boxed();
+
+        if let Some(domain) = domain.map(Into::into) {
+            query = query.filter(dsl::domain.eq(domain));
+        } else {
+            query = query.filter(dsl::domain.is_null());
+        };
+
+
+        query.first::<Account>(&**db_conn)
             .optional()
     }
 
