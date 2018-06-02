@@ -1,25 +1,28 @@
 use ammonia::Builder;
 use failure::Error;
 use posticle::{self, EntityKind};
+use maud_htmlescape::Escaper;
 
 use db;
 use db::models::Account;
 
-pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
-    // prestrip tags (i don't like this either, but I Want To Be Done Okay)
-    let text = Builder::default()
-        .tags(hashset![])
-        .link_rel(Some("noopener nofollow"))
-        .clean(text)
-        .to_string();
+fn escape_html(text: impl AsRef<str>) -> String {
+    use std::fmt::Write;
 
+    let mut out = String::new();
+    Escaper::new(&mut out).write_str(text.as_ref());
+
+    out
+}
+
+pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
     let mut html = String::new();
     let mut cursor = 0;
 
     let entities = posticle::entities(&text);
 
     for entity in entities {
-        html.push_str(&text[cursor..entity.range.0]);
+        html.push_str(&escape_html(&text[cursor..entity.range.0]));
         let entity_text = entity.substr(&text);
         let replacement = match entity.kind {
             EntityKind::Url => format!("<a href=\"{url}\">{url}</a>", url = entity_text),
@@ -39,7 +42,7 @@ pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
         html.push_str(&replacement);
         cursor = entity.range.1;
     }
-    html.push_str(&text[cursor..]);
+    html.push_str(&escape_html(&text[cursor..]));
 
     Ok(Builder::default()
         .tags(hashset!["a", "p", "br"])
