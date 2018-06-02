@@ -23,7 +23,7 @@ pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
         let entity_text = entity.substr(&text);
         let replacement = match entity.kind {
             EntityKind::Url => format!("<a href=\"{url}\">{url}</a>", url = entity_text),
-            EntityKind::Hashtag => entity.substr(&text).into(),
+            EntityKind::Hashtag => format!("<a href=\"#\">{hashtag}</a>", hashtag = entity_text),
             EntityKind::Mention(user, domain) => {
                 if let Some(account) = Account::fetch_by_username_domain(db_conn, user, domain)? {
                     format!(
