@@ -2,6 +2,7 @@
 #![plugin(rocket_codegen)]
 #![recursion_limit = "128"]
 
+extern crate ammonia;
 extern crate chrono;
 extern crate dotenv;
 extern crate failure;
@@ -23,6 +24,11 @@ extern crate serde_json;
 extern crate validator;
 #[macro_use]
 extern crate validator_derive;
+#[macro_use]
+extern crate maplit;
+extern crate posticle;
+extern crate regex;
+extern crate maud_htmlescape;
 
 extern crate rustodon_database as db;
 
@@ -31,6 +37,7 @@ mod error;
 mod activitypub;
 mod routes;
 mod templates;
+mod transform;
 
 use dotenv::dotenv;
 use std::env;

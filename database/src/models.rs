@@ -13,7 +13,6 @@ use flaken::Flaken;
 use pwhash::bcrypt;
 use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
-use sanitize;
 use schema::{accounts, follows, statuses, users};
 use std::borrow::Cow;
 use std::cell::Cell;
@@ -290,6 +289,26 @@ impl Account {
             .optional()
     }
 
+    pub fn fetch_by_username_domain(
+        db_conn: &Connection,
+        username: impl Into<String>,
+        domain: Option<impl Into<String>>,
+    ) -> QueryResult<Option<Account>> {
+        use super::schema::accounts::dsl;
+        let mut query = dsl::accounts
+            .filter(dsl::username.eq(username.into())).into_boxed();
+
+        if let Some(domain) = domain.map(Into::into) {
+            query = query.filter(dsl::domain.eq(domain));
+        } else {
+            query = query.filter(dsl::domain.is_null());
+        };
+
+
+        query.first::<Account>(&**db_conn)
+            .optional()
+    }
+
     /// Returns the fully-qualified (`@user@domain`) username of an account.
     pub fn fully_qualified_username(&self) -> String {
         format!(
@@ -428,10 +447,6 @@ impl Account {
             .set(summary.eq(new_summary))
             .execute(&**db_conn)
             .and(Ok(()))
-    }
-
-    pub fn safe_summary(&self) -> Option<String> {
-        self.summary.as_ref().map(sanitize::summary)
     }
 }
 

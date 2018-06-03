@@ -9,11 +9,14 @@ members = ['database/', 'lib/resopt/', 'lib/posticle/']
 [dependencies]
 chrono = "0.4"
 dotenv = "0.10"
+maplit = "1.0"
 failure = "0.1.1"
 failure_derive = "0.1.1"
 lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
+posticle = { path = "lib/posticle/" }
+regex = "1.0.0"
 
 rocket = "0.3.10"
 rocket_codegen = "0.3.10"
@@ -23,6 +26,9 @@ serde_derive = "1.0"
 serde_json = "1.0"
 validator = "0.6.3"
 validator_derive = "0.6.5"
+
+ammonia = "1.1.0"
+maud_htmlescape = "0.17.0"
 
 [dependencies.rustodon_database]
 path = "database/"
