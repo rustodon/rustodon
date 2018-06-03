@@ -20,16 +20,17 @@ $ export DATABASE_URL=postgres://username:password@localhost/rustodon
 
 This environment variable could alternatively be added to the `.env` file (you can use `git update-index --assume-unchanged .env` to keep Git from telling you `.env` has been modified. Please don't commit _your_ environment to the repo :p).
 
-On some operating systems, you may need to separately install the Postgres client library, as well as the MySQL library (even if we won't ever use it):
+On some operating systems, you may need to separately install the Postgres client library:
 
-* Ubuntu: `apt install libpq-dev libmysqlclient-dev`
-* Debian: `apt install libpq-dev default-libmysqlclient-dev`
+* Ubuntu: `apt install libpq-dev`
+* Debian: `apt install libpq-dev`
 
 Sass/SCSS is used to make stylesheeting a bit nicer, so you'll have to install Ruby via your favourite method and `gem install sass`.
 
 To set up a new database in Postgres and run all the migrations, first install the Diesel CLI:
 ```
-$ cargo install diesel_cli
+# We only need PostgreSQL support
+$ cargo install diesel_cli --no-default-features --features="postgres"
 ```
 
 Cargo, by default, will install any package binaries into `~/.cargo/bin`. We will assume you have added that directory to your `PATH` environment variable.
