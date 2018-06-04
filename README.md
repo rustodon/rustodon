@@ -20,6 +20,16 @@ $ export DATABASE_URL=postgres://username:password@localhost/rustodon
 
 This environment variable could alternatively be added to the `.env` file (you can use `git update-index --assume-unchanged .env` to keep Git from telling you `.env` has been modified. Please don't commit _your_ environment to the repo :p).
 
+If you don't have a Postgres instance available, you can use the supplied [docker-compose](https://github.com/docker/compose/) configuration file to start an instance:
+
+```
+$ docker-compose up -d
+```
+The instance will be started in the background. The default username _and password_ is `rustodon`. The corresponding connection string would be
+```
+$ export DATABASE_URL=postgres://rustodon:rustodon@localhost/rustodon
+```
+
 On some operating systems, you may need to separately install the Postgres client library:
 
 * Ubuntu: `apt install libpq-dev`
