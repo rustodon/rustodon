@@ -226,20 +226,19 @@ pub fn settings_profile_update(
 }
 
 #[get("/")]
-pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
-    Page::new().flash(flash).content(html! {
+pub fn index(
+    flash: Option<FlashMessage>,
+    user: Option<User>,
+    db_conn: db::Connection,
+) -> Result<Page, Error> {
+    let rendered = Page::new().flash(flash).content(html! {
         header h1 "Rustodon"
 
         div {
-            @if let None = user {
+            @if let Some(user) = user {
+                @let account = user.get_account(&db_conn)?;
                 div {
-                    a href="/auth/sign_in" "sign in!"
-                    " | "
-                    a href="/auth/sign_up" "sign up?"
-                }
-            } @else {
-                div {
-                    a href="/settings/profile" "edit my profile"
+                    a href=(account.get_uri()) "your profile"
                     " | "
                     form.inline method="post" action="/auth/sign_out" {
                         input type="hidden" name="stub"
@@ -253,9 +252,17 @@ pub fn index(flash: Option<FlashMessage>, user: Option<User>) -> Page {
 
                     button type="submit" "post"
                 }
+            } @else {
+                div {
+                    a href="/auth/sign_in" "sign in!"
+                    " | "
+                    a href="/auth/sign_up" "sign up?"
+                }
             }
         }
-    })
+    });
+
+    Ok(rendered)
 }
 
 #[get("/static/<path..>")]
