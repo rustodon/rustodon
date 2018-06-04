@@ -1,7 +1,7 @@
 use ammonia::Builder;
 use failure::Error;
-use posticle::{self, EntityKind};
 use maud_htmlescape::Escaper;
+use posticle::{self, EntityKind};
 
 use db;
 use db::models::Account;

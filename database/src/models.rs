@@ -296,7 +296,8 @@ impl Account {
     ) -> QueryResult<Option<Account>> {
         use super::schema::accounts::dsl;
         let mut query = dsl::accounts
-            .filter(dsl::username.eq(username.into())).into_boxed();
+            .filter(dsl::username.eq(username.into()))
+            .into_boxed();
 
         if let Some(domain) = domain.map(Into::into) {
             query = query.filter(dsl::domain.eq(domain));
@@ -304,9 +305,7 @@ impl Account {
             query = query.filter(dsl::domain.is_null());
         };
 
-
-        query.first::<Account>(&**db_conn)
-            .optional()
+        query.first::<Account>(&**db_conn).optional()
     }
 
     /// Returns the fully-qualified (`@user@domain`) username of an account.
