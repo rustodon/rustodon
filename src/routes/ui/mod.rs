@@ -127,8 +127,8 @@ pub struct UserPageParams {
 // This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
 // If you don't like this, please complain over there.
 #[get("/users/<username>", format = "text/html")]
-pub fn user_page(username: String, db_conn: db::Connection) -> Perhaps<Page> {
-    user_page_paginated(username, UserPageParams { max_id: None }, db_conn)
+pub fn user_page(username: String, db_conn: db::Connection, user: Option<User>) -> Perhaps<Page> {
+    user_page_paginated(username, UserPageParams { max_id: None }, db_conn, user)
 }
 
 #[get("/users/<username>?<params>", format = "text/html")]
@@ -136,6 +136,7 @@ pub fn user_page_paginated(
     username: String,
     params: UserPageParams,
     db_conn: db::Connection,
+    user: Option<User>,
 ) -> Perhaps<Page> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
     let statuses: Vec<Status> = account.statuses_before_id(&db_conn, params.max_id, 10)?;
@@ -158,6 +159,14 @@ pub fn user_page_paginated(
                         (PreEscaped(transform::bio(raw_bio, &db_conn)?))
                     } @else {
                         p {}
+                    }
+                }
+
+                @if let Some(user) = user {
+                    @if user.get_account(&db_conn)? == account {
+                        div.action-edit-note {
+                            "(" a href="/settings/profile" "edit" ")"
+                        }
                     }
                 }
             }
