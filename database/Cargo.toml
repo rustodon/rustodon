@@ -5,7 +5,7 @@ authors = ["The Rustodon team"]
 
 [dependencies]
 lazy_static = "1.0"
-regex = "0.2"
+regex = "1.0"
 maplit = "1.0"
 
 diesel = { version = "1.0.0", features = ["postgres", "chrono"] }
@@ -16,7 +16,7 @@ r2d2-diesel = "1.0.0"
 
 rocket = "0.3.10"
 
-pwhash = "0.1.2"
+pwhash = "0.2"
 chrono = "0.4"
 chrono-humanize = "0.0.11"
 
