@@ -8,7 +8,7 @@ members = ['database/', 'lib/resopt/', 'lib/posticle/']
 
 [dependencies]
 chrono = "0.4"
-dotenv = "0.10"
+dotenv = "0.13"
 maplit = "1.0"
 failure = "0.1.1"
 failure_derive = "0.1.1"
@@ -24,8 +24,8 @@ rocket_codegen = "0.3.10"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-validator = "0.6.3"
-validator_derive = "0.6.5"
+validator = "0.7"
+validator_derive = "0.7"
 
 ammonia = "1.1.0"
 maud_htmlescape = "0.17.0"
