@@ -32,8 +32,8 @@ $ export DATABASE_URL=postgres://rustodon:rustodon@localhost/rustodon
 
 On some operating systems, you may need to separately install the Postgres client library:
 
-* Ubuntu: `apt install libpq-dev`
-* Debian: `apt install libpq-dev`
+* Debian/Ubuntu/etc: `apt install libpq-dev`
+* Arch: `pacman -S postgresql-libs`
 
 Sass/SCSS is used to make stylesheeting a bit nicer, so you'll have to install Ruby via your favourite method and `gem install sass`.
 
