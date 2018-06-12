@@ -5,7 +5,12 @@
 Rustodon is an [Mastodon](https://joinmastodon.org)-compatible _federated social microblogging server_. It utilizes [_ActivityPub_](http://activitypub.rocks) to _federate_ with a constellation of _other servers_, connecting their communities with yours.
 
 ## Current Status
-Don't use this in production. Don't use it in testing, either. It currently implements nothing more than a bare framework to allow user creation and outwards user federation.
+**You probably don't want to use this, yet**. Federation is WIP, UI is WIP, we don't have timelines, etc.
+
+We currently have authentication, users, profiles, statuses, content warnings, actor and status visibility as both HTML and AS2.
+We **do not** have timelines, status delivery, inboxes, outboxes, notifcations, mentions, post privacy, or account privacy.
+
+If you want to work on making Rustodon feature-complete, check out the [issue tracker](https://github.com/rustodon/rustodon/issues)! We're not just looking for Rust devs, either; CSS witches, brainstormers, and documentation enthusiasts are highly welcome :smiley:
 
 ## Hacking on the code
 Rustodon depends on libraries (looking at you, Diesel and Rocket) that require bleeding-edge nightly rustc features. Ideally, install Rust via [`rustup`](https://www.rustup.rs/) and set an override in the Rustodon directory with
