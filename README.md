@@ -15,7 +15,7 @@ If you want to work on making Rustodon feature-complete, check out the [issue tr
 ## Hacking on the code
 Rustodon depends on libraries (looking at you, Diesel and Rocket) that require bleeding-edge nightly rustc features. Ideally, install Rust via [`rustup`](https://www.rustup.rs/) and set an override in the Rustodon directory with
 ```
-$ rustup override set nightly
+$ rustup override set $(cat REQUIRED_RUST_NIGHTLY)
 ```
 
 We use [Postgres](https://www.postgresql.org/) for data storage, so get a Postgres instance running, create a user, and set an environment variable `DATABASE_URL` to a Postgres URI, like so:
@@ -40,7 +40,7 @@ On some operating systems, you may need to separately install the Postgres clien
 * Debian/Ubuntu/etc: `apt install libpq-dev`
 * Arch: `pacman -S postgresql-libs`
 
-Sass/SCSS is used to make stylesheeting a bit nicer, so you'll have to install Ruby via your favourite method and `gem install sass`.
+Sass/SCSS is used to make stylesheeting a bit nicer, so you'll have to install Ruby via your favourite method and `bundle install`.
 
 To set up a new database in Postgres and run all the migrations, first install the Diesel CLI:
 ```
