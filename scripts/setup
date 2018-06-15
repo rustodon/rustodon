@@ -6,6 +6,7 @@ DEFAULT_POSTGRES_USER=""
 DEFAULT_POSTGRES_PASSWORD=""
 DEFAULT_POSTGRES_DATABASE="rustodon"
 TRAVIS_BRANCH="${TRAVIS_BRANCH:-""}"
+DATABASE_URL="${DATABASE_URL:-""}"
 
 # Ensure rustup and rust are installed
 if which rustup 2>/dev/null 1>&2 ; then
@@ -35,41 +36,43 @@ fi
 # Don't track changes to .env
 git update-index --assume-unchanged .env
 
-if grep DATABASE_URL ./.env; then
-  echo "Database already setup"
-else
-  # Prompt user for local database information
-  read -p "Postgres host (default: ${DEFAULT_POSTGRES_HOST}): " POSTGRES_HOST
-  read -p "Postgres user (default: ${DEFAULT_POSTGRES_USER}): " POSTGRES_USER
-  read -p "Postgres password (default: ${DEFAULT_POSTGRES_PASSWORD}): " POSTGRES_PASSWORD
-  read -p "Postgres database (default: ${DEFAULT_POSTGRES_DATABASE}): " POSTGRES_DATABASE
-  if [ -z "${POSTGRES_HOST}" ]; then
-    POSTGRES_HOST="${DEFAULT_POSTGRES_HOST}"
-  fi
-  if [ -z "${POSTGRES_USER}" ]; then
-    POSTGRES_USER="${DEFAULT_POSTGRES_USER}"
-  fi
-  if [ -z "${POSTGRES_PASSWORD}" ]; then
-    POSTGRES_PASSWORD="${DEFAULT_POSTGRES_PASSWORD}"
-  fi
-  if [ -z "${POSTGRES_DATABASE}" ]; then
-    POSTGRES_DATABASE="${DEFAULT_POSTGRES_DATABASE}"
-  fi
-  DB_CREDENTIALS=""
-  if [ ! -z "${POSTGRES_USER}" ]; then
-    if [ -z "${POSTGRES_PASSWORD}" ]; then
-      DB_CREDENTIALS="${POSTGRES_USER}@"
-    else
-      DB_CREDENTIALS="${POSTGRES_USER}:${POSTGRES_PASSWORD}@" 
-    fi
-  fi
-  if [ -z "${POSTGRES_PASSWORD}" ]; then
-    DATABASE_URL="postgres://${DB_CREDENTIALS}${POSTGRES_HOST}/${POSTGRES_DATABASE}"
+if [ -z "${DATABASE_URL}" ]; then
+  if grep DATABASE_URL ./.env; then
+    echo "Database already setup"
   else
-    DATABASE_URL="postgres://${DB_CREDENTIALS}${POSTGRES_HOST}/${POSTGRES_DATABASE}"
+    # Prompt user for local database information
+    read -p "Postgres host (default: ${DEFAULT_POSTGRES_HOST}): " POSTGRES_HOST
+    read -p "Postgres user (default: ${DEFAULT_POSTGRES_USER}): " POSTGRES_USER
+    read -p "Postgres password (default: ${DEFAULT_POSTGRES_PASSWORD}): " POSTGRES_PASSWORD
+    read -p "Postgres database (default: ${DEFAULT_POSTGRES_DATABASE}): " POSTGRES_DATABASE
+    if [ -z "${POSTGRES_HOST}" ]; then
+      POSTGRES_HOST="${DEFAULT_POSTGRES_HOST}"
+    fi
+    if [ -z "${POSTGRES_USER}" ]; then
+      POSTGRES_USER="${DEFAULT_POSTGRES_USER}"
+    fi
+    if [ -z "${POSTGRES_PASSWORD}" ]; then
+      POSTGRES_PASSWORD="${DEFAULT_POSTGRES_PASSWORD}"
+    fi
+    if [ -z "${POSTGRES_DATABASE}" ]; then
+      POSTGRES_DATABASE="${DEFAULT_POSTGRES_DATABASE}"
+    fi
+    DB_CREDENTIALS=""
+    if [ ! -z "${POSTGRES_USER}" ]; then
+      if [ -z "${POSTGRES_PASSWORD}" ]; then
+        DB_CREDENTIALS="${POSTGRES_USER}@"
+      else
+        DB_CREDENTIALS="${POSTGRES_USER}:${POSTGRES_PASSWORD}@" 
+      fi
+    fi
+    if [ -z "${POSTGRES_PASSWORD}" ]; then
+      DATABASE_URL="postgres://${DB_CREDENTIALS}${POSTGRES_HOST}/${POSTGRES_DATABASE}"
+    else
+      DATABASE_URL="postgres://${DB_CREDENTIALS}${POSTGRES_HOST}/${POSTGRES_DATABASE}"
+    fi
+    echo "DATABASE_URL=${DATABASE_URL}"
+    echo "DATABASE_URL=${DATABASE_URL}" >> .env
   fi
-  echo "DATABASE_URL=${DATABASE_URL}"
-  echo "DATABASE_URL=${DATABASE_URL}" >> .env
 fi
 
 # Ruby and Sass dependency checks
