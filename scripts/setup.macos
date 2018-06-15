@@ -5,6 +5,7 @@ DEFAULT_POSTGRES_HOST="localhost"
 DEFAULT_POSTGRES_USER=""
 DEFAULT_POSTGRES_PASSWORD=""
 DEFAULT_POSTGRES_DATABASE="rustodon"
+TRAVIS_BRANCH="${TRAVIS_BRANCH:-""}"
 
 # Ensure rustup and rust are installed
 if which rustup 2>/dev/null 1>&2 ; then
@@ -14,6 +15,12 @@ else
   # Installation deferred to user
   echo "You must install rust and rustup, see: https://www.rust-lang.org/en-US/install.html and https://rustup.rs/" >&2
   exit 1
+fi
+
+if rustup component list | grep rustfmt-preview | grep installed 2>/dev/null 1>&2 ; then
+  echo "rustfmt-preview installed"
+else
+  rustup component add rustfmt-preview
 fi
 
 # Ensure Postgres is installed
@@ -74,10 +81,12 @@ which diesel 2>/dev/null 1>&2 || cargo install diesel_cli --no-default-features 
 which cargo-watch 2>/dev/null 1>&2 || cargo install cargo-watch
 
 # Database creation and migration
-diesel database setup
+diesel database setup --migration-dir=migrations
 
 # Cargo build
-cargo build
+if [ -z "${TRAVIS_BRANCH}" ]; then
+  cargo build
+fi
 
 # Setup complete
 echo "Setup is complete, you may run the server with:"
