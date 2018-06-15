@@ -19,7 +19,6 @@ before_install:
   - sudo apt-get update -yqq
   - sudo apt-get install -yqq libpq-dev
   - rvm install 2.5.0
-  - echo "DATABASE_URL=postgres://postgres@localhost/rustodon" >> .env
 
 env:
   global:
