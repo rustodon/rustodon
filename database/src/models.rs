@@ -332,11 +332,18 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.profile_path()
                 ).into()
             })
+    }
+
+    pub fn profile_path<'a>(&'a self) -> Cow<'a, str>{
+        format!(
+            "/users/{user}",
+            user = self.username
+        ).into()
     }
 
     /// Returns the URI of the ActivityPub `inbox` endpoint for this account.
@@ -346,11 +353,18 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}/inbox",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.inbox_path()
                 ).into()
             })
+    }
+
+    pub fn inbox_path<'a>(&'a self) -> Cow<'a, str> {
+        format!(
+            "/users/{user}/inbox",
+            user = self.username
+        ).into()
     }
 
     /// Returns the URI of the ActivityPub `outbox` endpoint for this account.
@@ -360,11 +374,18 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}/outbox",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.outbox_path()
                 ).into()
             })
+    }
+
+    pub fn outbox_path<'a>(&'a self) -> Cow<'a, str> {
+        format!(
+            "/users/{user}/outbox",
+            user = self.username
+        ).into()
     }
 
     /// Returns the URI of the ActivityPub `following` endpoint for this account.
@@ -374,11 +395,18 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}/following",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.following_path()
                 ).into()
             })
+    }
+
+    pub fn following_path<'a>(&'a self) -> Cow<'a, str> {
+        format!(
+            "/users/{user}/following",
+            user = self.username
+        ).into()
     }
 
     /// Returns the URI of the ActivityPub `followers` endpoint for this account.
@@ -388,11 +416,18 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}/followers",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.followers_path()
                 ).into()
             })
+    }
+
+    pub fn followers_path<'a>(&'a self) -> Cow<'a, str> {
+        format!(
+            "/users/{user}/followers",
+            user = self.username
+        ).into()
     }
 
     /// Returns `n` statuses authored by this account, authored
@@ -483,13 +518,33 @@ impl Status {
         match uri {
             Some(x) => Ok(x),
             None => {
-                return Ok(format!(
-                    "{base}/users/{user}/statuses/{id}",
-                    base = BASE_URL.as_str(),
-                    user = self.account(db_conn)?.username,
-                    id = self.id
-                ).into())
+                let account_result = self.account(db_conn);
+                match account_result {
+                    Ok(account) => {
+                        return Ok(format!(
+                            "{base}{path}",
+                            base = BASE_URL.as_str(),
+                            path = self.status_path(&account).unwrap_or_else(|| { "".into() })
+                        ).into())
+                    }
+                    Err(error) => {
+                        return Err(error)
+                    }
+                }
             },
+        }
+    }
+
+    pub fn status_path<'a>(&'a self, account: &Account) -> Option<Cow<'a, str>> {
+        if account.id == self.account_id {
+            Some(
+                format!("/users/{user}/statuses/{id}",
+                        user = account.username,
+                        id=self.id
+                ).into()
+            )
+        } else {
+            None
         }
     }
 }

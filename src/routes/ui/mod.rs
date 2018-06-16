@@ -64,7 +64,7 @@ pub fn create_status(
     Ok(Redirect::to("/"))
 }
 
-fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Result<Markup, Error> {
+fn render_status(account: &Account, status: &Status, link: bool) -> Result<Markup, Error> {
     let meta_line = html !{
         span {
             ("published: ")
@@ -76,7 +76,11 @@ fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Resul
         div.status {
             header {
                 @if link {
-                    a href=(status.get_uri(db_conn)?) (meta_line)
+                    @if let Some(path) = status.status_path(account) {
+                        a href=(path) (meta_line)
+                    } else {
+                        (meta_line)
+                    }
                 } @else {
                     (meta_line)
                 }
@@ -114,7 +118,7 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
             user = account.username,
             id = status.id
         ))
-        .content(render_status(&db_conn, &status, false)?);
+        .content(render_status(&account, &status, false)?);
 
     Ok(Some(rendered))
 }
@@ -149,7 +153,7 @@ pub fn user_page_paginated(
                     span.p-name (account.display_name.as_ref().unwrap_or(&account.username))
 
                     span.fq-username {
-                        a.url.u-uid href=(account.get_uri()) (account.fully_qualified_username())
+                        a.url.u-uid href=(account.profile_path()) (account.fully_qualified_username())
                     }
                 }
 
@@ -175,7 +179,7 @@ pub fn user_page_paginated(
                 header h2 "Posts"
 
                 @for status in &statuses {
-                    (render_status(&db_conn, status, true)?)
+                    (render_status(&account, status, true)?)
                 }
 
                 nav.pagination {
@@ -247,7 +251,7 @@ pub fn index(
             @if let Some(user) = user {
                 @let account = user.get_account(&db_conn)?;
                 div {
-                    a href=(account.get_uri()) "your profile"
+                    a href=(account.profile_path()) "your profile"
                     " | "
                     form.inline method="post" action="/auth/sign_out" {
                         input type="hidden" name="stub"
