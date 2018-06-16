@@ -28,9 +28,12 @@ use rocket::{Outcome, Request, State};
 use std::env;
 use std::ops::Deref;
 
+pub mod idgen;
 pub mod models;
 pub mod schema;
 pub mod validators;
+
+pub use idgen::id_generator;
 
 // TODO: gross hack. find a nicer way to pass these in?
 lazy_static! {
