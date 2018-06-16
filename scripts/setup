@@ -8,28 +8,35 @@ DEFAULT_POSTGRES_DATABASE="rustodon"
 TRAVIS_BRANCH="${TRAVIS_BRANCH:-""}"
 DATABASE_URL="${DATABASE_URL:-""}"
 
+infoMsg() {
+  echo "[*] ${1}"
+}
+
+alertMsg() {
+  echo "[!] ${1}" >&2
+}
+
 # Ensure rustup and rust are installed
 if which rustup 2>/dev/null 1>&2 ; then
+  NIGHTLY_VERSION="$(cat REQUIRED_RUST_NIGHTLY)"
+  infoMsg "Setting Rust version to ${NIGHTLY_VERSION}..."
   # Ensure that rust is using nightly for library features
-  rustup override set $(cat REQUIRED_RUST_NIGHTLY) 2>/dev/null 1>&2
+  rustup override set "${NIGHTLY_VERSION}" 2>/dev/null 1>&2
 else
   # Installation deferred to user
-  echo "You must install rust and rustup, see: https://www.rust-lang.org/en-US/install.html and https://rustup.rs/" >&2
+  alertMsg "You must install rust and rustup, see: https://www.rust-lang.org/en-US/install.html and https://rustup.rs/"
   exit 1
 fi
 
-if rustup component list | grep rustfmt-preview | grep installed 2>/dev/null 1>&2 ; then
-  echo "rustfmt-preview installed"
-else
+if ! rustup component list | grep rustfmt-preview | grep installed 2>/dev/null 1>&2 ; then
+  infoMsg "Installing rustfmt..."
   rustup component add rustfmt-preview
 fi
 
 # Ensure Postgres is installed
-if which psql 2>/dev/null 1>&2 ; then
-  echo "Postgres installed"
-else
+if ! which psql 2>/dev/null 1>&2 ; then
   # Installation deferred to user
-  echo "You must install Postgres, see: https://www.postgresql.org/download/" >&2
+  alertMsg "You must install Postgres, see: https://www.postgresql.org/download/"
   exit 1
 fi
 
@@ -37,9 +44,7 @@ fi
 git update-index --assume-unchanged .env
 
 if [ -z "${DATABASE_URL}" ]; then
-  if grep DATABASE_URL ./.env; then
-    echo "Database already setup"
-  else
+  if ! grep DATABASE_URL ./.env 2>/dev/null 1>&2; then
     # Prompt user for local database information
     read -p "Postgres host (default: ${DEFAULT_POSTGRES_HOST}): " POSTGRES_HOST
     read -p "Postgres user (default: ${DEFAULT_POSTGRES_USER}): " POSTGRES_USER
@@ -70,27 +75,35 @@ if [ -z "${DATABASE_URL}" ]; then
     else
       DATABASE_URL="postgres://${DB_CREDENTIALS}${POSTGRES_HOST}/${POSTGRES_DATABASE}"
     fi
-    echo "DATABASE_URL=${DATABASE_URL}"
+    infoMsg "Database URL is ${DATABASE_URL}"
     echo "DATABASE_URL=${DATABASE_URL}" >> .env
   fi
 fi
 
 # Ruby and Sass dependency checks
-which bundler 2>/dev/null 1>&2 || gem install bundler
-bundle check 2>/dev/null 1>&2 || bundle install
-
-# Diesel CLI install
-which diesel 2>/dev/null 1>&2 || cargo install diesel_cli --no-default-features --features="postgres"
-which cargo-watch 2>/dev/null 1>&2 || cargo install cargo-watch
-
-# Database creation and migration
-diesel database setup --migration-dir=migrations
-
-# Cargo build
-if [ -z "${TRAVIS_BRANCH}" ]; then
-  cargo build
+if ! which bundler 2>/dev/null 1>&2 ; then
+  infoMsg "Installing Bundler..."
+  gem install bundler
+fi
+if ! bundle check 2>/dev/null 1>&2 ; then
+  infoMsg "Installing Ruby dependencies..."
+  bundle install
 fi
 
+# Diesel CLI install
+if ! which diesel 2>/dev/null 1>&2 ; then
+  infoMsg "Installing diesel_cli..."
+  cargo install diesel_cli --no-default-features --features="postgres"
+fi
+if ! which cargo-watch 2>/dev/null 1>&2 ; then
+  infoMsg "Installing cargo-watch..."
+  cargo install cargo-watch 
+fi
+
+# Database creation and migration
+infoMsg "Running migrations..."
+diesel database setup --migration-dir=migrations
+
 # Setup complete
-echo "Setup is complete, you may run the server with:"
+infoMsg "Setup is complete, you may run the server with:"
 echo "bundle exec foreman start"
