@@ -43,7 +43,7 @@ To run the application once you have installed all dependencies, you should run 
 
 Rustodon will launch on `http://localhost:8000` by default; this can be overriden by setting [certain environment variables](https://rocket.rs/guide/configuration/#environment-variables).
 
-Federation requires that the application know where it's hosted, and (thanks to Webfinger) also forces us to serve over HTTPS. To get around this in a development environment, you can use [ngrok](https://ngrok.com/) or a similar service. To make sure the app knows where it's serving from (used to compute, eg, AS2 UIDs), remember to set `DOMAIN` in `.env` (again, the `--assume-unchanged` trick is very useful).
+Federation requires that the application know where it's hosted, and (thanks to Webfinger) also forces us to serve over HTTPS. To get around this in a development environment, you can use [ngrok](https://ngrok.com/) or a similar service. The app knows where it's serving from (used to compute, eg, AS2 UIDs), so make sure to set `DOMAIN` in `.env`.
 
 ### Running database migrations
 
