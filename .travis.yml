@@ -19,7 +19,6 @@ before_install:
   - sudo apt-get update -yqq
   - sudo apt-get install -yqq libpq-dev
   - rvm install 2.5.0
-  - gem install sass
 
 env:
   global:
@@ -29,13 +28,10 @@ env:
     - MIGRATION_DIR=migrations FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
 
 before_script:
-  - rustup component add rustfmt-preview
-  - which cargo-install-update || cargo install cargo-update
-  - cargo install-update -i diesel_cli
+  - scripts/setup
 
 script:
   - cargo fmt -- --write-mode=diff
-  - diesel database setup --migration-dir=${MIGRATION_DIR}
   - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release; else cargo build; fi
   - cargo test --all
 
