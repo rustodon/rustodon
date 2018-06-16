@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# Uncomment the line below if you would like to diagnose what commands are being done on your behalf.
+# set -x
+
 DEFAULT_POSTGRES_HOST="localhost"
 DEFAULT_POSTGRES_USER=""
 DEFAULT_POSTGRES_PASSWORD=""
