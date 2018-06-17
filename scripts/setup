@@ -95,7 +95,7 @@ fi
 # Diesel CLI install
 if ! which diesel 2>/dev/null 1>&2 ; then
   infoMsg "Installing diesel_cli..."
-  cargo install diesel_cli --no-default-features --features="postgres"
+  cargo install diesel_cli --no-default-features --features="postgres sqlite"
 fi
 if ! which cargo-watch 2>/dev/null 1>&2 ; then
   infoMsg "Installing cargo-watch..."
@@ -104,7 +104,7 @@ fi
 
 # Database creation and migration
 infoMsg "Running migrations..."
-diesel database setup --migration-dir=migrations
+diesel database setup --migration-dir=migrations_sqlite
 
 # Setup complete
 infoMsg "Setup is complete, you may run the server with:"
