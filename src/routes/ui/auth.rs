@@ -1,6 +1,6 @@
-use db::models::{id_generator, NewAccount, NewUser, User};
+use db::models::{NewAccount, NewUser, User};
 use db::validators;
-use db::{self, DieselConnection};
+use db::{self, id_generator, DieselConnection};
 use failure::Error;
 use itertools::Itertools;
 use maud::html;

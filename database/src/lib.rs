@@ -35,6 +35,7 @@ use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
 
+pub mod idgen;
 pub mod models;
 pub mod schema;
 pub mod validators;
@@ -47,6 +48,7 @@ type DbConnection = SqliteConnection;
 
 #[cfg(all(not(feature = "sqlite"), feature = "postgres"))]
 type DbConnection = PgConnection;
+pub use idgen::id_generator;
 
 // TODO: gross hack. find a nicer way to pass these in?
 lazy_static! {
