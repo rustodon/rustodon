@@ -111,7 +111,7 @@ impl AsActivityPub for Status {
             "content": self.text,
             "summary": self.content_warning,
             "sensitive": self.content_warning.is_some(),
-            "published": self.created_at.to_rfc3339(),
+            "published": self.created_at_datetime().to_rfc3339(),
 
             "to": ["https://www.w3.org/ns/activitystreams#Public"],
             "cc": [account.get_followers_endpoint()],

@@ -55,7 +55,7 @@ pub fn create_status(
 
     let _status = NewStatus {
         id: id_generator().next(),
-        created_at: Utc::now(),
+        created_at: Utc::now().naive_utc(),
         text: form_data.content.to_owned(),
         content_warning: content_warning,
         account_id: user.account_id,
@@ -68,7 +68,7 @@ fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Resul
     let meta_line = html !{
         span {
             ("published: ")
-            time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
+            time datetime=(status.created_at_datetime().to_rfc3339()) (status.humanized_age())
         }
     };
 
