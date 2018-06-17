@@ -89,7 +89,7 @@ if ! which bundler 2>/dev/null 1>&2 ; then
 fi
 if ! bundle check 2>/dev/null 1>&2 ; then
   infoMsg "Installing Ruby dependencies..."
-  bundle install
+  bundle install --path=vendor/
 fi
 
 # Diesel CLI install
