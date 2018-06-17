@@ -30,11 +30,15 @@ use diesel::sqlite::SqliteConnection;
 
 #[cfg(feature = "postgres")]
 use diesel::pg::PgConnection;
+
 use rocket::http::Status;
 
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
 
+use chrono_humanize::Humanize;
+
+pub mod datetime;
 pub mod idgen;
 pub mod models;
 pub mod schema;
@@ -48,6 +52,7 @@ type DbConnection = SqliteConnection;
 
 #[cfg(all(not(feature = "sqlite"), feature = "postgres"))]
 type DbConnection = PgConnection;
+
 pub use idgen::id_generator;
 
 // TODO: gross hack. find a nicer way to pass these in?

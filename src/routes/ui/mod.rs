@@ -5,6 +5,7 @@ use rocket::response::{NamedFile, Redirect};
 use rocket::Route;
 use std::path::{Path, PathBuf};
 
+use db::datetime::{DateTimeType, NewDateTime, Rfc339able};
 use db::models::{Account, NewStatus, Status, User};
 use db::{self, id_generator};
 use error::Perhaps;
@@ -55,7 +56,7 @@ pub fn create_status(
 
     let _status = NewStatus {
         id: id_generator().next(),
-        created_at: Utc::now().naive_utc(),
+        created_at: DateTimeType::now(),
         text: form_data.content.to_owned(),
         content_warning: content_warning,
         account_id: user.account_id,
@@ -68,7 +69,7 @@ fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Resul
     let meta_line = html !{
         span {
             ("published: ")
-            time datetime=(status.created_at_datetime().to_rfc3339()) (status.humanized_age())
+            time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
         }
     };
 
