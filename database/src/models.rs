@@ -6,6 +6,7 @@
 
 use chrono::offset::Utc;
 use chrono::DateTime;
+use chrono::NaiveDateTime;
 use chrono_humanize::Humanize;
 use diesel;
 use diesel::prelude::*;
@@ -106,7 +107,7 @@ pub struct Status {
     pub id: i64,
     pub text: String,
     pub content_warning: Option<String>,
-    pub created_at: DateTime<Utc>,
+    pub created_at: NaiveDateTime,
     pub account_id: i64,
     pub uri: Option<String>,
 }
@@ -152,7 +153,7 @@ pub struct NewStatus {
     pub id: i64,
     pub text: String,
     pub content_warning: Option<String>,
-    pub created_at: DateTime<Utc>,
+    pub created_at: NaiveDateTime,
     pub account_id: i64,
 }
 
@@ -466,9 +467,13 @@ impl Status {
             .optional()
     }
 
+    pub fn created_at_datetime(&self) -> DateTime<Utc> {
+        DateTime::<Utc>::from_utc(self.created_at, Utc)
+    }
+
     /// Returns a human-readble description of the age of this status.
     pub fn humanized_age(&self) -> String {
-        self.created_at.humanize()
+        self.created_at_datetime().humanize()
     }
 
     /// Retunrs a URI to the ActivityPub object of this status.
