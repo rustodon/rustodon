@@ -1,0 +1,16 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:10-alpine
+    network_mode: bridge
+    environment:
+      PGDATA: /data
+      POSTGRES_USER: rustodon
+      POSTGRES_PASSWORD: rustodon
+    volumes:
+      - "postgres-data:/data"
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres-data:

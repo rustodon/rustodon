@@ -1,0 +1,22 @@
+.h-card header {
+  font-size: 200%;
+}
+
+.h-card .fq-username {
+  margin-left: 0.5em;
+  font-family: $mono_font;
+}
+
+.h-card .p-note {
+  margin-left: 1em;
+  padding: 0 0.5em;
+  border-left: 2px solid $border_color;
+}
+
+.h-card .action-edit-note {
+  margin-left: 1.5em;
+}
+
+.status {
+  margin: 1em 0;
+}
