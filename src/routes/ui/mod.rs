@@ -5,8 +5,8 @@ use rocket::response::{NamedFile, Redirect};
 use rocket::Route;
 use std::path::{Path, PathBuf};
 
-use db;
-use db::models::{id_generator, Account, NewStatus, Status, User};
+use db::models::{Account, NewStatus, Status, User};
+use db::{self, id_generator};
 use error::Perhaps;
 use failure::Error;
 use templates::Page;
