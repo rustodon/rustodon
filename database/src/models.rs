@@ -339,6 +339,7 @@ impl Account {
             })
     }
 
+    /// Returns the server local path to the Account profile page for this account.
     pub fn profile_path<'a>(&'a self) -> Cow<'a, str>{
         format!(
             "/users/{user}",
@@ -360,6 +361,7 @@ impl Account {
             })
     }
 
+    /// Returns the server local path to the `inbox` endpoint for this account.
     pub fn inbox_path<'a>(&'a self) -> Cow<'a, str> {
         format!(
             "/users/{user}/inbox",
@@ -381,6 +383,7 @@ impl Account {
             })
     }
 
+    /// Returns the server local path to the `outbox` endpoint for this account.
     pub fn outbox_path<'a>(&'a self) -> Cow<'a, str> {
         format!(
             "/users/{user}/outbox",
@@ -402,6 +405,7 @@ impl Account {
             })
     }
 
+    /// Returns the server local path to the `following` endpoint for this account.
     pub fn following_path<'a>(&'a self) -> Cow<'a, str> {
         format!(
             "/users/{user}/following",
@@ -423,6 +427,7 @@ impl Account {
             })
     }
 
+    /// Returns the server local path to the `followers` resource on this account.
     pub fn followers_path<'a>(&'a self) -> Cow<'a, str> {
         format!(
             "/users/{user}/followers",
@@ -431,7 +436,7 @@ impl Account {
     }
 
     /// Returns `n` statuses authored by this account, authored
-    // _strictly before_ the status `max_id`.
+    /// _strictly before_ the status `max_id`.
     pub fn statuses_before_id(
         &self,
         db_conn: &Connection,
@@ -507,12 +512,12 @@ impl Status {
             .optional()
     }
 
-    /// Returns a human-readble description of the age of this status.
+    /// Returns a human-readable description of the age of this status.
     pub fn humanized_age(&self) -> String {
         self.created_at.humanize()
     }
 
-    /// Retunrs a URI to the ActivityPub object of this status.
+    /// Returns a URI to the ActivityPub object of this status.
     pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Cow<'a, str>> {
         let uri = self.uri.as_ref().map(|x| String::as_str(x).into());
         match uri {
@@ -535,16 +540,24 @@ impl Status {
         }
     }
 
+    /// Returns the server local path to this status if it exists, or None
+    /// if the status does not reside on this server, or if the account provided
+    /// by the caller is not the creator of this status.
     pub fn status_path<'a>(&'a self, account: &Account) -> Option<Cow<'a, str>> {
-        if account.id == self.account_id {
-            Some(
-                format!("/users/{user}/statuses/{id}",
-                        user = account.username,
-                        id=self.id
-                ).into()
-            )
-        } else {
-            None
+        match self.uri {
+            Some(_) => None,
+            None => {
+                if account.id == self.account_id {
+                    Some(
+                        format!("/users/{user}/statuses/{id}",
+                                user = account.username,
+                                id=self.id
+                        ).into()
+                    )
+                } else {
+                    None
+                }
+            }
         }
     }
 }
