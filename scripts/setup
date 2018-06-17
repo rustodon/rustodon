@@ -107,6 +107,25 @@ fi
 infoMsg "Running migrations..."
 diesel database setup --migration-dir=migrations
 
+if [ ! -f "Rocket.toml" ]; then
+  infoMsg "Generating Rocket.toml. This contains your server secret key, keep this file private."
+  cat <<-EOTOML > Rocket.toml
+[development]
+address = "localhost"
+port = 8000
+workers = 1
+log = "normal"
+secret_key = "$(openssl rand -base64 32)"
+
+[production]
+address = "0.0.0.0"
+port = 8000
+workers = 12
+log = "normal"
+secret_key = "$(openssl rand -base64 32)"
+EOTOML
+fi
+
 # Setup complete
 infoMsg "Setup is complete, you may run the server with:"
 echo "bundle exec foreman start"
