@@ -1,5 +1,5 @@
 CREATE TABLE statuses (
-    id BIGINT PRIMARY KEY,
+    id BIGINT PRIMARY KEY NOT NULL,
     text TEXT NOT NULL,
     content_warning TEXT,
 
