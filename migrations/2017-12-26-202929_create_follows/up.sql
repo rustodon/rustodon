@@ -1,5 +1,5 @@
 CREATE TABLE follows (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY NOT NULL,
     source_id BIGINT REFERENCES accounts(id) NOT NULL,
     target_id BIGINT REFERENCES accounts(id) NOT NULL,
 
