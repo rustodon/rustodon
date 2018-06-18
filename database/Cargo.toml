@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["The Rustodon team"]
 
 [features]
-postgres = ["diesel/postgres", "diesel_infer_schema/postgres"]
-sqlite = ["diesel/sqlite", "diesel_infer_schema/sqlite"]
+postgres = ["diesel/postgres"]
+sqlite = ["diesel/sqlite"]
 
 [dependencies]
 lazy_static = "1.0"
