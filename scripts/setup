@@ -4,15 +4,23 @@ set -euo pipefail
 # Uncomment the line below if you would like to diagnose what commands are being done on your behalf.
 # set -x
 
-if [ -f .env ]; then
- source .env
+DATABASE_URL="${DATABASE_URL:-""}"
+
+if [ -z "${DATABASE_URL}" ]; then
+  if [ -f .env ]; then
+    source .env
+  fi
+fi
+
+if [ -z "${DATABASE_URL}" ]; then
+  echo "DATABASE_URL not set." >&2
+  exit 1
 fi
 
 DEFAULT_POSTGRES_HOST="localhost"
 DEFAULT_POSTGRES_USER=""
 DEFAULT_POSTGRES_PASSWORD=""
 DEFAULT_POSTGRES_DATABASE="rustodon"
-DATABASE_URL="${DATABASE_URL:-""}"
 
 infoMsg() {
   echo "[*] ${1}"
@@ -89,10 +97,12 @@ fi
 infoMsg "Running migrations..."
 if [[ "$DATABASE_URL" = "postgres"* ]]; then
   infoMsg "Detected Postgres..."
-  diesel database setup --migration-dir=migrations
+  diesel database setup --config-file=diesel.postgres.toml --migration-dir=migrations
+  diesel print-schema --config-file=diesel.postgres.toml > database/src/schema.rs
 else
   infoMsg "Assuming SQLite..."
-  diesel database setup --migration-dir=migrations_sqlite
+  diesel database setup --config-file=diesel.sqlite.toml --migration-dir=migrations_sqlite
+  diesel print-schema --config-file=diesel.sqlite.toml > database/src/schema.rs
 fi
 
 if [ ! -f "Rocket.toml" ]; then

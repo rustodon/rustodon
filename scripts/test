@@ -20,7 +20,7 @@ if [ ! -f "database/src/schema.rs" ]; then
 fi
 
 if [[ "${DATABASE_URL}" = "postgres"* ]]; then
-  exec cargo run --color always --no-default-features --features="postgres"
+  exec cargo test --all --no-default-features --features="postgres"
 else
-  exec cargo run --color always --no-default-features --features="sqlite"
+  exec cargo test --all --no-default-features --features="sqlite"
 fi
