@@ -33,7 +33,7 @@ before_script:
 
 script:
   - cargo fmt -- --write-mode=diff
-  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release; else cargo build; fi
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release --no-default-features --features="${FEATURES}"; else cargo build --no-default-features --features="${FEATURES}"; fi
   - scripts/test
 
 after_success: ./scripts/after_success.sh
