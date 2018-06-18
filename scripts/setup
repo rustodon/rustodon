@@ -97,12 +97,12 @@ fi
 infoMsg "Running migrations..."
 if [[ "$DATABASE_URL" = "postgres"* ]]; then
   infoMsg "Detected Postgres..."
-  diesel database setup --config-file=diesel.postgres.toml --migration-dir=migrations
-  diesel print-schema --config-file=diesel.postgres.toml > database/src/schema.rs
+  diesel database setup --migration-dir=migrations
+  diesel print-schema > database/src/schema.rs
 else
   infoMsg "Assuming SQLite..."
-  diesel database setup --config-file=diesel.sqlite.toml --migration-dir=migrations_sqlite
-  diesel print-schema --config-file=diesel.sqlite.toml > database/src/schema.rs
+  diesel database setup --migration-dir=migrations_sqlite
+  diesel print-schema > database/src/schema.rs
 fi
 
 if [ ! -f "Rocket.toml" ]; then
