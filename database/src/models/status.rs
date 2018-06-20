@@ -69,6 +69,15 @@ impl Status {
             .optional()
     }
 
+    /// Returns the number of local statuses
+    pub fn count_local(db_conn: &Connection) -> QueryResult<i64> {
+        use schema::statuses::dsl::{statuses, uri};
+        statuses
+            .filter(uri.is_null()) // is local status
+            .count()
+            .get_result(&**db_conn)
+    }
+
     /// Returns a human-readble description of the age of this status.
     pub fn humanized_age(&self) -> String {
         self.created_at.humanize()
