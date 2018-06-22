@@ -1,0 +1,25 @@
+<div class="status">
+    <header>
+        {%- if link %}
+            {% match status.status_uri(account.as_ref()) %}
+            {% when Some with (uri) %}
+                <a href="{{uri}}"><span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span></a>
+            {% when None %}
+                <span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span>
+            {% endmatch %}
+        {%- else -%}
+            <span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span>
+        {% endif -%}
+    </header>
+    <div>
+        {% match status.content_warning %}
+        {% when Some with (cw) %}
+            <span>{{cw}}</span>
+            <input class="collapse--toggle" id="collapsible-{{status.id}}" type="checkbox" />
+            <label class="collapse--lbl-toggle" for="collapsible-{{status.id}}" tabindex="0">Toggle CW</label>
+            <div class="content collapse">{{status.text}}</div>
+        {% when None %}
+            <div class="content">{{status.text}}</div>
+        {% endmatch %}
+    </div>
+</div>

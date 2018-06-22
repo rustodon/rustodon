@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{account_to_show.display_name_or_username()}}{% endblock %}
+
+{% block content %}
+    <div class="h-card">
+        <header>
+            <span class="p-name">{{account_to_show.display_name_or_username()}}</span>
+            <span class="fq-username">
+                <a class="url u-uid" href="{{account_to_show.get_uri()}}">{{account_to_show.fully_qualified_username()}}</a>
+            </span>
+        </header>
+        <div class="p-note">
+            {% match account_to_show.transformed_bio(connection.as_ref()) %}
+            {% when Some with (raw_bio) %}
+                <div>{{raw_bio}}</div>
+            {% when None %}
+                <p></p>
+            {% endmatch %}
+        </div>
+        {% match account %}
+        {% when Some with (current_account) %}
+            {% if current_account.id == account_to_show.id -%}
+                <div class="action-edit-note">
+                    ( <a href="/settings/profile">edit</a> )
+                </div>
+            {%- endif %}
+        {% when None %}
+        {% endmatch %}
+    </div>
+    <section class="statuses">
+        <header>
+            <h2>Posts</h2>
+        </header>
+        {% for status in statuses %}
+            {% let account = account_to_show.as_ref() %}
+            {% include "_status.html" %}
+        {% endfor %}
+        <nav class="pagination">
+            {% match prev_page_id %}
+            {% when Some with (backlink) %}
+                <a href="?max_id={{backlink}}" rel="next">older posts</a>
+            {% when None %}
+            {% endmatch %}
+        </nav>
+    </section>
+{% endblock %}

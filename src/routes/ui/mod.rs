@@ -1,16 +1,17 @@
+use askama::Template;
 use chrono::offset::Utc;
-use maud::{html, Markup, PreEscaped};
+use db::{self, id_generator};
+use db::models::{Account, NewStatus, Status, User};
+use error::Perhaps;
+use failure::Error;
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{NamedFile, Redirect};
 use rocket::Route;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
-
-use db::models::{Account, NewStatus, Status, User};
-use db::{self, id_generator};
-use error::Perhaps;
-use failure::Error;
-use templates::Page;
 use transform;
+
+use GIT_REV;
 
 mod auth;
 
@@ -31,6 +32,66 @@ pub fn routes() -> Vec<Route> {
         static_files
     ]
 }
+
+#[derive(Template)]
+#[template(path = "base.html")]
+pub struct BaseTemplate<'a> {
+    revision: &'a str,
+    flash: Option<FlashMessage>,
+}
+
+#[derive(FromForm, Debug)]
+pub struct UserPageParams {
+    max_id: Option<i64>,
+}
+
+#[derive(Template)]
+#[template(path = "status.html")]
+pub struct StatusTemplate<'a> {
+    status: Status,
+    link: bool,
+    account: Account,
+    _parent: BaseTemplate<'a>,
+}
+
+#[derive(Template)]
+#[template(path = "user.html")]
+pub struct UserTemplate<'a> {
+    account_to_show: Account,
+    account: Option<Account>,
+    statuses: Vec<Status>,
+    prev_page_id: Option<i64>,
+    connection: db::Connection,
+    link: bool,
+    _parent: BaseTemplate<'a>,
+}
+
+#[derive(Template)]
+#[template(path = "edit_profile.html")]
+pub struct EditProfileTemplate<'a> {
+    account: Account,
+    _parent: BaseTemplate<'a>,
+}
+
+#[derive(Template)]
+#[template(path = "signin.html")]
+pub struct SigninTemplate<'a> {
+    _parent: BaseTemplate<'a>,
+}
+
+#[derive(Template)]
+#[template(path = "signup.html")]
+pub struct SignupTemplate<'a> {
+    _parent: BaseTemplate<'a>,
+}
+
+#[derive(Template)]
+#[template(path = "index.html")]
+pub struct IndexTemplate<'a> {
+    account: Option<Account>,
+    _parent: BaseTemplate<'a>,
+}
+
 
 #[derive(Debug, FromForm)]
 pub struct CreateStatusForm {
@@ -64,43 +125,8 @@ pub fn create_status(
     Ok(Redirect::to("/"))
 }
 
-fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Result<Markup, Error> {
-    let meta_line = html !{
-        span {
-            ("published: ")
-            time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
-        }
-    };
-
-    let rendered = html! {
-        div.status {
-            header {
-                @if link {
-                    a href=(status.get_uri(db_conn)?) (meta_line)
-                } @else {
-                    (meta_line)
-                }
-            }
-            div {
-                @if let Some(cw) = &status.content_warning {
-                    @let collapse_id = format!("collapsible-{}", status.id);
-
-                    span (cw)
-                    input.collapse--toggle id=(collapse_id) type="checkbox";
-                    label.collapse--lbl-toggle for=(collapse_id) tabindex="0" { "Toggle CW" }
-                    div.content.collapse--content (status.text)
-                } @else {
-                    div.content (status.text)
-                }
-            }
-        }
-    };
-
-    Ok(rendered)
-}
-
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
-pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) -> Perhaps<Page> {
+pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) -> Perhaps<StatusTemplate<'static>> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
     let status = try_resopt!(Status::by_account_and_id(
         &db_conn,
@@ -108,27 +134,35 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
         status_id as i64
     ));
 
-    let rendered = Page::new()
-        .title(format!(
-            "@{user}: {id}",
-            user = account.username,
-            id = status.id
-        ))
-        .content(render_status(&db_conn, &status, false)?);
-
-    Ok(Some(rendered))
+Ok(Some(StatusTemplate {
+    status: status,
+    link: false,
+    account: account,
+    _parent: BaseTemplate { flash: None, revision: GIT_REV },
+}))
 }
 
-#[derive(FromForm, Debug)]
-pub struct UserPageParams {
-    max_id: Option<i64>,
+trait HasBio {
+    fn transformed_bio<'a>(&'a self, connection: &db::Connection) -> Option<String>;
+}
+impl HasBio for Account {
+    fn transformed_bio<'a>(&'a self, connection: &db::Connection) -> Option<String> {
+        if let Some(raw_bio) = self.summary.as_ref().map(String::as_str) {
+            match transform::bio(raw_bio, connection) {
+                Ok(transformed) => Some(transformed),
+                Err(_) => None
+            }
+        } else {
+            None
+        }
+    }
 }
 
 // This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
 // If you don't like this, please complain over there.
 #[get("/users/<username>", format = "text/html")]
-pub fn user_page(username: String, db_conn: db::Connection, user: Option<User>) -> Perhaps<Page> {
-    user_page_paginated(username, UserPageParams { max_id: None }, db_conn, user)
+pub fn user_page(username: String, db_conn: db::Connection, account: Option<Account>) -> Perhaps<UserTemplate<'static>> {
+    user_page_paginated(username, UserPageParams { max_id: None }, db_conn, account)
 }
 
 #[get("/users/<username>?<params>", format = "text/html")]
@@ -136,78 +170,47 @@ pub fn user_page_paginated(
     username: String,
     params: UserPageParams,
     db_conn: db::Connection,
-    user: Option<User>,
-) -> Perhaps<Page> {
-    let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
-    let statuses: Vec<Status> = account.statuses_before_id(&db_conn, params.max_id, 10)?;
-
-    let rendered = Page::new()
-        .title(format!("@{user}", user = account.username))
-        .content(html! {
-            div.h-card {
-                header {
-                    span.p-name (account.display_name.as_ref().unwrap_or(&account.username))
-
-                    span.fq-username {
-                        a.url.u-uid href=(account.get_uri()) (account.fully_qualified_username())
-                    }
-                }
-
-                div.p-note {
-                    @if let Some(raw_bio) = account.summary.as_ref().map(String::as_str)
-                    {
-                        (PreEscaped(transform::bio(raw_bio, &db_conn)?))
-                    } @else {
-                        p {}
-                    }
-                }
-
-                @if let Some(user) = user {
-                    @if user.get_account(&db_conn)? == account {
-                        div.action-edit-note {
-                            "(" a href="/settings/profile" "edit" ")"
-                        }
-                    }
-                }
-            }
-
-            section.statuses {
-                header h2 "Posts"
-
-                @for status in &statuses {
-                    (render_status(&db_conn, status, true)?)
-                }
-
-                nav.pagination {
-                    @if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
-                        @let bounds = account.status_id_bounds(&db_conn)?;
-                        // unwrap is safe since we already know we have statuses
-                        @if prev_page_max_id > bounds.unwrap().0 {
-                            a href=(format!("?max_id={}", prev_page_max_id)) rel="next" "⇐ older posts"
-                        }
-                    }
-                }
-            }
-        });
-
-    Ok(Some(rendered))
+    account: Option<Account>,
+) -> Perhaps<UserTemplate<'static>> {
+    let account_to_show = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
+    let statuses: Vec<Status> = {
+        let a = &account_to_show;
+        a.statuses_before_id(&db_conn, params.max_id, 10)?
+    };
+    let prev_page_id = if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
+        let bounds = account_to_show.status_id_bounds(&db_conn)?;
+        // unwrap is safe since we already know we have statuses
+        if prev_page_max_id > bounds.unwrap().0 {
+            Some(prev_page_max_id)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    Ok(Some(UserTemplate {
+        account_to_show: account_to_show,
+        account: account,
+        statuses: statuses,
+        prev_page_id: prev_page_id,
+        connection: db_conn,
+        link: true,
+        _parent: BaseTemplate {
+            flash: None,
+            revision: GIT_REV,
+        },
+    }))
 }
 
 #[get("/settings/profile")]
-pub fn settings_profile(db_conn: db::Connection, user: User) -> Result<Page, Error> {
-    let account = user.get_account(&db_conn)?;
-
-    let rendered = Page::new().title("edit your profile").content(html! {
-        header h2 "Edit your profile"
-
-        form method="post" action="/settings/profile" {
-            div textarea name="summary" {(account.summary.as_ref().map(String::as_ref).unwrap_or(""))}
-
-            button type="submit" "update"
+pub fn settings_profile(db_conn: db::Connection, user: User) -> Perhaps<EditProfileTemplate<'static>> {
+    Ok(Some(EditProfileTemplate {
+        account: user.get_account(&db_conn)?,
+        _parent: BaseTemplate {
+            flash: None,
+            revision: GIT_REV
         }
-    });
-
-    Ok(rendered)
+    }))
 }
 
 #[derive(Debug, FromForm)]
@@ -235,43 +238,14 @@ pub fn settings_profile_update(
 }
 
 #[get("/")]
-pub fn index(
-    flash: Option<FlashMessage>,
-    user: Option<User>,
-    db_conn: db::Connection,
-) -> Result<Page, Error> {
-    let rendered = Page::new().flash(flash).content(html! {
-        header h1 "Rustodon"
-
-        div {
-            @if let Some(user) = user {
-                @let account = user.get_account(&db_conn)?;
-                div {
-                    a href=(account.get_uri()) "your profile"
-                    " | "
-                    form.inline method="post" action="/auth/sign_out" {
-                        input type="hidden" name="stub"
-                        button.link type="submit" name="submit" "sign out."
-                    }
-                }
-
-                form method="post" action="/statuses/create" {
-                    div input name="content_warning" placeholder="content warning" {}
-                    div textarea name="content" {}
-
-                    button type="submit" "post"
-                }
-            } @else {
-                div {
-                    a href="/auth/sign_in" "sign in!"
-                    " | "
-                    a href="/auth/sign_up" "sign up?"
-                }
-            }
-        }
-    });
-
-    Ok(rendered)
+pub fn index(flash: Option<FlashMessage>, account: Option<Account>) -> IndexTemplate<'static> {
+    IndexTemplate {
+        account: account,
+        _parent: BaseTemplate {
+            flash: flash,
+            revision: GIT_REV
+        },
+    }
 }
 
 #[get("/static/<path..>")]

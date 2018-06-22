@@ -93,3 +93,9 @@ impl Deref for Connection {
         &self.0
     }
 }
+
+impl AsRef<Connection> for Connection {
+    fn as_ref(&self) -> &Connection {
+        &self
+    }
+}

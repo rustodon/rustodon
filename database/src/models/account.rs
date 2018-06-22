@@ -4,8 +4,11 @@ use std::borrow::Cow;
 use Connection;
 use {BASE_URL, DOMAIN};
 
-use models::Status;
+use models::{Status, User};
+use rocket::request::{self, FromRequest, Request};
+
 use schema::accounts;
+
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
@@ -220,5 +223,34 @@ impl Account {
             .set(summary.eq(new_summary))
             .execute(&**db_conn)
             .and(Ok(()))
+    }
+
+    pub fn display_name_or_username<'a>(&'a self) -> &'a String {
+        &self.username
+    }
+}
+
+impl AsRef<Account> for Account {
+    fn as_ref(&self) -> &Account {
+        &self
+    }
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for Account {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<Account, ()> {
+        use rocket::http::Status;
+        use rocket::Outcome;
+
+        let db_conn = request.guard::<Connection>()?;
+        if let Some(user) = request.guard::<User>().succeeded() {
+            match user.get_account(&db_conn) {
+                Ok(account) => Outcome::Success(account),
+                Err(_) => Outcome::Failure((Status::InternalServerError, ())),
+            }
+        } else {
+            Outcome::Forward(())
+        }
     }
 }

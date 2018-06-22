@@ -11,7 +11,7 @@ extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
-extern crate maud;
+extern crate maud_htmlescape;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
@@ -26,7 +26,6 @@ extern crate validator;
 extern crate validator_derive;
 #[macro_use]
 extern crate maplit;
-extern crate maud_htmlescape;
 extern crate posticle;
 extern crate regex;
 
@@ -36,11 +35,13 @@ extern crate rustodon_database as db;
 mod error;
 mod activitypub;
 mod routes;
-mod templates;
 mod transform;
 
 use dotenv::dotenv;
 use std::env;
+
+#[macro_use]
+extern crate askama;
 
 lazy_static! {
     pub static ref BASE_URL: String = format!(
