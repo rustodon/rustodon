@@ -9,7 +9,6 @@ use rocket::request::{self, FromRequest, Request};
 
 use schema::accounts;
 
-
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
 /// A uri of None implies a local account.

@@ -1,6 +1,6 @@
-use db::{self, id_generator, DieselConnection};
 use db::models::{NewAccount, NewUser, User};
 use db::validators;
+use db::{self, id_generator, DieselConnection};
 use failure::Error;
 use itertools::Itertools;
 use rocket::http::{Cookie, Cookies};
@@ -16,9 +16,9 @@ use GIT_REV;
 pub fn signin_get(flash: Option<FlashMessage>) -> SigninTemplate<'static> {
     SigninTemplate {
         _parent: BaseTemplate {
-            flash: flash,
-            revision: GIT_REV
-        }
+            flash:    flash,
+            revision: GIT_REV,
+        },
     }
 }
 
@@ -84,9 +84,9 @@ pub struct SignupForm {
 pub fn signup_get(flash: Option<FlashMessage>) -> SignupTemplate<'static> {
     SignupTemplate {
         _parent: BaseTemplate {
-            flash: flash,
-            revision: GIT_REV
-        }
+            flash:    flash,
+            revision: GIT_REV,
+        },
     }
 }
 
@@ -102,8 +102,7 @@ pub fn signup_post(
 
         // concatenate the error descriptions, with commas between them.
         // TODO: make this less ugly :(
-        let error_desc = errs
-            .iter()
+        let error_desc = errs.iter()
             .flat_map(|(_, errs)| errs)
             .map(|e| {
                 let msg = e.message.to_owned();

@@ -86,14 +86,14 @@ impl Status {
     pub fn status_uri<'a, 'b>(&'a self, account: &'b Account) -> Option<Cow<'a, str>> {
         match self.uri.as_ref().map(|x| String::as_str(x).into()) {
             Some(x) => Some(x),
-            None => {
-                Some(format!(
+            None => Some(
+                format!(
                     "{base}/users/{user}/statuses/{id}",
                     base = BASE_URL.as_str(),
                     user = account.username,
                     id = self.id
-                ).into())
-            }
+                ).into(),
+            ),
         }
     }
 }

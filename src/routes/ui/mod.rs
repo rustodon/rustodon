@@ -1,7 +1,7 @@
 use askama::Template;
 use chrono::offset::Utc;
-use db::{self, id_generator};
 use db::models::{Account, NewStatus, Status, User};
+use db::{self, id_generator};
 use error::Perhaps;
 use failure::Error;
 use rocket::request::{FlashMessage, Form};
@@ -37,7 +37,7 @@ pub fn routes() -> Vec<Route> {
 #[template(path = "base.html")]
 pub struct BaseTemplate<'a> {
     revision: &'a str,
-    flash: Option<FlashMessage>,
+    flash:    Option<FlashMessage>,
 }
 
 #[derive(FromForm, Debug)]
@@ -48,8 +48,8 @@ pub struct UserPageParams {
 #[derive(Template)]
 #[template(path = "status.html")]
 pub struct StatusTemplate<'a> {
-    status: Status,
-    link: bool,
+    status:  Status,
+    link:    bool,
     account: Account,
     _parent: BaseTemplate<'a>,
 }
@@ -92,7 +92,6 @@ pub struct IndexTemplate<'a> {
     _parent: BaseTemplate<'a>,
 }
 
-
 #[derive(Debug, FromForm)]
 pub struct CreateStatusForm {
     content: String,
@@ -126,7 +125,11 @@ pub fn create_status(
 }
 
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
-pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) -> Perhaps<StatusTemplate<'static>> {
+pub fn status_page(
+    username: String,
+    status_id: u64,
+    db_conn: db::Connection,
+) -> Perhaps<StatusTemplate<'static>> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
     let status = try_resopt!(Status::by_account_and_id(
         &db_conn,
@@ -134,12 +137,15 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
         status_id as i64
     ));
 
-Ok(Some(StatusTemplate {
-    status: status,
-    link: false,
-    account: account,
-    _parent: BaseTemplate { flash: None, revision: GIT_REV },
-}))
+    Ok(Some(StatusTemplate {
+        status:  status,
+        link:    false,
+        account: account,
+        _parent: BaseTemplate {
+            flash:    None,
+            revision: GIT_REV,
+        },
+    }))
 }
 
 trait HasBio {
@@ -150,7 +156,7 @@ impl HasBio for Account {
         if let Some(raw_bio) = self.summary.as_ref().map(String::as_str) {
             match transform::bio(raw_bio, connection) {
                 Ok(transformed) => Some(transformed),
-                Err(_) => None
+                Err(_) => None,
             }
         } else {
             None
@@ -161,7 +167,11 @@ impl HasBio for Account {
 // This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
 // If you don't like this, please complain over there.
 #[get("/users/<username>", format = "text/html")]
-pub fn user_page(username: String, db_conn: db::Connection, account: Option<Account>) -> Perhaps<UserTemplate<'static>> {
+pub fn user_page(
+    username: String,
+    db_conn: db::Connection,
+    account: Option<Account>,
+) -> Perhaps<UserTemplate<'static>> {
     user_page_paginated(username, UserPageParams { max_id: None }, db_conn, account)
 }
 
@@ -196,20 +206,23 @@ pub fn user_page_paginated(
         connection: db_conn,
         link: true,
         _parent: BaseTemplate {
-            flash: None,
+            flash:    None,
             revision: GIT_REV,
         },
     }))
 }
 
 #[get("/settings/profile")]
-pub fn settings_profile(db_conn: db::Connection, user: User) -> Perhaps<EditProfileTemplate<'static>> {
+pub fn settings_profile(
+    db_conn: db::Connection,
+    user: User,
+) -> Perhaps<EditProfileTemplate<'static>> {
     Ok(Some(EditProfileTemplate {
         account: user.get_account(&db_conn)?,
         _parent: BaseTemplate {
-            flash: None,
-            revision: GIT_REV
-        }
+            flash:    None,
+            revision: GIT_REV,
+        },
     }))
 }
 
@@ -242,8 +255,8 @@ pub fn index(flash: Option<FlashMessage>, account: Option<Account>) -> IndexTemp
     IndexTemplate {
         account: account,
         _parent: BaseTemplate {
-            flash: flash,
-            revision: GIT_REV
+            flash:    flash,
+            revision: GIT_REV,
         },
     }
 }
