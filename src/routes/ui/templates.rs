@@ -16,7 +16,6 @@ pub struct BaseTemplate<'a> {
 #[template(path = "status.html")]
 pub struct StatusTemplate<'a> {
     pub status:  Status,
-    pub link:    bool,
     pub account: Account,
     pub _parent: BaseTemplate<'a>,
 }
@@ -29,7 +28,6 @@ pub struct UserTemplate<'a> {
     pub statuses: Vec<Status>,
     pub prev_page_id: Option<i64>,
     pub connection: db::Connection,
-    pub link: bool,
     pub _parent: BaseTemplate<'a>,
 }
 

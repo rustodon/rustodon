@@ -86,7 +86,6 @@ pub fn status_page(
 
     Ok(Some(StatusTemplate {
         status:  status,
-        link:    false,
         account: account,
         _parent: BaseTemplate {
             flash:    None,
@@ -135,7 +134,6 @@ pub fn user_page_paginated(
         statuses: statuses,
         prev_page_id: prev_page_id,
         connection: db_conn,
-        link: true,
         _parent: BaseTemplate {
             flash:    None,
             revision: GIT_REV,

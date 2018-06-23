@@ -2,5 +2,20 @@
 {% block title %}@{{account.username}}: {{status.id}}{% endblock %}
 
 {% block content %}
-    {% include "_status.html" %}
+    <div class="status">
+        <header>
+            <span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span>
+        </header>
+        <div>
+            {% match status.content_warning %}
+            {% when Some with (cw) %}
+                <span>{{cw}}</span>
+                <input class="collapse--toggle" id="collapsible-{{status.id}}" type="checkbox" />
+                <label class="collapse--lbl-toggle" for="collapsible-{{status.id}}" tabindex="0">Toggle CW</label>
+                <div class="content collapse">{{status.text}}</div>
+            {% when None %}
+                <div class="content">{{status.text}}</div>
+            {% endmatch %}
+        </div>
+    </div>
 {% endblock %}
