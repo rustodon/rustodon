@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+
+DATABASE_URL="${DATABASE_URL:-""}"
+
+if [ -z "${DATABASE_URL}" ]; then
+  if [ -f .env ]; then
+    source .env
+  fi
+fi
+
+if [ -z "${DATABASE_URL}" ]; then
+  echo "DATABASE_URL not set." >&2
+  exit 1
+fi
+
+if [ ! -f "database/src/schema.rs" ]; then
+  echo "Database schema does not exist, run scripts/setup before attempting to run the tests." >&2
+  exit 1
+fi
+
+if [[ "${DATABASE_URL}" = "postgres"* ]]; then
+  exec cargo test --all --no-default-features --features="postgres"
+else
+  exec cargo test --all --no-default-features --features="sqlite"
+fi

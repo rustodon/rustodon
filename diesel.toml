@@ -1,0 +1,3 @@
+[print_schema]
+file="database/src/schema.rs"
+import_types = ["diesel::sql_types::*"]

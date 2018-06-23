@@ -88,6 +88,8 @@ impl Render for Page {
                         "."
                     }
                 }
+
+                script src="/static/js/accessibility.js" {}
             }
         }
     }

@@ -1,48 +1,55 @@
 # Rustodon
 
-[![Build Status](https://travis-ci.org/rustodon/rustodon.svg?branch=master)](https://travis-ci.org/rustodon/rustodon)
+[![Build Status](https://travis-ci.org/rustodon/rustodon.svg?branch=master)](https://travis-ci.org/rustodon/rustodon) [![dependency status](https://deps.rs/repo/github/rustodon/rustodon/status.svg)](https://deps.rs/repo/github/rustodon/rustodon)
 
 Rustodon is an [Mastodon](https://joinmastodon.org)-compatible _federated social microblogging server_. It utilizes [_ActivityPub_](http://activitypub.rocks) to _federate_ with a constellation of _other servers_, connecting their communities with yours.
 
 ## Current Status
-Don't use this in production. Don't use it in testing, either. It currently implements nothing more than a bare framework to allow user creation and outwards user federation.
+**You probably don't want to use this, yet**. Federation is WIP, UI is WIP, we don't have timelines, etc.
+
+We currently have authentication, users, profiles, statuses, content warnings, actor and status visibility as both HTML and AS2.
+We **do not** have timelines, status delivery, inboxes, outboxes, notifcations, mentions, post privacy, or account privacy.
+
+If you want to work on making Rustodon feature-complete, check out the [issue tracker](https://github.com/rustodon/rustodon/issues)! We're not just looking for Rust devs, either; CSS witches, brainstormers, and documentation enthusiasts are highly welcome :smiley:
 
 ## Hacking on the code
-Rustodon depends on libraries (looking at you, Diesel and Rocket) that require bleeding-edge nightly rustc features. Ideally, install Rust via [`rustup`](https://www.rustup.rs/) and set an override in the Rustodon directory with
-```
-$ rustup override set nightly
-```
 
-We use [Postgres](https://www.postgresql.org/) for data storage, so get a Postgres instance running, create a user, and set an environment variable `DATABASE_URL` to a Postgres URI, like so:
-```
-$ export DATABASE_URL=postgres://username:password@localhost/rustodon
-```
+You will need to install several base dependencies:
 
-This environment variable could alternatively be added to the `.env` file (you can use `git update-index --assume-unchanged .env` to keep Git from telling you `.env` has been modified. Please don't commit _your_ environment to the repo :p).
+1. [Rust](https://www.rust-lang.org/en-US/install.html). Make sure you have followed the official instructions regarding your `PATH` variable.
+   > In the Rust development environment, all tools are installed to the ~/.cargo/bin directory, and this is where you will find the Rust toolchain, including rustc, cargo, and rustup.
+   > Accordingly, it is customary for Rust developers to include this directory in their PATH environment variable. During installation rustup will attempt to configure the PATH. Because of differences between platforms, command shells, and bugs in rustup, the modifications to PATH may not take effect until the console is restarted, or the user is logged out, or it may not succeed at all.
+   > If, after installation, running rustc --version in the console fails, this is the most likely reason. 
+1. [Postgres](https://www.postgresql.org/download/). If you don't have a Postgres instance available, you can use the supplied [docker-compose](https://github.com/docker/compose/) configuration file to start an instance:
+   ```
+   docker-compose up -d
+   ```
+   The instance will be started in the background. The default username _and password_ is `rustodon`. The corresponding connection string would be:
+   ```
+   export DATABASE_URL=postgres://rustodon:rustodon@localhost/rustodon
+   ```
+   On some operating systems, you may need to separately install the Postgres client library:
+   * Debian/Ubuntu/etc: `apt install libpq-dev`
+   * Arch: `pacman -S postgresql-libs`
 
-On some operating systems, you may need to separately install the Postgres client library, as well as the MySQL library (even if we won't ever use it):
+Once you have installed these base components, you should run `scripts/setup` to install the remainder of the application dependencies.
 
-* Debian/Ubuntu: `apt install libpq-dev libmysqlclient-dev`
+### Running the application
 
-Sass/SCSS is used to make stylesheeting a bit nicer, so you'll have to install Ruby via your favourite method and `gem install sass`.
+To run the application once you have installed all dependencies, you should run either:
 
-To set up a new database in Postgres and run all the migrations, first install the Diesel CLI:
-```
-$ cargo install diesel_cli
-```
-
-Cargo, by default, will install any package binaries into `~/.cargo/bin`. We will assume you have added that directory to your `PATH` environment variable.
-
-Then, run the database setup:
-```
-$ diesel database setup
-```
-
-You can now launch Rustodon by running
-```
-$ cargo run
-```
+* `cargo run`: Runs just the server
+* `bundle exec foreman start`: Runs the server and additional helper processes
 
 Rustodon will launch on `http://localhost:8000` by default; this can be overriden by setting [certain environment variables](https://rocket.rs/guide/configuration/#environment-variables).
 
-Federation requires that the application know where it's hosted, and (thanks to Webfinger) also forces us to serve over HTTPS. To get around this in a development environment, you can use [ngrok](https://ngrok.com/) or a similar service. To make sure the app knows where it's serving from (used to compute, eg, AS2 UIDs), remember to set `DOMAIN` in `.env` (again, the `--assume-unchanged` trick is very useful).
+Federation requires that the application know where it's hosted, and (thanks to Webfinger) also forces us to serve over HTTPS. To get around this in a development environment, you can use [ngrok](https://ngrok.com/) or a similar service. The app knows where it's serving from (used to compute, eg, AS2 UIDs), so make sure to set `DOMAIN` in `.env`.
+
+### Running database migrations
+
+`scripts/setup`
+
+### Running the tests
+
+`scripts/test`
+

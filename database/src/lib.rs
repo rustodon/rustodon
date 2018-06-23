@@ -1,10 +1,10 @@
 #![recursion_limit = "128"]
 
 extern crate chrono;
+extern crate chrono_humanize;
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate diesel_infer_schema;
+extern crate flaken;
 #[macro_use]
 extern crate lazy_static;
 extern crate pwhash;
@@ -14,10 +14,14 @@ extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
+#[macro_use]
+extern crate maplit;
 
-use std::ops::Deref;
-use std::env;
 use r2d2_diesel::ConnectionManager;
+use std::env;
+use std::ops::Deref;
+
+pub use diesel::connection::Connection as DieselConnection;
 
 #[cfg(feature = "sqlite")]
 use diesel::sqlite::SqliteConnection;
@@ -25,13 +29,18 @@ use diesel::sqlite::SqliteConnection;
 #[cfg(feature = "postgres")]
 use diesel::pg::PgConnection;
 
+use rocket::http::Status;
+
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
-use rocket::http::Status;
-pub use diesel::connection::Connection as DieselConnection;
 
-pub mod schema;
+use chrono_humanize::Humanize;
+
+pub mod datetime;
+pub mod idgen;
 pub mod models;
+pub mod schema;
+pub mod validators;
 
 #[cfg(all(feature = "sqlite", feature = "postgres"))]
 compile_error!("sqlite and postgres features cannot be simultaneously selected");
@@ -42,9 +51,14 @@ type DbConnection = SqliteConnection;
 #[cfg(all(not(feature = "sqlite"), feature = "postgres"))]
 type DbConnection = PgConnection;
 
+pub use idgen::id_generator;
+
 // TODO: gross hack. find a nicer way to pass these in?
 lazy_static! {
-    pub static ref BASE_URL: String = format!("https://{}", env::var("DOMAIN").expect("DOMAIN must be set"));
+    pub static ref BASE_URL: String = format!(
+        "https://{}",
+        env::var("DOMAIN").expect("DOMAIN must be set")
+    );
     pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
 }
 
