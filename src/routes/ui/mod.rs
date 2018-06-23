@@ -1,4 +1,3 @@
-use askama::Template;
 use chrono::offset::Utc;
 use db::models::{Account, NewStatus, Status, User};
 use db::{self, id_generator};
@@ -7,13 +6,15 @@ use failure::Error;
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{NamedFile, Redirect};
 use rocket::Route;
-use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use transform;
 
 use GIT_REV;
 
 mod auth;
+mod templates;
+mod view_helpers;
+
+use self::templates::*;
 
 pub fn routes() -> Vec<Route> {
     routes![
@@ -33,63 +34,9 @@ pub fn routes() -> Vec<Route> {
     ]
 }
 
-#[derive(Template)]
-#[template(path = "base.html")]
-pub struct BaseTemplate<'a> {
-    revision: &'a str,
-    flash:    Option<FlashMessage>,
-}
-
 #[derive(FromForm, Debug)]
 pub struct UserPageParams {
     max_id: Option<i64>,
-}
-
-#[derive(Template)]
-#[template(path = "status.html")]
-pub struct StatusTemplate<'a> {
-    status:  Status,
-    link:    bool,
-    account: Account,
-    _parent: BaseTemplate<'a>,
-}
-
-#[derive(Template)]
-#[template(path = "user.html")]
-pub struct UserTemplate<'a> {
-    account_to_show: Account,
-    account: Option<Account>,
-    statuses: Vec<Status>,
-    prev_page_id: Option<i64>,
-    connection: db::Connection,
-    link: bool,
-    _parent: BaseTemplate<'a>,
-}
-
-#[derive(Template)]
-#[template(path = "edit_profile.html")]
-pub struct EditProfileTemplate<'a> {
-    account: Account,
-    _parent: BaseTemplate<'a>,
-}
-
-#[derive(Template)]
-#[template(path = "signin.html")]
-pub struct SigninTemplate<'a> {
-    _parent: BaseTemplate<'a>,
-}
-
-#[derive(Template)]
-#[template(path = "signup.html")]
-pub struct SignupTemplate<'a> {
-    _parent: BaseTemplate<'a>,
-}
-
-#[derive(Template)]
-#[template(path = "index.html")]
-pub struct IndexTemplate<'a> {
-    account: Option<Account>,
-    _parent: BaseTemplate<'a>,
 }
 
 #[derive(Debug, FromForm)]
@@ -146,22 +93,6 @@ pub fn status_page(
             revision: GIT_REV,
         },
     }))
-}
-
-trait HasBio {
-    fn transformed_bio<'a>(&'a self, connection: &db::Connection) -> Option<String>;
-}
-impl HasBio for Account {
-    fn transformed_bio<'a>(&'a self, connection: &db::Connection) -> Option<String> {
-        if let Some(raw_bio) = self.summary.as_ref().map(String::as_str) {
-            match transform::bio(raw_bio, connection) {
-                Ok(transformed) => Some(transformed),
-                Err(_) => None,
-            }
-        } else {
-            None
-        }
-    }
 }
 
 // This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
