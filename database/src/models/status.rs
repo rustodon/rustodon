@@ -84,11 +84,11 @@ impl Status {
         match self.uri.as_ref().map(|x| String::as_str(x).into()) {
             Some(x) => x,
             None => format!(
-                    "{base}/users/{user}/statuses/{id}",
-                    base = BASE_URL.as_str(),
-                    user = account.username,
-                    id = self.id
-                ).into(),
+                "{base}/users/{user}/statuses/{id}",
+                base = BASE_URL.as_str(),
+                user = account.username,
+                id = self.id
+            ).into(),
         }
     }
 }

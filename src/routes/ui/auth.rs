@@ -102,8 +102,7 @@ pub fn signup_post(
 
         // concatenate the error descriptions, with commas between them.
         // TODO: make this less ugly :(
-        let error_desc = errs
-            .iter()
+        let error_desc = errs.iter()
             .flat_map(|(_, errs)| errs)
             .map(|e| {
                 let msg = e.message.to_owned();
