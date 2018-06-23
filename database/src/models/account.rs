@@ -224,8 +224,8 @@ impl Account {
             .and(Ok(()))
     }
 
-    pub fn display_name_or_username<'a>(&'a self) -> &'a String {
-        &self.username
+    pub fn display_name_or_username(&self) -> &str {
+        self.display_name.as_ref().unwrap_or(&self.username)
     }
 }
 
