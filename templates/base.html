@@ -10,14 +10,16 @@
 </head>
 
 <body>
-    {% match flash %}
-    {% when Some with (flashmessage) %}
-        <div class="flash {{flashmessage.name()}}">{{flashmessage.msg()}}</div>
-    {% when None %}
-    {% endmatch %}
+    <main>
+        {% match flash %}
+        {% when Some with (flashmessage) %}
+            <div class="flash {{flashmessage.name()}}">{{flashmessage.msg()}}</div>
+        {% when None %}
+        {% endmatch %}
 
-    {% block content %}
-    {% endblock %}
+        {% block content %}
+        {% endblock %}
+    </main>
 
     <footer>
         <div>
