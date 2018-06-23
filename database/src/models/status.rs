@@ -77,23 +77,18 @@ impl Status {
     /// Returns a URI to the ActivityPub object of this status.
     pub fn get_uri<'a>(&'a self, db_conn: &'a Connection) -> QueryResult<Cow<'a, str>> {
         let account = self.account(db_conn)?;
-        match self.status_uri(&account) {
-            Some(x) => Ok(x),
-            None => Err(diesel::NotFound),
-        }
+        Ok(self.status_uri(&account))
     }
 
-    pub fn status_uri<'a, 'b>(&'a self, account: &'b Account) -> Option<Cow<'a, str>> {
+    pub fn status_uri<'a>(&'a self, account: &Account) -> Cow<'a, str> {
         match self.uri.as_ref().map(|x| String::as_str(x).into()) {
-            Some(x) => Some(x),
-            None => Some(
-                format!(
+            Some(x) => x,
+            None => format!(
                     "{base}/users/{user}/statuses/{id}",
                     base = BASE_URL.as_str(),
                     user = account.username,
                     id = self.id
                 ).into(),
-            ),
         }
     }
 }
