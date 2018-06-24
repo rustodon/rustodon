@@ -113,10 +113,7 @@ pub fn user_page_paginated(
     account: Option<Account>,
 ) -> Perhaps<UserTemplate<'static>> {
     let account_to_show = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
-    let statuses: Vec<Status> = {
-        let a = &account_to_show;
-        a.statuses_before_id(&db_conn, params.max_id, 10)?
-    };
+    let statuses: Vec<Status> = account_to_show.statuses_before_id(&db_conn, params.max_id, 10)?;
     let prev_page_id = if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
         let bounds = account_to_show.status_id_bounds(&db_conn)?;
         // unwrap is safe since we already know we have statuses
