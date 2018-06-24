@@ -9,7 +9,7 @@ macro_rules! HtmlTemplate {
     ($x:tt) => {{
         $x {
             _parent: BaseTemplate {
-                revision: ::GIT_REV,
+                revision: $crate::GIT_REV,
             }
         }
     }};
@@ -18,7 +18,7 @@ macro_rules! HtmlTemplate {
         $x {
             _parent: BaseTemplate {
                 flash: $flash,
-                revision: ::GIT_REV,
+                revision: $crate::GIT_REV,
             }
         }
     }};
@@ -28,7 +28,7 @@ macro_rules! HtmlTemplate {
             $( $y: $z ),*
             ,_parent: BaseTemplate {
                 flash: None,
-                revision: ::GIT_REV,
+                revision: $crate::GIT_REV,
             }
         }
     }};
@@ -37,7 +37,7 @@ macro_rules! HtmlTemplate {
             $( $y: $z ),*
             ,_parent: BaseTemplate {
                 flash: $flash,
-                revision: ::GIT_REV,
+                revision: $crate::GIT_REV,
             }
         }
     }};
