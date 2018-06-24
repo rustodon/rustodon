@@ -44,47 +44,8 @@ macro_rules! HtmlTemplate {
 }
 
 macro_rules! PerhapsHtmlTemplate {
-    ($x:tt) => {{
-        Ok(Some($x {
-            _parent: BaseTemplate {
-                revision: ::GIT_REV,
-            }
-        }))
-    }};
-
-    ($x:tt, $flash: ident) => {{
-        Ok(Some($x {
-            _parent: BaseTemplate {
-                flash: $flash,
-                revision: ::GIT_REV,
-            }
-        }))
-    }};
-
-    ($x:tt, { $( $y:ident : $z:expr ),* }) => {{
-        {
-            let tmpl = $x {
-                $( $y: $z ),*
-                ,_parent: BaseTemplate {
-                    flash: None,
-                    revision: ::GIT_REV,
-                }
-            };
-            Ok(Some(tmpl))
-        }
-    }};
-
-    ($x:tt, $flash: ident, { $( $y:ident : $z:expr ),* }) => {{
-        {
-            let tmpl = $x {
-                $( $y: $z ),*
-                ,_parent: BaseTemplate {
-                    flash: $flash,
-                    revision: ::GIT_REV,
-                }
-            };
-            Ok(Some(tmpl))
-        }
+    ($($x:tt)*) => {{
+        Ok(Some(HtmlTemplate!($($x)*)))
     }};
 }
 
