@@ -5,6 +5,89 @@ use rocket::request::FlashMessage;
 use routes::ui::view_helpers::*;
 use std::ops::Deref;
 
+macro_rules! HtmlTemplate {
+    ($x:tt) => {{
+        $x {
+            _parent: BaseTemplate {
+                revision: ::GIT_REV,
+            }
+        }
+    }};
+
+    ($x:tt, $flash: ident) => {{
+        $x {
+            _parent: BaseTemplate {
+                flash: $flash,
+                revision: ::GIT_REV,
+            }
+        }
+    }};
+
+    ($x:tt, { $( $y:ident : $z:expr ),* }) => {{
+        $x {
+            $( $y: $z ),*
+            ,_parent: BaseTemplate {
+                flash: None,
+                revision: ::GIT_REV,
+            }
+        }
+    }};
+    ($x:tt, $flash: ident, { $( $y:ident : $z:expr ),* }) => {{
+        $x {
+            $( $y: $z ),*
+            ,_parent: BaseTemplate {
+                flash: $flash,
+                revision: ::GIT_REV,
+            }
+        }
+    }};
+}
+
+macro_rules! PerhapsHtmlTemplate {
+    ($x:tt) => {{
+        Ok(Some($x {
+            _parent: BaseTemplate {
+                revision: ::GIT_REV,
+            }
+        }))
+    }};
+
+    ($x:tt, $flash: ident) => {{
+        Ok(Some($x {
+            _parent: BaseTemplate {
+                flash: $flash,
+                revision: ::GIT_REV,
+            }
+        }))
+    }};
+
+    ($x:tt, { $( $y:ident : $z:expr ),* }) => {{
+        {
+            let tmpl = $x {
+                $( $y: $z ),*
+                ,_parent: BaseTemplate {
+                    flash: None,
+                    revision: ::GIT_REV,
+                }
+            };
+            Ok(Some(tmpl))
+        }
+    }};
+
+    ($x:tt, $flash: ident, { $( $y:ident : $z:expr ),* }) => {{
+        {
+            let tmpl = $x {
+                $( $y: $z ),*
+                ,_parent: BaseTemplate {
+                    flash: $flash,
+                    revision: ::GIT_REV,
+                }
+            };
+            Ok(Some(tmpl))
+        }
+    }};
+}
+
 #[derive(Template)]
 #[template(path = "base.html")]
 pub struct BaseTemplate<'a> {

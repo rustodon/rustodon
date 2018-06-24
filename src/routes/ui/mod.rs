@@ -8,10 +8,9 @@ use rocket::response::{NamedFile, Redirect};
 use rocket::Route;
 use std::path::{Path, PathBuf};
 
-use GIT_REV;
-
-mod auth;
+#[macro_use]
 mod templates;
+mod auth;
 mod view_helpers;
 
 use self::templates::*;
@@ -84,14 +83,10 @@ pub fn status_page(
         status_id as i64
     ));
 
-    Ok(Some(StatusTemplate {
+    PerhapsHtmlTemplate!(StatusTemplate, {
         status:  status,
-        account: account,
-        _parent: BaseTemplate {
-            flash:    None,
-            revision: GIT_REV,
-        },
-    }))
+        account: account
+    })
 }
 
 // This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
@@ -125,17 +120,13 @@ pub fn user_page_paginated(
     } else {
         None
     };
-    Ok(Some(UserTemplate {
+    PerhapsHtmlTemplate!(UserTemplate, {
         account_to_show: account_to_show,
         account: account,
         statuses: statuses,
         prev_page_id: prev_page_id,
-        connection: db_conn,
-        _parent: BaseTemplate {
-            flash:    None,
-            revision: GIT_REV,
-        },
-    }))
+        connection: db_conn
+    })
 }
 
 #[get("/settings/profile")]
@@ -143,13 +134,9 @@ pub fn settings_profile(
     db_conn: db::Connection,
     user: User,
 ) -> Perhaps<EditProfileTemplate<'static>> {
-    Ok(Some(EditProfileTemplate {
-        account: user.get_account(&db_conn)?,
-        _parent: BaseTemplate {
-            flash:    None,
-            revision: GIT_REV,
-        },
-    }))
+    PerhapsHtmlTemplate!(EditProfileTemplate, {
+        account: user.get_account(&db_conn)?
+    })
 }
 
 #[derive(Debug, FromForm)]
@@ -178,13 +165,7 @@ pub fn settings_profile_update(
 
 #[get("/")]
 pub fn index(flash: Option<FlashMessage>, account: Option<Account>) -> IndexTemplate<'static> {
-    IndexTemplate {
-        account: account,
-        _parent: BaseTemplate {
-            flash:    flash,
-            revision: GIT_REV,
-        },
-    }
+    HtmlTemplate!(IndexTemplate, flash, { account: account })
 }
 
 #[get("/static/<path..>")]

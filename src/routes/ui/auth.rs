@@ -10,16 +10,9 @@ use routes::ui::templates::{BaseTemplate, SigninTemplate, SignupTemplate};
 use std::borrow::Cow;
 use validator::Validate;
 
-use GIT_REV;
-
 #[get("/auth/sign_in")]
 pub fn signin_get(flash: Option<FlashMessage>) -> SigninTemplate<'static> {
-    SigninTemplate {
-        _parent: BaseTemplate {
-            flash:    flash,
-            revision: GIT_REV,
-        },
-    }
+    HtmlTemplate!(SigninTemplate, flash)
 }
 
 #[derive(Debug, FromForm)]
@@ -82,12 +75,7 @@ pub struct SignupForm {
 
 #[get("/auth/sign_up")]
 pub fn signup_get(flash: Option<FlashMessage>) -> SignupTemplate<'static> {
-    SignupTemplate {
-        _parent: BaseTemplate {
-            flash:    flash,
-            revision: GIT_REV,
-        },
-    }
+    HtmlTemplate!(SignupTemplate, flash)
 }
 
 #[post("/auth/sign_up", data = "<form>")]
