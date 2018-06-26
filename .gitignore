@@ -11,3 +11,5 @@
 static/style.css
 static/style.css.map
 Rocket.toml
+/.bundle
+/vendor
