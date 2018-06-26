@@ -22,7 +22,7 @@
         {% when Some with (current_account) %}
             {% if current_account.id == account_to_show.id -%}
                 <div class="action-edit-note">
-                    ( <a href="/settings/profile">edit</a> )
+                    (<a href="/settings/profile">edit</a>)
                 </div>
             {%- endif %}
         {% when None %}
@@ -44,7 +44,7 @@
                         <span>{{cw}}</span>
                         <input class="collapse--toggle" id="collapsible-{{status.id}}" type="checkbox" />
                         <label class="collapse--lbl-toggle" for="collapsible-{{status.id}}" tabindex="0">Toggle CW</label>
-                        <div class="content collapse">{{status.text}}</div>
+                        <div class="content collapse--content">{{status.text}}</div>
                     {% when None %}
                         <div class="content">{{status.text}}</div>
                     {% endmatch %}
