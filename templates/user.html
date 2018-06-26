@@ -36,7 +36,7 @@
             <article class="status">
                 <header>
                     {% let uri = status.uri_with_account(account_to_show.as_ref()) %}
-                    <a href="{{uri}}"><span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span></a>
+                    <a href="{{uri|safe}}"><span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span></a>
                 </header>
                 <section>
                     {% match status.content_warning %}
@@ -54,7 +54,7 @@
         <nav class="pagination">
             {% match prev_page_id %}
             {% when Some with (backlink) %}
-                <a href="?max_id={{backlink}}" rel="next">older posts</a>
+                <a href="?max_id={{backlink|safe}}" rel="next">older posts</a>
             {% when None %}
             {% endmatch %}
         </nav>
