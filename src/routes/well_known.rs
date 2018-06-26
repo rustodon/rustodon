@@ -1,9 +1,9 @@
+use failure::Error;
 use itertools::Itertools;
 use rocket::http::ContentType;
 use rocket::response::Content;
 use rocket::Route;
 use rocket_contrib::Json;
-use failure::Error;
 
 use db;
 use db::models::{Account, Status, User};
@@ -11,7 +11,12 @@ use error::Perhaps;
 use {BASE_URL, DOMAIN, GIT_REV};
 
 pub fn routes() -> Vec<Route> {
-    routes![webfinger_get_resource, webfinger_host_meta, webfinger_nodeinfo, nodeinfo]
+    routes![
+        webfinger_get_resource,
+        webfinger_host_meta,
+        webfinger_nodeinfo,
+        nodeinfo
+    ]
 }
 
 /// A type representing the parameters of a WebFinger query.
