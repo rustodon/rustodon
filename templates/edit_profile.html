@@ -6,11 +6,18 @@
 <header>
     <h2>Edit your profile</h2>
 </header>
-
-<form method="post" action="/settings/profile">
-    <div>
-        <textarea name="summary">{% match account.summary %}{% when Some with (summary) %}{{summary}}{% when None %}{% endmatch %}</textarea>
-        <input type="submit" value="update" />
-    </div>
-</form>
+<section>
+    <form method="post" action="/settings/profile">
+        <div>
+            <textarea name="summary">
+            {%- match account.summary %}
+            {%- when Some with (summary) -%}
+            {{summary}}
+            {%- when None -%}
+            {% endmatch -%}
+            </textarea>
+            <input type="submit" value="update" />
+        </div>
+    </form>
+</section>
 {% endblock %}

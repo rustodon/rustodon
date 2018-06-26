@@ -3,30 +3,37 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h1>Rustodon</h1>
-
     {% match account %}
     {% when Some with (a) %}
-        <div>
-            <a href="{{a.get_uri()}}">your profile</a> |
-            <form class="inline" method="post" action="/auth/sign_out">
-                <input type="hidden" name="stub" />
-                <input class="link" type="submit" name="submit" value="sign out." />
+        <header>
+            <h1>Rustodon</h1>
+            <nav>
+                <a href="{{a.get_uri()}}">your profile</a> |
+                <form class="inline" method="post" action="/auth/sign_out">
+                    <input type="hidden" name="stub" />
+                    <input class="link" type="submit" name="submit" value="sign out." />
+                </form>
+            </nav>
+        </header>
+        <section>
+            <form method="post" action="/statuses/create">
+                <div>
+                    <input type="text" name="content_warning" placeholder="content_warning" />
+                </div>
+                <div>
+                    <textarea name="content"></textarea>
+                </div>
+                <input type="submit" value="post" />
             </form>
-        </div>
-        <form method="post" action="/statuses/create">
-            <div>
-                <input type="text" name="content_warning" placeholder="content_warning" />
-            </div>
-            <div>
-                <textarea name="content"></textarea>
-            </div>
-            <input type="submit" value="post" />
-        </form>
+        </section>
         {% when None %}
-        <div>
-            <a href="/auth/sign_in">sign in!</a> |
-            <a href="/auth/sign_up">sign up?</a>
-        </div>
+        <header>
+            <h1>Rustodon</h1>
+            <nav>
+                <a href="/auth/sign_in">sign in!</a> |
+                <a href="/auth/sign_up">sign up?</a>
+            </nav>
+        </header>
     {% endmatch %}
+
 {% endblock %}

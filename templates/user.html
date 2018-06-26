@@ -3,21 +3,21 @@
 {% block title %}{{account_to_show.display_name_or_username()}}{% endblock %}
 
 {% block content %}
-    <div class="h-card">
+    <section class="h-card">
         <header>
             <span class="p-name">{{account_to_show.display_name_or_username()}}</span>
             <span class="fq-username">
                 <a class="url u-uid" href="{{account_to_show.get_uri()}}">{{account_to_show.fully_qualified_username()}}</a>
             </span>
         </header>
-        <div class="p-note">
+        <section class="p-note">
             {% match account_to_show.transformed_bio(connection.as_ref()) %}
             {% when Some with (raw_bio) %}
                 <div>{{raw_bio}}</div>
             {% when None %}
                 <p></p>
             {% endmatch %}
-        </div>
+        </section>
         {% match account %}
         {% when Some with (current_account) %}
             {% if current_account.id == account_to_show.id -%}
@@ -27,18 +27,18 @@
             {%- endif %}
         {% when None %}
         {% endmatch %}
-    </div>
+    </section>
     <section class="statuses">
         <header>
             <h2>Posts</h2>
         </header>
         {% for status in statuses %}
-            <div class="status">
+            <article class="status">
                 <header>
                     {% let uri = status.uri_with_account(account_to_show.as_ref()) %}
                     <a href="{{uri}}"><span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span></a>
                 </header>
-                <div>
+                <section>
                     {% match status.content_warning %}
                     {% when Some with (cw) %}
                         <span>{{cw}}</span>
@@ -48,8 +48,8 @@
                     {% when None %}
                         <div class="content">{{status.text}}</div>
                     {% endmatch %}
-                </div>
-            </div>
+                </section>
+            </article>
         {% endfor %}
         <nav class="pagination">
             {% match prev_page_id %}
