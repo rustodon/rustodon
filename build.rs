@@ -19,7 +19,7 @@ where
 }
 
 fn main() {
-    if let Err(_) = Command::new("sass").status() {
+    if let Err(_) = Command::new("bundle").arg("exec").arg("sass").status() {
         eprintln!("build error: sass compiler not installed. please run `gem install sass`.");
         process::exit(1);
     }
