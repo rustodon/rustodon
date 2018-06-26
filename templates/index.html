@@ -11,14 +11,14 @@
                 <a href="{{a.get_uri()}}">your profile</a> |
                 <form class="inline" method="post" action="/auth/sign_out">
                     <input type="hidden" name="stub" />
-                    <input class="link" type="submit" name="submit" value="sign out." />
+                    <button class="link" type="submit" name="submit">sign out.</button>
                 </form>
             </nav>
         </header>
         <section>
             <form method="post" action="/statuses/create">
                 <div>
-                    <input type="text" name="content_warning" placeholder="content_warning" />
+                    <input type="text" name="content_warning" placeholder="content warning" />
                 </div>
                 <div>
                     <textarea name="content"></textarea>
