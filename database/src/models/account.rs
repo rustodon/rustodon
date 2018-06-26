@@ -39,20 +39,17 @@ pub struct NewAccount {
 impl NewAccount {
     pub fn insert(self, conn: &Connection) -> QueryResult<Account> {
         use schema::accounts::dsl::*;
-        let inserted = diesel::insert_into(accounts).values(&self).execute(&**conn);
-        match inserted {
-            Ok(inserted) => {
-                if inserted == 1 {
-                    if let Ok(Some(account)) = Account::fetch_by_id(conn, self.id) {
-                        Ok(account)
-                    } else {
-                        Err(diesel::NotFound)
-                    }
-                } else {
-                    Err(diesel::NotFound)
-                }
-            },
-            Err(error) => Err(error),
+        let inserted = diesel::insert_into(accounts)
+            .values(&self)
+            .execute(&**conn)?;
+        if inserted == 1 {
+            if let Some(account) = Account::fetch_by_id(conn, self.id)? {
+                Ok(account)
+            } else {
+                Err(diesel::NotFound)
+            }
+        } else {
+            Err(diesel::NotFound)
         }
     }
 }
