@@ -1,10 +1,11 @@
-#!/bin/bash 
+#!/bin/bash
 set -euo pipefail
 
 # Uncomment the line below if you would like to diagnose what commands are being done on your behalf.
 # set -x
 
 DATABASE_URL="${DATABASE_URL:-""}"
+CI="${CI:-"0"}"
 
 if [ -z "${DATABASE_URL}" ]; then
   if [ -f .env ]; then
@@ -80,7 +81,11 @@ if ! which bundler 2>/dev/null 1>&2 ; then
 fi
 if ! bundle check 2>/dev/null 1>&2 ; then
   infoMsg "Installing Ruby dependencies..."
-  bundle install --path=vendor/
+  if [ "${CI}" -eq 1 ]; then
+    bundle install
+  else
+    bundle install --path=vendor/
+  fi
 fi
 
 # Diesel CLI install
@@ -90,7 +95,7 @@ if ! which diesel 2>/dev/null 1>&2 ; then
 fi
 if ! which cargo-watch 2>/dev/null 1>&2 ; then
   infoMsg "Installing cargo-watch..."
-  cargo install cargo-watch 
+  cargo install cargo-watch
 fi
 
 # Database creation and migration

@@ -29,7 +29,7 @@ env:
     - MIGRATION_DIR=migrations_sqlite FEATURES=sqlite   DATABASE_URL=rustodon.sqlite3
 
 before_script:
-  - scripts/setup
+  - CI=1 scripts/setup
 
 script:
   - cargo fmt -- --write-mode=diff
