@@ -39,9 +39,9 @@ default-features = false
 features = ["json"]
 
 [dependencies.askama]
-version = "0.6.4"
+version = "0.7.0"
 features = ["with-rocket"]
 
 [build-dependencies.askama]
-version = "0.6.4"
+version = "0.7.0"
 features = ["with-rocket"]
