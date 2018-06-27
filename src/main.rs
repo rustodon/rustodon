@@ -38,6 +38,7 @@ mod activitypub;
 mod routes;
 mod templates;
 mod transform;
+mod util;
 
 use dotenv::dotenv;
 use std::env;
