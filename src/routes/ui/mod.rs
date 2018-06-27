@@ -1,9 +1,13 @@
 use chrono::offset::Utc;
+use itertools::Itertools;
 use maud::{html, Markup, PreEscaped};
 use rocket::request::{FlashMessage, Form};
-use rocket::response::{NamedFile, Redirect};
+use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::Route;
+use std::borrow::Cow;
+use std::boxed::Box;
 use std::path::{Path, PathBuf};
+use validator::Validate;
 
 use db::models::{Account, NewStatus, Status, User};
 use db::{self, id_generator};
@@ -11,6 +15,7 @@ use error::Perhaps;
 use failure::Error;
 use templates::Page;
 use transform;
+use util::Either;
 
 mod auth;
 
@@ -32,8 +37,9 @@ pub fn routes() -> Vec<Route> {
     ]
 }
 
-#[derive(Debug, FromForm)]
+#[derive(Debug, FromForm, Validate)]
 pub struct CreateStatusForm {
+    #[validate(length(min = "1", message = "Content must not be empty"))]
     content: String,
     content_warning: String,
 }
@@ -43,8 +49,24 @@ pub fn create_status(
     user: User,
     db_conn: db::Connection,
     form: Form<CreateStatusForm>,
-) -> Result<Redirect, Error> {
+) -> Result<Either<Flash<Redirect>, Redirect>, Error> {
     let form_data = form.get();
+
+    if let Err(errs) = form_data.validate() {
+        let errs = errs.inner();
+
+        // concatenate the error descriptions, with commas between them.
+        // TODO: make this less ugly :(
+        let error_desc = errs.iter()
+            .flat_map(|(_, errs)| errs)
+            .map(|e| {
+                let msg = e.message.to_owned();
+                msg.unwrap_or(Cow::Borrowed("unknown error"))
+            })
+            .join(", ");
+
+        return Ok(Either::Left(Flash::error(Redirect::to("/"), error_desc)));
+    }
 
     // convert CW to option if present, so we get proper nulls in DB
     let content_warning: Option<String> = if form_data.content_warning.len() > 0 {
@@ -61,7 +83,7 @@ pub fn create_status(
         account_id: user.account_id,
     }.insert(&db_conn)?;
 
-    Ok(Redirect::to("/"))
+    Ok(Either::Right(Redirect::to("/")))
 }
 
 fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Result<Markup, Error> {
