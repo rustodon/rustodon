@@ -35,7 +35,7 @@
         {% for status in statuses %}
             <article class="status">
                 <header>
-                    {% let uri = status.uri_with_account(account_to_show.as_ref()) %}
+                    {% let uri = status.uri_with_account(account_to_show.as_ref()).unwrap() %}
                     <a href="{{uri|safe}}"><span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span></a>
                 </header>
                 <section>
