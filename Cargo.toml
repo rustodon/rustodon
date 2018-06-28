@@ -38,6 +38,10 @@ version = "0.3.8"
 default-features = false
 features = ["json"]
 
-[dependencies.maud]
-version = "0.17.4"
-features = ["rocket"]
+[dependencies.askama]
+version = "0.7.0"
+features = ["with-rocket"]
+
+[build-dependencies.askama]
+version = "0.7.0"
+features = ["with-rocket"]
