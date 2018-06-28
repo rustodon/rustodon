@@ -11,7 +11,7 @@ fn escape_html(text: impl AsRef<str>) -> Result<String, Error> {
 
     let mut out = String::new();
     Escaper::new(&mut out).write_str(text.as_ref())?;
-    out = out.replace("\n", "<br>");
+    out = out.replace("\r", "").replace("\n", "<br>");
 
     Ok(out)
 }
