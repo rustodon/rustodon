@@ -6,13 +6,14 @@ use posticle::{self, EntityKind};
 use db;
 use db::models::Account;
 
-fn escape_html(text: impl AsRef<str>) -> String {
+fn escape_html(text: impl AsRef<str>) -> Result<String, Error> {
     use std::fmt::Write;
 
     let mut out = String::new();
-    Escaper::new(&mut out).write_str(text.as_ref());
+    Escaper::new(&mut out).write_str(text.as_ref())?;
+    out = out.replace("\n", "<br>");
 
-    out
+    Ok(out)
 }
 
 /// TODO: This should likely not require a db connection, the caller should provide a map of usernames to
@@ -24,7 +25,7 @@ pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
     let entities = posticle::entities(&text);
 
     for entity in entities {
-        html.push_str(&escape_html(&text[cursor..entity.range.0]));
+        html.push_str(&escape_html(&text[cursor..entity.range.0])?);
         let entity_text = entity.substr(&text);
         let replacement = match entity.kind {
             EntityKind::Url => format!("<a href=\"{url}\">{url}</a>", url = entity_text),
@@ -44,7 +45,7 @@ pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
         html.push_str(&replacement);
         cursor = entity.range.1;
     }
-    html.push_str(&escape_html(&text[cursor..]));
+    html.push_str(&escape_html(&text[cursor..])?);
 
     Ok(Builder::default()
         .tags(hashset!["a", "p", "br"])
