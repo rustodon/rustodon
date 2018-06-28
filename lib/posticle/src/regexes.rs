@@ -56,10 +56,10 @@ lazy_static! {
         part=*VALID_DOMAIN_SEGMENT, tld=*SYNTACTICALLY_VALID_TLD);
 
     /// Matches characters valid in a path segment.
-    static ref VALID_PATH_CHARS: String = format!(r"[^{space}\(\)\?]", space=UNICODE_SPACES);
+    static ref VALID_PATH_CHARS: String = format!(r#"[^{space}\(\)\?<>]"#, space=UNICODE_SPACES);
     /// Matches characters valid at the end of a path segment.
     static ref VALID_PATH_ENDING_CHARS: String = format!(
-        r"[^{space}\(\)\?!\*';:=,\.\$%\[\]~&\|@]|(?:{balanced_parens})",
+        r#"[^{space}\(\)\?!\*';:=,\.\$%\[\]~&\|@"<>]|(?:{balanced_parens})"#,
         space=UNICODE_SPACES,
         balanced_parens=*VALID_PATH_BALANCED_PARENS,
     );
@@ -191,6 +191,8 @@ mod test {
         assert!(!re.is_match("http://☃-.net/"));
         assert!(!re.is_match("http://%e2%98%83.net/"));
         assert!(!re.is_match("http://example.com/#anchor "));
+        assert!(!re.is_match("http://example.com/\">"));
+        assert!(!re.is_match("http://example.com/\">xyz "));
     }
 
     #[test]
