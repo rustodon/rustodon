@@ -69,51 +69,40 @@ impl Status {
             .optional()
     }
 
+    /// Returns the number of local statuses
+    pub fn count_local(db_conn: &Connection) -> QueryResult<i64> {
+        use schema::statuses::dsl::{statuses, uri};
+        statuses
+            .filter(uri.is_null()) // is local status
+            .count()
+            .get_result(&**db_conn)
+    }
+
     /// Returns a human-readble description of the age of this status.
     pub fn humanized_age(&self) -> String {
         self.created_at.humanize()
     }
 
     /// Returns a URI to the ActivityPub object of this status.
-    pub fn get_uri<'a>(&'a self, db_conn: &Connection) -> QueryResult<Cow<'a, str>> {
-        let uri = self.uri.as_ref().map(|x| String::as_str(x).into());
-        match uri {
-            Some(x) => Ok(x),
-            None => {
-                let account_result = self.account(db_conn);
-                match account_result {
-                    Ok(account) => {
-                        return Ok(format!(
-                            "{base}{path}",
-                            base = BASE_URL.as_str(),
-                            path = self.status_path(&account).unwrap_or_else(|| "".into())
-                        ).into())
-                    },
-                    Err(error) => return Err(error),
-                }
-            },
-        }
+    pub fn get_uri<'a>(&'a self, db_conn: &'a Connection) -> QueryResult<Cow<'a, str>> {
+        let account = self.account(db_conn)?;
+        Ok(self.uri_with_account(&account))
     }
 
-    /// Returns the server local path to this status if it exists, or None
-    /// if the status does not reside on this server, or if the account provided
-    /// by the caller is not the creator of this status.
-    pub fn status_path<'a>(&'a self, account: &Account) -> Option<Cow<'a, str>> {
-        match self.uri {
-            Some(_) => None,
-            None => {
-                if account.id == self.account_id {
-                    Some(
-                        format!(
-                            "/users/{user}/statuses/{id}",
-                            user = account.username,
-                            id = self.id
-                        ).into(),
-                    )
-                } else {
-                    None
-                }
-            },
+    pub fn uri_with_account<'a>(&'a self, account: &Account) -> Cow<'a, str> {
+        assert_eq!(
+            account.id, self.account_id,
+            "Account {} did not create Status {}, cannot present URI",
+            account.id, self.id
+        );
+        match self.uri.as_ref().map(|x| String::as_str(x).into()) {
+            Some(x) => x,
+            None => format!(
+                "{base}/users/{user}/statuses/{id}",
+                base = BASE_URL.as_str(),
+                user = account.username,
+                id = self.id
+            ).into(),
         }
     }
 }

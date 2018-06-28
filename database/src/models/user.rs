@@ -84,6 +84,13 @@ impl User {
         users.find(uid).first(&**db_conn).optional()
     }
 
+    /// Returns the number of local users.
+    pub fn count(db_conn: &Connection) -> QueryResult<i64> {
+        use schema::users::dsl::users;
+
+        users.count().get_result(&**db_conn)
+    }
+
     /// Returns the corresponding `Account` of a local user.
     ///
     /// Note: panics if the account does not exist. This _will_ be caught by

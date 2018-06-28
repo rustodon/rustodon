@@ -11,7 +11,7 @@ extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
-extern crate maud;
+extern crate maud_htmlescape;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
@@ -26,7 +26,6 @@ extern crate validator;
 extern crate validator_derive;
 #[macro_use]
 extern crate maplit;
-extern crate maud_htmlescape;
 extern crate posticle;
 extern crate regex;
 
@@ -36,11 +35,14 @@ extern crate rustodon_database as db;
 mod error;
 mod activitypub;
 mod routes;
-mod templates;
 mod transform;
+mod util;
 
 use dotenv::dotenv;
 use std::env;
+
+#[macro_use]
+extern crate askama;
 
 lazy_static! {
     pub static ref BASE_URL: String = format!(
@@ -64,6 +66,7 @@ fn main() {
     rocket::ignite()
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
+        .mount("/", routes::well_known::routes())
         .manage(db_connection_pool) // store the db pool as Rocket managed state
                                     // (this lets us use the db::Connection guard)
         .launch();

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{account_to_show.display_name_or_username()}}{% endblock %}
+
+{% block content %}
+    <section class="h-card">
+        <header>
+            <span class="p-name">{{account_to_show.display_name_or_username()}}</span>
+            <span class="fq-username">
+                <a class="url u-uid" href="{{account_to_show.get_uri()|safe}}">{{account_to_show.fully_qualified_username()}}</a>
+            </span>
+        </header>
+        <section class="p-note">
+            {% match account_to_show.transformed_bio(connection.as_ref()) %}
+            {% when Some with (raw_bio) %}
+                <div>{{raw_bio}}</div>
+            {% when None %}
+                <p></p>
+            {% endmatch %}
+        </section>
+        {% match account %}
+        {% when Some with (current_account) %}
+            {% if current_account.id == account_to_show.id -%}
+                <div class="action-edit-note">
+                    (<a href="/settings/profile">edit</a>)
+                </div>
+            {%- endif %}
+        {% when None %}
+        {% endmatch %}
+    </section>
+    <section class="statuses">
+        <header>
+            <h2>Posts</h2>
+        </header>
+        {% for status in statuses %}
+            <article class="status">
+                <header>
+                    {% let uri = status.uri_with_account(account_to_show.as_ref()) %}
+                    <a href="{{uri|safe}}"><span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span></a>
+                </header>
+                <section>
+                    {% match status.content_warning %}
+                    {% when Some with (cw) %}
+                        <span>{{cw}}</span>
+                        <input class="collapse--toggle" id="collapsible-{{status.id}}" type="checkbox" />
+                        <label class="collapse--lbl-toggle" for="collapsible-{{status.id}}" tabindex="0">Toggle CW</label>
+                        <div class="content collapse--content">{{status.text}}</div>
+                    {% when None %}
+                        <div class="content">{{status.text}}</div>
+                    {% endmatch %}
+                </section>
+            </article>
+        {% endfor %}
+        <nav class="pagination">
+            {% match prev_page_id %}
+            {% when Some with (backlink) %}
+                <a href="?max_id={{backlink|safe}}" rel="next">older posts</a>
+            {% when None %}
+            {% endmatch %}
+        </nav>
+    </section>
+{% endblock %}

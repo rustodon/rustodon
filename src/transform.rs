@@ -15,6 +15,8 @@ fn escape_html(text: impl AsRef<str>) -> String {
     out
 }
 
+/// TODO: This should likely not require a db connection, the caller should provide a map of usernames to
+/// urls or similar.
 pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
     let mut html = String::new();
     let mut cursor = 0;
