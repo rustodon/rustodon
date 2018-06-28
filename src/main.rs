@@ -36,6 +36,7 @@ mod error;
 mod activitypub;
 mod routes;
 mod transform;
+mod util;
 
 use dotenv::dotenv;
 use std::env;
