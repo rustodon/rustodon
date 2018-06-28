@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Rustodon - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IM+Fell+Great+Primer:400,400i|Nova+Mono" />
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+    <main>
+        {% match flash %}
+        {% when Some with (flashmessage) %}
+            <div class="flash {{flashmessage.name()}}">{{flashmessage.msg()}}</div>
+        {% when None %}
+        {% endmatch %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div>
+            Running commit
+            <a href="https://github.com/rustodon/rustodon/commit/{{revision}}">
+                <code>{{revision}}</code>
+            </a>
+        </div>
+        <script type="text/javascript" src="/static/js/accessibility.js"></script>
+    </footer>
+</body>
+
+</html>

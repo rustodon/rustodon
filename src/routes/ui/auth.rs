@@ -3,33 +3,16 @@ use db::validators;
 use db::{self, id_generator, DieselConnection};
 use failure::Error;
 use itertools::Itertools;
-use maud::html;
 use rocket::http::{Cookie, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, Redirect};
+use routes::ui::templates::{SigninTemplate, SignupTemplate};
 use std::borrow::Cow;
-use templates::Page;
 use validator::Validate;
 
 #[get("/auth/sign_in")]
-pub fn signin_get(flash: Option<FlashMessage>) -> Page {
-    Page::new().title("sign in").flash(flash).content(html! {
-        header h2 "sign in"
-
-        form method="post" {
-            div {
-                label for="username" "username:"
-                input type="text" id="username" name="username";
-            }
-
-            div {
-                label for="password" "password:"
-                input type="password" id="password" name="password";
-            }
-
-            button type="submit" "sign in"
-        }
-    })
+pub fn signin_get(flash: Option<FlashMessage>) -> SigninTemplate<'static> {
+    HtmlTemplate!(SigninTemplate, flash)
 }
 
 #[derive(Debug, FromForm)]
@@ -91,29 +74,8 @@ pub struct SignupForm {
 }
 
 #[get("/auth/sign_up")]
-pub fn signup_get(flash: Option<FlashMessage>) -> Page {
-    Page::new().title("sign up").flash(flash).content(html! {
-        header h2 "sign up"
-
-        form method="post" {
-            div {
-                label for="username" "username:"
-                input type="text" id="username" name="username";
-            }
-
-            div {
-                label for="email" "email:"
-                input type="email" id="email" name="email";
-            }
-
-            div {
-                label for="password" "password:"
-                input type="password" id="password" name="password";
-            }
-
-            button type="submit" "sign up"
-        }
-    })
+pub fn signup_get(flash: Option<FlashMessage>) -> SignupTemplate<'static> {
+    HtmlTemplate!(SignupTemplate, flash)
 }
 
 #[post("/auth/sign_up", data = "<form>")]

@@ -1,19 +1,26 @@
 use chrono::offset::Utc;
-use maud::{html, Markup, PreEscaped};
-use rocket::request::{FlashMessage, Form};
-use rocket::response::{NamedFile, Redirect};
-use rocket::Route;
-use std::path::{Path, PathBuf};
 
 use db::datetime::{DateTimeType, NewDateTime, Rfc339able};
 use db::models::{Account, NewStatus, Status, User};
 use db::{self, id_generator};
 use error::Perhaps;
 use failure::Error;
-use templates::Page;
-use transform;
+use itertools::Itertools;
+use rocket::request::{FlashMessage, Form};
+use rocket::response::{Flash, NamedFile, Redirect};
+use rocket::Route;
+use std::borrow::Cow;
+use std::boxed::Box;
+use std::path::{Path, PathBuf};
+use util::Either;
+use validator::Validate;
 
+#[macro_use]
+mod templates;
 mod auth;
+mod view_helpers;
+
+use self::templates::*;
 
 pub fn routes() -> Vec<Route> {
     routes![
@@ -33,8 +40,14 @@ pub fn routes() -> Vec<Route> {
     ]
 }
 
-#[derive(Debug, FromForm)]
+#[derive(FromForm, Debug)]
+pub struct UserPageParams {
+    max_id: Option<i64>,
+}
+
+#[derive(Debug, FromForm, Validate)]
 pub struct CreateStatusForm {
+    #[validate(length(min = "1", message = "Content must not be empty"))]
     content: String,
     content_warning: String,
 }
@@ -44,8 +57,25 @@ pub fn create_status(
     user: User,
     db_conn: db::Connection,
     form: Form<CreateStatusForm>,
-) -> Result<Redirect, Error> {
+) -> Result<Either<Flash<Redirect>, Redirect>, Error> {
     let form_data = form.get();
+
+    if let Err(errs) = form_data.validate() {
+        let errs = errs.inner();
+
+        // concatenate the error descriptions, with commas between them.
+        // TODO: make this less ugly :(
+        let error_desc = errs
+            .iter()
+            .flat_map(|(_, errs)| errs)
+            .map(|e| {
+                let msg = e.message.to_owned();
+                msg.unwrap_or(Cow::Borrowed("unknown error"))
+            })
+            .join(", ");
+
+        return Ok(Either::Left(Flash::error(Redirect::to("/"), error_desc)));
+    }
 
     // convert CW to option if present, so we get proper nulls in DB
     let content_warning: Option<String> = if form_data.content_warning.len() > 0 {
@@ -62,46 +92,15 @@ pub fn create_status(
         account_id: user.account_id,
     }.insert(&db_conn)?;
 
-    Ok(Redirect::to("/"))
-}
-
-fn render_status(db_conn: &db::Connection, status: &Status, link: bool) -> Result<Markup, Error> {
-    let meta_line = html !{
-        span {
-            ("published: ")
-            time datetime=(status.created_at.to_rfc3339()) (status.humanized_age())
-        }
-    };
-
-    let rendered = html! {
-        div.status {
-            header {
-                @if link {
-                    a href=(status.get_uri(db_conn)?) (meta_line)
-                } @else {
-                    (meta_line)
-                }
-            }
-            div {
-                @if let Some(cw) = &status.content_warning {
-                    @let collapse_id = format!("collapsible-{}", status.id);
-
-                    span (cw)
-                    input.collapse--toggle id=(collapse_id) type="checkbox";
-                    label.collapse--lbl-toggle for=(collapse_id) tabindex="0" { "Toggle CW" }
-                    div.content.collapse--content (status.text)
-                } @else {
-                    div.content (status.text)
-                }
-            }
-        }
-    };
-
-    Ok(rendered)
+    Ok(Either::Right(Redirect::to("/")))
 }
 
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
-pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) -> Perhaps<Page> {
+pub fn status_page(
+    username: String,
+    status_id: u64,
+    db_conn: db::Connection,
+) -> Perhaps<StatusTemplate<'static>> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
     let status = try_resopt!(Status::by_account_and_id(
         &db_conn,
@@ -109,27 +108,21 @@ pub fn status_page(username: String, status_id: u64, db_conn: db::Connection) ->
         status_id as i64
     ));
 
-    let rendered = Page::new()
-        .title(format!(
-            "@{user}: {id}",
-            user = account.username,
-            id = status.id
-        ))
-        .content(render_status(&db_conn, &status, false)?);
-
-    Ok(Some(rendered))
-}
-
-#[derive(FromForm, Debug)]
-pub struct UserPageParams {
-    max_id: Option<i64>,
+    PerhapsHtmlTemplate!(StatusTemplate, {
+        status:  status,
+        account: account
+    })
 }
 
 // This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
 // If you don't like this, please complain over there.
 #[get("/users/<username>", format = "text/html")]
-pub fn user_page(username: String, db_conn: db::Connection, user: Option<User>) -> Perhaps<Page> {
-    user_page_paginated(username, UserPageParams { max_id: None }, db_conn, user)
+pub fn user_page(
+    username: String,
+    db_conn: db::Connection,
+    account: Option<Account>,
+) -> Perhaps<UserTemplate<'static>> {
+    user_page_paginated(username, UserPageParams { max_id: None }, db_conn, account)
 }
 
 #[get("/users/<username>?<params>", format = "text/html")]
@@ -137,78 +130,38 @@ pub fn user_page_paginated(
     username: String,
     params: UserPageParams,
     db_conn: db::Connection,
-    user: Option<User>,
-) -> Perhaps<Page> {
-    let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
-    let statuses: Vec<Status> = account.statuses_before_id(&db_conn, params.max_id, 10)?;
-
-    let rendered = Page::new()
-        .title(format!("@{user}", user = account.username))
-        .content(html! {
-            div.h-card {
-                header {
-                    span.p-name (account.display_name.as_ref().unwrap_or(&account.username))
-
-                    span.fq-username {
-                        a.url.u-uid href=(account.get_uri()) (account.fully_qualified_username())
-                    }
-                }
-
-                div.p-note {
-                    @if let Some(raw_bio) = account.summary.as_ref().map(String::as_str)
-                    {
-                        (PreEscaped(transform::bio(raw_bio, &db_conn)?))
-                    } @else {
-                        p {}
-                    }
-                }
-
-                @if let Some(user) = user {
-                    @if user.get_account(&db_conn)? == account {
-                        div.action-edit-note {
-                            "(" a href="/settings/profile" "edit" ")"
-                        }
-                    }
-                }
-            }
-
-            section.statuses {
-                header h2 "Posts"
-
-                @for status in &statuses {
-                    (render_status(&db_conn, status, true)?)
-                }
-
-                nav.pagination {
-                    @if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
-                        @let bounds = account.status_id_bounds(&db_conn)?;
-                        // unwrap is safe since we already know we have statuses
-                        @if prev_page_max_id > bounds.unwrap().0 {
-                            a href=(format!("?max_id={}", prev_page_max_id)) rel="next" "⇐ older posts"
-                        }
-                    }
-                }
-            }
-        });
-
-    Ok(Some(rendered))
+    account: Option<Account>,
+) -> Perhaps<UserTemplate<'static>> {
+    let account_to_show = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
+    let statuses: Vec<Status> = account_to_show.statuses_before_id(&db_conn, params.max_id, 10)?;
+    let prev_page_id = if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
+        let bounds = account_to_show.status_id_bounds(&db_conn)?;
+        // unwrap is safe since we already know we have statuses
+        if prev_page_max_id > bounds.unwrap().0 {
+            Some(prev_page_max_id)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    PerhapsHtmlTemplate!(UserTemplate, {
+        account_to_show: account_to_show,
+        account: account,
+        statuses: statuses,
+        prev_page_id: prev_page_id,
+        connection: db_conn
+    })
 }
 
 #[get("/settings/profile")]
-pub fn settings_profile(db_conn: db::Connection, user: User) -> Result<Page, Error> {
-    let account = user.get_account(&db_conn)?;
-
-    let rendered = Page::new().title("edit your profile").content(html! {
-        header h2 "Edit your profile"
-
-        form method="post" action="/settings/profile" {
-            div textarea name="summary" {(account.summary.as_ref().map(String::as_ref).unwrap_or(""))}
-
-            button type="submit" "update"
-        }
-    });
-
-    Ok(rendered)
+pub fn settings_profile(
+    db_conn: db::Connection,
+    user: User,
+) -> Perhaps<EditProfileTemplate<'static>> {
+    PerhapsHtmlTemplate!(EditProfileTemplate, {
+        account: user.get_account(&db_conn)?
+    })
 }
 
 #[derive(Debug, FromForm)]
@@ -236,43 +189,8 @@ pub fn settings_profile_update(
 }
 
 #[get("/")]
-pub fn index(
-    flash: Option<FlashMessage>,
-    user: Option<User>,
-    db_conn: db::Connection,
-) -> Result<Page, Error> {
-    let rendered = Page::new().flash(flash).content(html! {
-        header h1 "Rustodon"
-
-        div {
-            @if let Some(user) = user {
-                @let account = user.get_account(&db_conn)?;
-                div {
-                    a href=(account.get_uri()) "your profile"
-                    " | "
-                    form.inline method="post" action="/auth/sign_out" {
-                        input type="hidden" name="stub"
-                        button.link type="submit" name="submit" "sign out."
-                    }
-                }
-
-                form method="post" action="/statuses/create" {
-                    div input name="content_warning" placeholder="content warning" {}
-                    div textarea name="content" {}
-
-                    button type="submit" "post"
-                }
-            } @else {
-                div {
-                    a href="/auth/sign_in" "sign in!"
-                    " | "
-                    a href="/auth/sign_up" "sign up?"
-                }
-            }
-        }
-    });
-
-    Ok(rendered)
+pub fn index(flash: Option<FlashMessage>, account: Option<Account>) -> IndexTemplate<'static> {
+    HtmlTemplate!(IndexTemplate, flash, { account: account })
 }
 
 #[get("/static/<path..>")]

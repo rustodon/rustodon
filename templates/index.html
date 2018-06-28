@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    {% match account %}
+    {% when Some with (a) %}
+        <header>
+            <h1>Rustodon</h1>
+            <nav>
+                <a href="{{a.get_uri()|safe}}">your profile</a> |
+                <form class="inline" method="post" action="/auth/sign_out">
+                    <input type="hidden" name="stub" />
+                    <button class="link" type="submit" name="submit">sign out.</button>
+                </form>
+            </nav>
+        </header>
+        <section>
+            <form method="post" action="/statuses/create">
+                <div>
+                    <input type="text" name="content_warning" placeholder="content warning" />
+                </div>
+                <div>
+                    <textarea name="content"></textarea>
+                </div>
+                <button type="submit">post</button>
+            </form>
+        </section>
+        {% when None %}
+        <header>
+            <h1>Rustodon</h1>
+            <nav>
+                <a href="/auth/sign_in">sign in!</a> |
+                <a href="/auth/sign_up">sign up?</a>
+            </nav>
+        </header>
+    {% endmatch %}
+
+{% endblock %}
