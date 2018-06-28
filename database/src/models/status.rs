@@ -86,24 +86,23 @@ impl Status {
     /// Returns a URI to the ActivityPub object of this status.
     pub fn get_uri<'a>(&'a self, db_conn: &'a Connection) -> QueryResult<Cow<'a, str>> {
         let account = self.account(db_conn)?;
-        self.uri_with_account(&account).ok_or(diesel::NotFound)
+        Ok(self.uri_with_account(&account))
     }
 
-    pub fn uri_with_account<'a>(&'a self, account: &Account) -> Option<Cow<'a, str>> {
-        if account.id == self.account_id {
-            match self.uri.as_ref().map(|x| String::as_str(x).into()) {
-                Some(x) => Some(x),
-                None => Some(
-                    format!(
-                        "{base}/users/{user}/statuses/{id}",
-                        base = BASE_URL.as_str(),
-                        user = account.username,
-                        id = self.id
-                    ).into(),
-                ),
-            }
-        } else {
-            None
+    pub fn uri_with_account<'a>(&'a self, account: &Account) -> Cow<'a, str> {
+        assert_eq!(
+            account.id, self.account_id,
+            "Account {} did not create Status {}, cannot present URI",
+            account.id, self.id
+        );
+        match self.uri.as_ref().map(|x| String::as_str(x).into()) {
+            Some(x) => x,
+            None => format!(
+                "{base}/users/{user}/statuses/{id}",
+                base = BASE_URL.as_str(),
+                user = account.username,
+                id = self.id
+            ).into(),
         }
     }
 }
