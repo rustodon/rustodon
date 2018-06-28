@@ -98,11 +98,23 @@ impl Status {
         match self.uri.as_ref().map(|x| String::as_str(x).into()) {
             Some(x) => x,
             None => format!(
-                "{base}/users/{user}/statuses/{id}",
+                "{base}{path}",
                 base = BASE_URL.as_str(),
-                user = account.username,
-                id = self.id
+                path = self.path_with_account(account)
             ).into(),
         }
+    }
+
+    pub fn path_with_account<'a>(&'a self, account: &Account) -> Cow<'a, str> {
+        assert_eq!(
+            account.id, self.account_id,
+            "Account {} did not create Status {}, cannot present URI",
+            account.id, self.id
+        );
+        format!(
+            "/users/{user}/statuses/{id}",
+            user = account.username,
+            id = self.id
+        ).into()
     }
 }
