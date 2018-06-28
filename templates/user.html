@@ -7,7 +7,7 @@
         <header>
             <span class="p-name">{{account_to_show.display_name_or_username()}}</span>
             <span class="fq-username">
-                <a class="url u-uid" href="{{account_to_show.get_uri()|safe}}">{{account_to_show.fully_qualified_username()}}</a>
+                <a class="url u-uid" href="{{account_to_show.profile_path()|safe}}">{{account_to_show.fully_qualified_username()}}</a>
             </span>
         </header>
         <section class="p-note">

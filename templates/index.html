@@ -8,7 +8,7 @@
         <header>
             <h1>Rustodon</h1>
             <nav>
-                <a href="{{a.get_uri()|safe}}">your profile</a> |
+                <a href="{{a.profile_path()|safe}}">your profile</a> |
                 <form class="inline" method="post" action="/auth/sign_out">
                     <input type="hidden" name="stub" />
                     <button class="link" type="submit" name="submit">sign out.</button>
