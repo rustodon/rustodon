@@ -89,8 +89,7 @@ impl Status {
         self.created_at.humanize()
     }
 
-    /// Returns `n` statuses in the database, authored _strictly before_ the
-    /// status `max_id`.
+    /// Returns `n` local statuses which were authored _strictly before_ the status `max_id`.
     pub fn local_before_id(
         db_conn: &Connection,
         max_id: Option<i64>,
@@ -110,7 +109,7 @@ impl Status {
             .get_results::<Status>(&**db_conn)
     }
 
-    /// Returns a tuple of upper and lower bounds on the IDs of statuses authored by this account
+    /// Returns a tuple of upper and lower bounds on all the IDs of statuses we know about.
     /// (i.e., `min(ids)` and `max(ids)` where `ids` is a list of status ids authored by this user).
     ///
     /// If there are no statuses in the database, return `None`.
