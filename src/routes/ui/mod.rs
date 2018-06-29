@@ -22,6 +22,7 @@ use self::templates::*;
 pub fn routes() -> Vec<Route> {
     routes![
         index,
+        index_paginated,
         user_page,
         user_page_paginated,
         settings_profile,
@@ -39,6 +40,11 @@ pub fn routes() -> Vec<Route> {
 
 #[derive(FromForm, Debug)]
 pub struct UserPageParams {
+    max_id: Option<i64>,
+}
+
+#[derive(FromForm, Debug)]
+pub struct IndexPageParams {
     max_id: Option<i64>,
 }
 
@@ -62,8 +68,7 @@ pub fn create_status(
 
         // concatenate the error descriptions, with commas between them.
         // TODO: make this less ugly :(
-        let error_desc = errs
-            .iter()
+        let error_desc = errs.iter()
             .flat_map(|(_, errs)| errs)
             .map(|e| {
                 let msg = e.message.to_owned();
@@ -186,8 +191,39 @@ pub fn settings_profile_update(
 }
 
 #[get("/")]
-pub fn index(flash: Option<FlashMessage>, account: Option<Account>) -> IndexTemplate<'static> {
-    HtmlTemplate!(IndexTemplate, flash, { account: account })
+pub fn index(
+    flash: Option<FlashMessage>,
+    account: Option<Account>,
+    db_conn: db::Connection,
+) -> Result<IndexTemplate<'static>, Error> {
+    index_paginated(flash, account, IndexPageParams { max_id: None }, db_conn)
+}
+
+#[get("/?<params>")]
+pub fn index_paginated(
+    flash: Option<FlashMessage>,
+    account: Option<Account>,
+    params: IndexPageParams,
+    db_conn: db::Connection,
+) -> Result<IndexTemplate<'static>, Error> {
+    let local_statuses: Vec<Status> = Status::local_before_id(&db_conn, params.max_id, 10)?;
+    let prev_page_id = if let Some(prev_page_max_id) = local_statuses.iter().map(|s| s.id).min() {
+        let bounds = Status::status_id_bounds(&db_conn)?;
+        // unwrap is safe since we already know we have statuses
+        if prev_page_max_id > bounds.unwrap().0 {
+            Some(prev_page_max_id)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    Ok(HtmlTemplate!(IndexTemplate, flash, {
+        account: account,
+        local_statuses: local_statuses,
+        prev_page_id: prev_page_id,
+        connection: db_conn
+    }))
 }
 
 #[get("/static/<path..>")]
