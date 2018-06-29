@@ -13,7 +13,7 @@
         <section class="p-note">
             {% match account_to_show.transformed_bio(connection.as_ref()) %}
             {% when Some with (raw_bio) %}
-                <div>{{raw_bio}}</div>
+                <div>{{raw_bio|safe}}</div>
             {% when None %}
                 <p></p>
             {% endmatch %}
