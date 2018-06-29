@@ -4,7 +4,8 @@ use db::{self, id_generator};
 use error::Perhaps;
 use failure::Error;
 use itertools::Itertools;
-use rocket::request::{FlashMessage, Form};
+use rocket::http::RawStr;
+use rocket::request::{FromFormValue, FlashMessage, Form};
 use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::Route;
 use std::borrow::Cow;
@@ -43,9 +44,28 @@ pub struct UserPageParams {
     max_id: Option<i64>,
 }
 
+#[derive(Debug)]
+pub enum Timeline {
+    Local,
+    Federated,
+}
+
+impl<'v> FromFormValue<'v> for Timeline {
+    type Error = &'v RawStr;
+
+    fn from_form_value(form_value: &'v RawStr) -> Result<Self, Self::Error> {
+        match form_value.as_str() {
+            "local" => Ok(Timeline::Local),
+            "federated" => Ok(Timeline::Federated),
+            _ => Err(form_value),
+        }
+    }
+}
+
 #[derive(FromForm, Debug)]
 pub struct IndexPageParams {
     max_id: Option<i64>,
+    timeline: Option<Timeline>,
 }
 
 #[derive(Debug, FromForm, Validate)]
@@ -196,7 +216,7 @@ pub fn index(
     account: Option<Account>,
     db_conn: db::Connection,
 ) -> Result<IndexTemplate<'static>, Error> {
-    index_paginated(flash, account, IndexPageParams { max_id: None }, db_conn)
+    index_paginated(flash, account, IndexPageParams { max_id: None, timeline: None }, db_conn)
 }
 
 #[get("/?<params>")]
@@ -206,9 +226,16 @@ pub fn index_paginated(
     params: IndexPageParams,
     db_conn: db::Connection,
 ) -> Result<IndexTemplate<'static>, Error> {
-    let local_statuses: Vec<Status> = Status::local_before_id(&db_conn, params.max_id, 10)?;
-    let prev_page_id = if let Some(prev_page_max_id) = local_statuses.iter().map(|s| s.id).min() {
-        let bounds = Status::status_id_bounds(&db_conn)?;
+    let statuses: Vec<Status> = match params.timeline {
+        Some(Timeline::Local) | None => Status::local_before_id(&db_conn, params.max_id, 10)?,
+        Some(Timeline::Federated) => Status::federated_before_id(&db_conn, params.max_id, 10)?,
+    };
+
+    let prev_page_id = if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
+        let bounds = match params.timeline {
+            Some(Timeline::Local) | None => Status::local_status_id_bounds(&db_conn)?,
+            Some(Timeline::Federated) => Status::federated_status_id_bounds(&db_conn)?,
+        };
         // unwrap is safe since we already know we have statuses
         if prev_page_max_id > bounds.unwrap().0 {
             Some(prev_page_max_id)
@@ -218,9 +245,16 @@ pub fn index_paginated(
     } else {
         None
     };
+
+    let timeline_str = match params.timeline {
+        Some(Timeline::Local) | None => "local",
+        Some(Timeline::Federated) => "federated",
+    };
+
     Ok(HtmlTemplate!(IndexTemplate, flash, {
         account: account,
-        local_statuses: local_statuses,
+        statuses: statuses,
+        timeline: timeline_str,
         prev_page_id: prev_page_id,
         connection: db_conn
     }))

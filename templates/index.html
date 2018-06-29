@@ -28,22 +28,25 @@
         </section>
         <section class="statuses">
             <header>
-                <h2>Local Timeline</h2>
+                <h2 class="title">{{timeline}} timeline</h2>
+                <nav>
+                    <span>Switch to: </span>
+                    <span><a href="?timeline=local">local</a></span>
+                    <span><a href="?timeline=federated">federated</a></span>
+                </nav>
             </header>
-            {% for status in local_statuses %}
+            {% for status in statuses %}
                 <article class="status">
                     {% match status.get_uri(connection.as_ref()) %}
                     {% when Ok with (uri) %}
                         <header>
-                            <a href="{{uri|safe}}">
                                 {% match status.account(connection.as_ref()) %}
                                 {% when Ok with (status_account) %}
-                                    <div>by: {{status_account.fully_qualified_username()}}</div>
+                                    <a href="{{status_account.get_uri()}}"><div>by: {{status_account.fully_qualified_username()}}</div></a>
                                 {% when Err with (e) %}
                                     <div>[error getting account username]</div>
                                 {% endmatch %}
-                                <div>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></div>
-                            </a>
+                            <a href="{{uri|safe}}"><div>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></div></a>
                         </header>
                     {% when Err with (e) %}
 
@@ -64,7 +67,7 @@
             <nav class="pagination">
                 {% match prev_page_id %}
                 {% when Some with (backlink) %}
-                    <a href="?max_id={{backlink|safe}}" rel="next">older posts</a>
+                    <a href="?timeline={{timeline}}&max_id={{backlink|safe}}" rel="next">older posts</a>
                 {% when None %}
                 {% endmatch %}
             </nav>

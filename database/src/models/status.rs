@@ -99,6 +99,29 @@ impl Status {
 
         let mut query = dsl::statuses.filter(dsl::uri.is_null()).into_boxed();
 
+        println!("{:?}", max_id);
+
+        if let Some(max_id) = max_id {
+            query = query.filter(dsl::id.lt(max_id));
+        }
+
+        query
+            .order(dsl::id.desc())
+            .limit(n as i64)
+            .get_results::<Status>(&**db_conn)
+    }
+    
+    /// Returns `n` statuses in the database, authored _strictly before_ the
+    /// status `max_id`.
+    pub fn federated_before_id(
+        db_conn: &Connection,
+        max_id: Option<i64>,
+        n: usize,
+    ) -> QueryResult<Vec<Status>> {
+        use schema::statuses::{all_columns, dsl};
+
+        let mut query = dsl::statuses.select(all_columns).into_boxed();
+
         if let Some(max_id) = max_id {
             query = query.filter(dsl::id.lt(max_id));
         }
@@ -109,11 +132,30 @@ impl Status {
             .get_results::<Status>(&**db_conn)
     }
 
-    /// Returns a tuple of upper and lower bounds on all the IDs of statuses we know about.
-    /// (i.e., `min(ids)` and `max(ids)` where `ids` is a list of status ids authored by this user).
+    /// Returns a tuple of upper and lower bounds on the IDs of statuses authored locally
+    /// (i.e., `min(ids)` and `max(ids)` where `ids` is a list of status ids authored locally).
+    ///
+    /// If there are no local statuses in the database, return `None`.
+    pub fn local_status_id_bounds(db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
+        use diesel::dsl::sql;
+        use schema::statuses::dsl::*;
+        // Yes, this is gross and we don't like having to use sql() either.
+        // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
+        statuses
+            .select(sql("min(id), max(id)"))
+            .filter(uri.is_null())
+            .first::<(Option<i64>, Option<i64>)>(&**db_conn)
+            .map(|result| match result {
+                (Some(x), Some(y)) => Some((x, y)),
+                _ => None,
+            })
+    }
+
+    /// Returns a tuple of upper and lower bounds on the IDs of statuses in the database
+    /// (i.e., `min(ids)` and `max(ids)` where `ids` is a list of status ids).
     ///
     /// If there are no statuses in the database, return `None`.
-    pub fn status_id_bounds(db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
+    pub fn federated_status_id_bounds(db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
         use diesel::dsl::sql;
         use schema::statuses::dsl::*;
         // Yes, this is gross and we don't like having to use sql() either.

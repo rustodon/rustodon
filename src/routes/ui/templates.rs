@@ -88,7 +88,8 @@ pub struct SignupTemplate<'a> {
 #[template(path = "index.html")]
 pub struct IndexTemplate<'a> {
     pub account:  Option<Account>,
-    pub local_statuses: Vec<Status>,
+    pub statuses: Vec<Status>,
+    pub timeline: &'a str,
     pub prev_page_id: Option<i64>,
     pub connection: db::Connection,
     pub revision: &'a str,
