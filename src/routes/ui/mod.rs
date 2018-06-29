@@ -10,7 +10,6 @@ use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::Route;
 use std::borrow::Cow;
-use std::boxed::Box;
 use std::path::{Path, PathBuf};
 use util::Either;
 use validator::Validate;
