@@ -1,7 +1,10 @@
 source "https://rubygems.org"
 
-gem "sass"
 
 group "development" do
+  gem "sass"
   gem "foreman"
+  gem "cucumber"
+  gem "capybara-selenium"
+  gem "minitest"
 end
