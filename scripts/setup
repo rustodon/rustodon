@@ -42,6 +42,11 @@ if ! which psql 2>/dev/null 1>&2 ; then
   exit 1
 fi
 
+if ! which chromedriver 2>/dev/null 1>&2 ; then
+  alertMsg "chromedriver is not installed, you will not be able to run the integration tests."
+  alertMsg "Install chromedriver via your package manager or the instructions at http://chromedriver.chromium.org/getting-started"
+fi
+
 # Don't track changes to .env
 git update-index --assume-unchanged .env
 
