@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -euo pipefail
+
+PORT="${PORT:-"8001"}"
+DATABASE_URL="${DATABASE_URL:-"postgres://$(whoami)@localhost/rustodontest"}"
+CUCUMBER_HOST="${CUCUMBER_HOST:-"http://localhost:${PORT}/"}"
+
+env DATABASE_URL="${DATABASE_URL}" scripts/setup
+
+mkdir -p log
+env ROCKET_PORT="${PORT}" ROCKET_HOST="localhost" DATABASE_URL="${DATABASE_URL}" cargo run 2>&1 1>log/cucumber.log &
+SERVER_PROCESS=$!
+if [ "${SERVER_PROCESS}" -lt 1 ]; then
+  echo "Cannot run tests, pid < 0"
+  exit 1
+fi
+function killServerProcess() {
+ kill "${SERVER_PROCESS}"
+}
+trap killServerProcess EXIT
+trap killServerProcess INT
+bundle exec env CUCUMBER_HOST="${CUCUMBER_HOST}" DATABASE_URL="${DATABASE_URL}" DOMAIN="cucumber.domain" cucumber $@
+
