@@ -92,3 +92,7 @@ textarea {
   background-color: $background_color;
   border: 1px solid $border_color;
 }
+
+.title {
+  text-transform: capitalize;
+}
