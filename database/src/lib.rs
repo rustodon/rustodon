@@ -12,8 +12,6 @@ extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
-#[macro_use]
-extern crate maplit;
 
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
