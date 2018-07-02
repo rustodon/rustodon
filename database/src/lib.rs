@@ -4,24 +4,18 @@ extern crate chrono;
 extern crate chrono_humanize;
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate diesel_infer_schema;
 extern crate flaken;
 #[macro_use]
 extern crate lazy_static;
 extern crate pwhash;
-extern crate r2d2;
-extern crate r2d2_diesel;
 extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
-#[macro_use]
-extern crate maplit;
 
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
-use r2d2_diesel::ConnectionManager;
+use diesel::r2d2::{self, ConnectionManager};
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
@@ -51,7 +45,7 @@ type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 
 /// Initializes a new connection pool for the database at `url`.
-pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::Error>
+pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::PoolError>
 where
     S: Into<String>,
 {

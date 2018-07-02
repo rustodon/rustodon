@@ -5,7 +5,7 @@ use error::Perhaps;
 use failure::Error;
 use itertools::Itertools;
 use rocket::http::RawStr;
-use rocket::request::{FromFormValue, FlashMessage, Form};
+use rocket::request::{FlashMessage, Form, FromFormValue};
 use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::Route;
 use std::borrow::Cow;
@@ -64,7 +64,7 @@ impl<'v> FromFormValue<'v> for Timeline {
 
 #[derive(FromForm, Debug)]
 pub struct IndexPageParams {
-    max_id: Option<i64>,
+    max_id:   Option<i64>,
     timeline: Option<Timeline>,
 }
 
@@ -88,7 +88,8 @@ pub fn create_status(
 
         // concatenate the error descriptions, with commas between them.
         // TODO: make this less ugly :(
-        let error_desc = errs.iter()
+        let error_desc = errs
+            .iter()
             .flat_map(|(_, errs)| errs)
             .map(|e| {
                 let msg = e.message.to_owned();
@@ -216,7 +217,15 @@ pub fn index(
     account: Option<Account>,
     db_conn: db::Connection,
 ) -> Result<IndexTemplate<'static>, Error> {
-    index_paginated(flash, account, IndexPageParams { max_id: None, timeline: None }, db_conn)
+    index_paginated(
+        flash,
+        account,
+        IndexPageParams {
+            max_id:   None,
+            timeline: None,
+        },
+        db_conn,
+    )
 }
 
 #[get("/?<params>")]

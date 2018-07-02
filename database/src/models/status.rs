@@ -110,7 +110,7 @@ impl Status {
             .limit(n as i64)
             .get_results::<Status>(&**db_conn)
     }
-    
+
     /// Returns `n` statuses in the database, authored _strictly before_ the
     /// status `max_id`.
     pub fn federated_before_id(
@@ -142,7 +142,7 @@ impl Status {
         // Yes, this is gross and we don't like having to use sql() either.
         // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
         statuses
-            .select(sql("min(id), max(id)"))
+            .select((sql("min(id)"), sql("max(id)")))
             .filter(uri.is_null())
             .first::<(Option<i64>, Option<i64>)>(&**db_conn)
             .map(|result| match result {
@@ -161,7 +161,7 @@ impl Status {
         // Yes, this is gross and we don't like having to use sql() either.
         // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
         statuses
-            .select(sql("min(id), max(id)"))
+            .select((sql("min(id)"), sql("max(id)")))
             .first::<(Option<i64>, Option<i64>)>(&**db_conn)
             .map(|result| match result {
                 (Some(x), Some(y)) => Some((x, y)),

@@ -202,7 +202,7 @@ impl Account {
         // Yes, this is gross and we don't like having to use sql() either.
         // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
         statuses
-            .select(sql("min(id), max(id)"))
+            .select((sql("min(id)"), sql("max(id)")))
             .filter(account_id.eq(self.id))
             .first::<(Option<i64>, Option<i64>)>(&**db_conn)
             .map(|result| match result {
