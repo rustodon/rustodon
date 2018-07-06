@@ -42,7 +42,7 @@
                         <header>
                                 {% match status.account(connection.as_ref()) %}
                                 {% when Ok with (status_account) %}
-                                    <a href="{{status_account.get_uri()}}"><div>by: {{status_account.fully_qualified_username()}}</div></a>
+                                    <a href="{{status_account.get_uri()|safe}}"><div>by: {{status_account.fully_qualified_username()}}</div></a>
                                 {% when Err with (e) %}
                                     <div>[error getting account username]</div>
                                 {% endmatch %}
