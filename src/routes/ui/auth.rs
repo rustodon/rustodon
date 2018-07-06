@@ -102,7 +102,7 @@ pub fn signup_post(
 
         return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
     }
-    if let Ok(_) =
+    if let Ok(Some(_)) =
         db::models::Account::fetch_local_by_username(&db_conn, form_data.username.as_str())
     {
         return Ok(Flash::error(
