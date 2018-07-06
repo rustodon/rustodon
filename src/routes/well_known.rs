@@ -29,9 +29,13 @@ pub struct WFQuery {
 #[get("/.well-known/webfinger?<query>")]
 pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhaps<Content<Json>> {
     // TODO: don't unwrap
-    let (_, addr) = query
-        .resource
-        .split_at(query.resource.rfind("acct:").unwrap() + "acct:".len());
+    let (_, addr) = query.resource.split_at(
+        query
+            .resource
+            .rfind("acct:")
+            .map(|i| i + "acct:".len())
+            .unwrap_or(0),
+    );
     let (username, domain) = addr.split('@').collect_tuple().unwrap();
 
     // If the webfinger address had a different domain, 404 out.
