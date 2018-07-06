@@ -1,6 +1,6 @@
 use db::models::{NewAccount, NewUser, User};
 use db::validators;
-use db::{self, id_generator, DieselConnection};
+use db::{self, id_generator, DieselConnection, LOCAL_ACCOUNT_DOMAIN};
 use failure::Error;
 use itertools::Itertools;
 use rocket::http::{Cookie, Cookies};
@@ -80,8 +80,6 @@ pub fn signup_get(flash: Option<FlashMessage>) -> SignupTemplate<'static> {
     HtmlTemplate!(SignupTemplate, flash)
 }
 
-static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
-
 #[post("/auth/sign_up", data = "<form>")]
 pub fn signup_post(
     form: Form<SignupForm>,
@@ -104,7 +102,7 @@ pub fn signup_post(
 
         return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
     }
-    if let Ok(account) =
+    if let Ok(_) =
         db::models::Account::fetch_local_by_username(&db_conn, form_data.username.as_str())
     {
         return Ok(Flash::error(
@@ -117,7 +115,7 @@ pub fn signup_post(
         let mut id_gen = id_generator();
         let account = NewAccount {
             id: id_gen.next(),
-            domain: Some(String::from(LOCAL_ACCOUNT_DOMAIN)),
+            domain: Some(LOCAL_ACCOUNT_DOMAIN.to_string()),
             uri: None,
 
             username: form_data.username.to_owned(),
