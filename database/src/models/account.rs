@@ -12,6 +12,9 @@ use schema::accounts;
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
 /// A uri of None implies a local account.
+///
+/// Uniqueness is enforced both on the username/domain pair and on the uri.
+
 #[derive(Identifiable, Queryable, Debug, PartialEq)]
 #[table_name = "accounts"]
 pub struct Account {

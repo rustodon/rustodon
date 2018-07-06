@@ -55,8 +55,8 @@ pub fn signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
 
 #[derive(FromForm, Validate, Debug)]
 pub struct SignupForm {
-    #[validate(length(min = "1", max = "32"))]
     #[validate(
+        length(min = "1", max = "32"),
         regex(
             path = "validators::VALID_USERNAME_RE",
             message = "Username must consist of {A-Z, a-z, 0-9, _}."
@@ -78,13 +78,14 @@ pub fn signup_get(flash: Option<FlashMessage>) -> SignupTemplate<'static> {
     HtmlTemplate!(SignupTemplate, flash)
 }
 
+static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
+
 #[post("/auth/sign_up", data = "<form>")]
 pub fn signup_post(
     form: Form<SignupForm>,
     db_conn: db::Connection,
 ) -> Result<Flash<Redirect>, Error> {
     let form_data = form.get();
-
     if let Err(errs) = form_data.validate() {
         let errs = errs.inner();
 
@@ -101,13 +102,20 @@ pub fn signup_post(
 
         return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
     }
+    if let Ok(account) =
+        db::models::Account::fetch_local_by_username(&db_conn, form_data.username.as_str())
+    {
+        return Ok(Flash::error(
+            Redirect::to("/auth/sign_up"),
+            "Username taken",
+        ));
+    }
 
     (*db_conn).transaction::<_, _, _>(|| {
         let mut id_gen = id_generator();
-
         let account = NewAccount {
             id: id_gen.next(),
-            domain: None,
+            domain: Some(String::from(LOCAL_ACCOUNT_DOMAIN)),
             uri: None,
 
             username: form_data.username.to_owned(),
