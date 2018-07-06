@@ -99,8 +99,6 @@ impl Status {
 
         let mut query = dsl::statuses.filter(dsl::uri.is_null()).into_boxed();
 
-        println!("{:?}", max_id);
-
         if let Some(max_id) = max_id {
             query = query.filter(dsl::id.lt(max_id));
         }
