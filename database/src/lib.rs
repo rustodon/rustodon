@@ -38,6 +38,8 @@ lazy_static! {
     pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
 }
 
+pub static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
+
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 

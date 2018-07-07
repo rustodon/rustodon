@@ -1,6 +1,6 @@
 use db::models::{NewAccount, NewUser, User};
 use db::validators;
-use db::{self, id_generator, DieselConnection};
+use db::{self, id_generator, DieselConnection, LOCAL_ACCOUNT_DOMAIN};
 use failure::Error;
 use itertools::Itertools;
 use rocket::http::{Cookie, Cookies};
@@ -55,8 +55,10 @@ pub fn signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
 
 #[derive(FromForm, Validate, Debug)]
 pub struct SignupForm {
-    #[validate(length(min = "1", max = "32"))]
     #[validate(
+        length(
+            min = "1", max = "32", message = "Username must be between 1 and 32 characters long."
+        ),
         regex(
             path = "validators::VALID_USERNAME_RE",
             message = "Username must consist of {A-Z, a-z, 0-9, _}."
@@ -84,7 +86,6 @@ pub fn signup_post(
     db_conn: db::Connection,
 ) -> Result<Flash<Redirect>, Error> {
     let form_data = form.get();
-
     if let Err(errs) = form_data.validate() {
         let errs = errs.inner();
 
@@ -101,13 +102,20 @@ pub fn signup_post(
 
         return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
     }
+    if let Ok(Some(_)) =
+        db::models::Account::fetch_local_by_username(&db_conn, form_data.username.as_str())
+    {
+        return Ok(Flash::error(
+            Redirect::to("/auth/sign_up"),
+            "Username taken",
+        ));
+    }
 
     (*db_conn).transaction::<_, _, _>(|| {
         let mut id_gen = id_generator();
-
         let account = NewAccount {
             id: id_gen.next(),
-            domain: None,
+            domain: Some(LOCAL_ACCOUNT_DOMAIN.to_string()),
             uri: None,
 
             username: form_data.username.to_owned(),
