@@ -2,7 +2,7 @@ use diesel;
 use diesel::prelude::*;
 use std::borrow::Cow;
 use Connection;
-use {BASE_URL, DOMAIN};
+use {BASE_URL, DOMAIN, LOCAL_ACCOUNT_DOMAIN};
 
 use models::{Status, User};
 use rocket::request::{self, FromRequest, Request};
@@ -12,6 +12,9 @@ use schema::accounts;
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
 /// A uri of None implies a local account.
+///
+/// Uniqueness is enforced both on the username/domain pair and on the uri.
+
 #[derive(Identifiable, Queryable, Debug, PartialEq)]
 #[table_name = "accounts"]
 pub struct Account {
@@ -60,7 +63,7 @@ impl Account {
         use schema::accounts::dsl;
         dsl::accounts
             .filter(dsl::username.eq(username.into()))
-            .filter(dsl::domain.is_null())
+            .filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN))
             .first::<Account>(&**db_conn)
             .optional()
     }
@@ -78,7 +81,7 @@ impl Account {
         if let Some(domain) = domain.map(Into::into) {
             query = query.filter(dsl::domain.eq(domain));
         } else {
-            query = query.filter(dsl::domain.is_null());
+            query = query.filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN));
         };
 
         query.first::<Account>(&**db_conn).optional()
@@ -95,10 +98,20 @@ impl Account {
 
     /// Returns the domain on which an account resides.
     pub fn get_domain(&self) -> &str {
-        self.domain
-            .as_ref()
-            .map(String::as_str)
-            .unwrap_or_else(|| DOMAIN.as_str())
+        if let Some(domain_str) = self.domain.as_ref() {
+            if domain_str.as_str() == LOCAL_ACCOUNT_DOMAIN {
+                DOMAIN.as_str()
+            } else {
+                domain_str.as_str()
+            }
+        } else {
+            // This is not quite "correct", in that a domain that is NULL is neither a
+            // local domain nor a remote domain, however it reflects the intent of the
+            // application the closest. There may be downstream security concerns here
+            // tho if a user is able to somehow manufacture an Account with a NULL
+            // domain.
+            DOMAIN.as_str()
+        }
     }
 
     /// Returns the URI of the account's ActivityPub object.
@@ -227,7 +240,7 @@ impl Account {
         // Yes, this is gross and we don't like having to use sql() either.
         // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
         statuses
-            .select(sql("min(id), max(id)"))
+            .select((sql("min(id)"), sql("max(id)")))
             .filter(account_id.eq(self.id))
             .first::<(Option<i64>, Option<i64>)>(&**db_conn)
             .map(|result| match result {
@@ -275,6 +288,61 @@ impl<'a, 'r> FromRequest<'a, 'r> for Account {
             }
         } else {
             Outcome::Forward(())
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+
+    #[test]
+    fn it_calculates_domain_correctly() {
+        let local_domain: &str = "local.domain";
+        let test_env_domain = env::var("DOMAIN");
+        env::set_var("DOMAIN", local_domain);
+        let account_with_null_domain: Account = Account {
+            id: 1,
+            uri: Some("http://fake.value/1".to_string()),
+            domain: None,
+            username: "account1".to_string(),
+            display_name: None,
+            summary: None,
+        };
+        let account_with_local_domain: Account = Account {
+            id: 2,
+            uri: Some("http://fake.value/2".to_string()),
+            domain: Some(LOCAL_ACCOUNT_DOMAIN.to_string()),
+            username: "account2".to_string(),
+            display_name: None,
+            summary: None,
+        };
+        let account_with_remote_domain: Account = Account {
+            id: 3,
+            uri: Some("http://fake.value/3".to_string()),
+            domain: Some("fake.value".to_string()),
+            username: "account3".to_string(),
+            display_name: None,
+            summary: None,
+        };
+        assert_eq!(
+            account_with_null_domain.get_domain(),
+            local_domain,
+            "Account with NULL domain should be calculated as the local domain"
+        );
+        assert_eq!(
+            account_with_local_domain.get_domain(),
+            local_domain,
+            "Account created locally should be calculated as the local domain"
+        );
+        assert_eq!(
+            account_with_remote_domain.get_domain(),
+            "fake.value",
+            "Account from remote should be calculated as their origin"
+        );
+        if let Ok(original_domain) = test_env_domain {
+            env::set_var("DOMAIN", original_domain);
         }
     }
 }
