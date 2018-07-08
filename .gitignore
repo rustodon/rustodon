@@ -7,6 +7,7 @@
 *.sqlite3*-wal
 *.sqlite*-shm
 *.sqlite*-wal
+*.env.*
 .sass-cache/
 static/style.css
 static/style.css.map
