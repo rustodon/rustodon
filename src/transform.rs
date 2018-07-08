@@ -34,7 +34,7 @@ pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
                 if let Some(account) = Account::fetch_by_username_domain(db_conn, user, domain)? {
                     format!(
                         "<a href=\"{url}\">{mention}</a>",
-                        url = account.get_uri(),
+                        url = account.profile_path(),
                         mention = entity_text
                     )
                 } else {

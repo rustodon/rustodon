@@ -121,11 +121,16 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.profile_path()
                 ).into()
             })
+    }
+
+    /// Returns the server local path to the Account profile page for this account.
+    pub fn profile_path<'a>(&'a self) -> Cow<'a, str> {
+        format!("/users/{user}", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `inbox` endpoint for this account.
@@ -135,11 +140,16 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}/inbox",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.inbox_path()
                 ).into()
             })
+    }
+
+    /// Returns the server local path to the `inbox` endpoint for this account.
+    pub fn inbox_path<'a>(&'a self) -> Cow<'a, str> {
+        format!("/users/{user}/inbox", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `outbox` endpoint for this account.
@@ -149,11 +159,16 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}/outbox",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.outbox_path()
                 ).into()
             })
+    }
+
+    /// Returns the server local path to the `outbox` endpoint for this account.
+    pub fn outbox_path<'a>(&'a self) -> Cow<'a, str> {
+        format!("/users/{user}/outbox", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `following` endpoint for this account.
@@ -163,11 +178,16 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}/following",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.following_path()
                 ).into()
             })
+    }
+
+    /// Returns the server local path to the `following` endpoint for this account.
+    pub fn following_path<'a>(&'a self) -> Cow<'a, str> {
+        format!("/users/{user}/following", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `followers` endpoint for this account.
@@ -177,11 +197,16 @@ impl Account {
             .map(|x| String::as_str(x).into())
             .unwrap_or_else(|| {
                 format!(
-                    "{base}/users/{user}/followers",
+                    "{base}{path}",
                     base = BASE_URL.as_str(),
-                    user = self.username
+                    path = self.followers_path()
                 ).into()
             })
+    }
+
+    /// Returns the server local path to the `followers` resource on this account.
+    pub fn followers_path<'a>(&'a self) -> Cow<'a, str> {
+        format!("/users/{user}/followers", user = self.username).into()
     }
 
     /// Returns `n` statuses authored by this account, authored
