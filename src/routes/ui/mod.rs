@@ -1,4 +1,6 @@
 use chrono::offset::Utc;
+
+use db::datetime::{DateTimeType, NewDateTime, Rfc339able};
 use db::models::{Account, NewStatus, Status, User};
 use db::{self, id_generator};
 use error::Perhaps;
@@ -109,7 +111,7 @@ pub fn create_status(
 
     let _status = NewStatus {
         id: id_generator().next(),
-        created_at: Utc::now(),
+        created_at: DateTimeType::now(),
         text: form_data.content.to_owned(),
         content_warning: content_warning,
         account_id: user.account_id,

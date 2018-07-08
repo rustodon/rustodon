@@ -44,10 +44,18 @@ pub struct NewAccount {
 impl NewAccount {
     pub fn insert(self, conn: &Connection) -> QueryResult<Account> {
         use schema::accounts::dsl::*;
-
-        diesel::insert_into(accounts)
+        let inserted = diesel::insert_into(accounts)
             .values(&self)
-            .get_result(&**conn)
+            .execute(&**conn)?;
+        if inserted == 1 {
+            if let Some(account) = Account::fetch_by_id(conn, self.id)? {
+                Ok(account)
+            } else {
+                Err(diesel::NotFound)
+            }
+        } else {
+            Err(diesel::NotFound)
+        }
     }
 }
 
@@ -84,6 +92,12 @@ impl Account {
             query = query.filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN));
         };
 
+        query.first::<Account>(&**db_conn).optional()
+    }
+
+    pub fn fetch_by_id(db_conn: &Connection, id: i64) -> QueryResult<Option<Account>> {
+        use schema::accounts::dsl;
+        let mut query = dsl::accounts.filter(dsl::id.eq(id)).into_boxed();
         query.first::<Account>(&**db_conn).optional()
     }
 

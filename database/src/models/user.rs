@@ -33,10 +33,10 @@ pub struct NewUser {
 }
 
 impl NewUser {
-    pub fn insert(self, conn: &Connection) -> QueryResult<User> {
+    pub fn insert(self, conn: &Connection) -> QueryResult<usize> {
         use schema::users::dsl::*;
 
-        diesel::insert_into(users).values(&self).get_result(&**conn)
+        diesel::insert_into(users).values(&self).execute(&**conn)
     }
 }
 

@@ -3,6 +3,11 @@ name = "rustodon"
 version = "0.1.0"
 authors = ["The Rustodon team"]
 
+[features]
+default = ["postgres"]
+postgres = ["rustodon_database/postgres"]
+sqlite = ["rustodon_database/sqlite"]
+
 [workspace]
 members = ['database/', 'lib/resopt/', 'lib/posticle/']
 

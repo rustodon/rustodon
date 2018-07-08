@@ -1,5 +1,6 @@
 use chrono::offset::Utc;
 use chrono::DateTime;
+use chrono::NaiveDateTime;
 use chrono_humanize::Humanize;
 use diesel;
 use diesel::prelude::*;
@@ -7,6 +8,7 @@ use std::borrow::Cow;
 use Connection;
 use BASE_URL;
 
+use datetime::{DateTimeType, Humanizable};
 use models::Account;
 use schema::statuses;
 
@@ -20,7 +22,7 @@ pub struct Status {
     pub id: i64,
     pub text: String,
     pub content_warning: Option<String>,
-    pub created_at: DateTime<Utc>,
+    pub created_at: DateTimeType,
     pub account_id: i64,
     pub uri: Option<String>,
 }
@@ -32,17 +34,15 @@ pub struct NewStatus {
     pub id: i64,
     pub text: String,
     pub content_warning: Option<String>,
-    pub created_at: DateTime<Utc>,
+    pub created_at: DateTimeType,
     pub account_id: i64,
 }
 
 impl NewStatus {
-    pub fn insert(self, conn: &Connection) -> QueryResult<Status> {
+    pub fn insert(self, conn: &Connection) -> QueryResult<usize> {
         use schema::statuses::dsl::*;
 
-        diesel::insert_into(statuses)
-            .values(&self)
-            .get_result(&**conn)
+        diesel::insert_into(statuses).values(&self).execute(&**conn)
     }
 }
 

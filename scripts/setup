@@ -4,11 +4,24 @@ set -euo pipefail
 # Uncomment the line below if you would like to diagnose what commands are being done on your behalf.
 # set -x
 
+DATABASE_URL="${DATABASE_URL:-""}"
+CI="${CI:-"0"}"
+
+if [ -z "${DATABASE_URL}" ]; then
+  if [ -f .env ]; then
+    source .env
+  fi
+fi
+
+if [ -z "${DATABASE_URL}" ]; then
+  echo "DATABASE_URL not set." >&2
+  exit 1
+fi
+
 DEFAULT_POSTGRES_HOST="localhost"
 DEFAULT_POSTGRES_USER=""
 DEFAULT_POSTGRES_PASSWORD=""
 DEFAULT_POSTGRES_DATABASE="rustodon"
-DATABASE_URL="${DATABASE_URL:-""}"
 
 infoMsg() {
   echo "[*] ${1}"
@@ -48,35 +61,14 @@ git update-index --assume-unchanged .env
 if [ -z "${DATABASE_URL}" ]; then
   if ! grep DATABASE_URL ./.env 2>/dev/null 1>&2; then
     # Prompt user for local database information
-    read -p "Postgres host (default: ${DEFAULT_POSTGRES_HOST}): " POSTGRES_HOST
-    read -p "Postgres user (default: ${DEFAULT_POSTGRES_USER}): " POSTGRES_USER
-    read -p "Postgres password (default: ${DEFAULT_POSTGRES_PASSWORD}): " POSTGRES_PASSWORD
-    read -p "Postgres database (default: ${DEFAULT_POSTGRES_DATABASE}): " POSTGRES_DATABASE
-    if [ -z "${POSTGRES_HOST}" ]; then
-      POSTGRES_HOST="${DEFAULT_POSTGRES_HOST}"
-    fi
-    if [ -z "${POSTGRES_USER}" ]; then
-      POSTGRES_USER="${DEFAULT_POSTGRES_USER}"
-    fi
-    if [ -z "${POSTGRES_PASSWORD}" ]; then
-      POSTGRES_PASSWORD="${DEFAULT_POSTGRES_PASSWORD}"
-    fi
-    if [ -z "${POSTGRES_DATABASE}" ]; then
-      POSTGRES_DATABASE="${DEFAULT_POSTGRES_DATABASE}"
-    fi
-    DB_CREDENTIALS=""
-    if [ ! -z "${POSTGRES_USER}" ]; then
-      if [ -z "${POSTGRES_PASSWORD}" ]; then
-        DB_CREDENTIALS="${POSTGRES_USER}@"
-      else
-        DB_CREDENTIALS="${POSTGRES_USER}:${POSTGRES_PASSWORD}@" 
-      fi
-    fi
-    if [ -z "${POSTGRES_PASSWORD}" ]; then
-      DATABASE_URL="postgres://${DB_CREDENTIALS}${POSTGRES_HOST}/${POSTGRES_DATABASE}"
-    else
-      DATABASE_URL="postgres://${DB_CREDENTIALS}${POSTGRES_HOST}/${POSTGRES_DATABASE}"
-    fi
+    infoMsg "Enter the database URL for your configuration."
+    infoMsg "If you are using SQLite, enter a path to the file, a la:"
+    infoMsg "rustodon.sqlite"
+    infoMsg "If you are using Postgres, enter a Postgres database URL, a la:"
+    infoMsg "postgres://myusername@localhost/rustodon"
+    infoMsg "OR if you are using a password, "
+    infoMsg "postgres://myusername:mypassword@localhost/rustodon"
+    read -p "Enter datatabase URL value: " DATABASE_URL
     infoMsg "Database URL is ${DATABASE_URL}"
     echo "DATABASE_URL=${DATABASE_URL}" >> .env
   fi
@@ -89,22 +81,34 @@ if ! which bundler 2>/dev/null 1>&2 ; then
 fi
 if ! bundle check 2>/dev/null 1>&2 ; then
   infoMsg "Installing Ruby dependencies..."
-  bundle install --path=vendor/
+  if [ "${CI}" -eq 1 ]; then
+    bundle install
+  else
+    bundle install --path=vendor/
+  fi
 fi
 
 # Diesel CLI install
 if ! which diesel 2>/dev/null 1>&2 ; then
   infoMsg "Installing diesel_cli..."
-  cargo install diesel_cli --no-default-features --features="postgres"
+  cargo install diesel_cli --no-default-features --features="postgres sqlite"
 fi
 if ! which cargo-watch 2>/dev/null 1>&2 ; then
   infoMsg "Installing cargo-watch..."
-  cargo install cargo-watch 
+  cargo install cargo-watch
 fi
 
 # Database creation and migration
 infoMsg "Running migrations..."
-diesel database setup --migration-dir=migrations
+if [[ "$DATABASE_URL" = "postgres"* ]]; then
+  infoMsg "Detected Postgres..."
+  diesel database setup --migration-dir=migrations
+  diesel print-schema > database/src/schema.rs
+else
+  infoMsg "Assuming SQLite..."
+  diesel database setup --migration-dir=migrations_sqlite
+  diesel print-schema > database/src/schema.rs
+fi
 
 if [ ! -f "Rocket.toml" ]; then
   infoMsg "Generating Rocket.toml. This contains your server secret key, keep this file private."

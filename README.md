@@ -47,9 +47,9 @@ Federation requires that the application know where it's hosted, and (thanks to 
 
 ### Running database migrations
 
-`diesel database setup`
+`scripts/setup`
 
 ### Running the tests
 
-`cargo test --all`
+`scripts/test`
 

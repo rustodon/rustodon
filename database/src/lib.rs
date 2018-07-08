@@ -13,19 +13,38 @@ extern crate regex;
 extern crate resopt;
 extern crate rocket;
 
-pub use diesel::connection::Connection as DieselConnection;
-use diesel::pg::PgConnection;
-use diesel::r2d2::{self, ConnectionManager};
-use rocket::http::Status;
-use rocket::request::{self, FromRequest};
-use rocket::{Outcome, Request, State};
 use std::env;
 use std::ops::Deref;
 
+pub use diesel::connection::Connection as DieselConnection;
+
+#[cfg(feature = "sqlite")]
+use diesel::sqlite::SqliteConnection;
+
+#[cfg(feature = "postgres")]
+use diesel::pg::PgConnection;
+use diesel::r2d2::{self, ConnectionManager};
+use rocket::http::Status;
+
+use rocket::request::{self, FromRequest};
+use rocket::{Outcome, Request, State};
+
+use chrono_humanize::Humanize;
+
+pub mod datetime;
 pub mod idgen;
 pub mod models;
 pub mod schema;
 pub mod validators;
+
+#[cfg(all(feature = "sqlite", feature = "postgres"))]
+compile_error!("sqlite and postgres features cannot be simultaneously selected");
+
+#[cfg(all(feature = "sqlite", not(feature = "postgres")))]
+type DbConnection = SqliteConnection;
+
+#[cfg(all(not(feature = "sqlite"), feature = "postgres"))]
+type DbConnection = PgConnection;
 
 pub use idgen::id_generator;
 
@@ -41,17 +60,17 @@ lazy_static! {
 pub static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
 
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
-type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+type Pool = r2d2::Pool<ConnectionManager<DbConnection>>;
 
 /// Type alias for the pooled connection.
-type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
+type PooledConnection = r2d2::PooledConnection<ConnectionManager<DbConnection>>;
 
 /// Initializes a new connection pool for the database at `url`.
 pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::PoolError>
 where
     S: Into<String>,
 {
-    let manager = ConnectionManager::<PgConnection>::new(url);
+    let manager = ConnectionManager::<DbConnection>::new(url);
 
     r2d2::Pool::builder().build(manager)
 }
@@ -79,11 +98,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for Connection {
     }
 }
 
-/// A convenient way to use a `&db::Connection` as a `&PgConnection`.
+/// A convenient way to use a `&db::Connection` as a `&DbConnection`.
 ///
 /// Just allows deref-ing the inner `PooledConnection`.
 impl Deref for Connection {
-    type Target = PgConnection;
+    type Target = DbConnection;
 
     fn deref(&self) -> &Self::Target {
         &self.0

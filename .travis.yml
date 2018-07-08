@@ -25,15 +25,16 @@ env:
     - secure: "UDGBd4vW7M4kMDQXp7Y/syTDU0TglHV5OCuv9b2S5aA3woPxFMl+qzfKNsexstYK49804oDt3jQO8e7aDDVkcOqWluhKSDAmOH8cqqYwfayGyuTy6f4rLmluOIoZ5Ak7gLnV/aufLWE8oxYRByq3OI0np4cdztHmcrvnaGIcVH43t7q4M7u+qKWsZfcEa0ftVO0zynShbiUNtWXek7iSt7YzJTDe4WzOYKeQ7W2lDGKX/642xjPO1NdpcsAidPGz4B8aZNVPiKDUbrptXkBEK04MvrVwI3KRX6JDsrkN29NXq0s+zbES+gWXwnHRhJ9GAqGiysqiNm7OY4zS4+sPSDSyJouSwg+VRwZ1TDDhLOTgKG208AJb10Nx2tKxmmM2z9l/aqkRhGcNneVCTPWLYR4a33KApzu7bsoom4VxtlBeIQDdG7gIxZu2bFxePVwbD/pS2P/9VdAMnE+7kracbJGvY4A8jiqRVlL9ozQ8+FUIB1+wK57KwbvZTabjr6JFB2pG8vkOuqGaA23KZeSOGDI3xR9FO2CRfBhm3GEOu0neGRqX8h79WNXaZ94W65qxVPY4s0S0NV7Rstz8usRWfGoas2QwJpPNaY9BESwi+4VNeQifsAWAUH+0QIlkvkS/k8bga3CJ2SGJp4IyH3m1nUF+hnHHlnHhm5WW6eVKK/o="
     - secure: "UV8N8yku3CKiUZByQ9Sy8kIL2O1xL6jxdnxN+OxO6wlwEdHZFGQA1takFO9i5aokdTnGJXBh25EnT31oPEsz7oJVz/8QMeuvg9prGOwKk2jeZdwwzfpgnrLDQTqV09TIOJ5Numle4AoyiotmbgjKaYSOU1yujGdonfGCeAcUpotgUPO97W8F7Il+RDjvLA3sKTSrvjf9RBglipNpb1T2gZT9oZCp9AGGQVwB2y/aLj6Io2zy3xc6OVG6uzTQYnKOkqyIK8KaYpE6NI0ACmg1EpuBTlCjBV2jM3S/4ycSLPHHmVVvvZBpFtlDFs0pd0yZPHv5PwG/duXJFs0/5+cTbbnRsQisWKazfbOPhR2XZOBmaCxAwI/W04pRrVJPAM05WNEGZCRU6w/ZMuBJFVvCjMhco5UhLZINCLQz3hodnVW7Wl5oP8dFfqV3NPQx8KhVnMhDxcWWwyTZeDkZalPXgX36Qo5T5tklQQ3/DiyiICLTrcePqaHlI/vEug+nGPZPQiX2pKttrDYKy2DTRk79vH2Rsw14NjTFUJZgzNHxT0xTampFJ+jkq1WXw0O+tnPQYqQYkf2aqzFrDwfakuKeGqUarJgaQeqm5CTYDETkQI7wSTtdB7srghYFS6fbhgvGqusus61LG+N7YMVirNsDLAOdcffpVWsNOMVHJAmp7b4="
   matrix:
-    - MIGRATION_DIR=migrations FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
+    - MIGRATION_DIR=migrations        FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
+    - MIGRATION_DIR=migrations_sqlite FEATURES=sqlite   DATABASE_URL=rustodon.sqlite3
 
 before_script:
-  - scripts/setup
+  - CI=1 scripts/setup
 
 script:
   - cargo fmt -- --check
-  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release; else cargo build; fi
-  - cargo test --all
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release --no-default-features --features="${FEATURES}"; else cargo build --no-default-features --features="${FEATURES}"; fi
+  - scripts/test
 
 after_success: ./scripts/after_success.sh
 
