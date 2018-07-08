@@ -8,16 +8,11 @@ extern crate flaken;
 #[macro_use]
 extern crate lazy_static;
 extern crate pwhash;
-extern crate r2d2;
-extern crate r2d2_diesel;
 extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
-#[macro_use]
-extern crate maplit;
 
-use r2d2_diesel::ConnectionManager;
 use std::env;
 use std::ops::Deref;
 
@@ -28,7 +23,7 @@ use diesel::sqlite::SqliteConnection;
 
 #[cfg(feature = "postgres")]
 use diesel::pg::PgConnection;
-
+use diesel::r2d2::{self, ConnectionManager};
 use rocket::http::Status;
 
 use rocket::request::{self, FromRequest};
@@ -62,6 +57,8 @@ lazy_static! {
     pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
 }
 
+pub static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
+
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
 type Pool = r2d2::Pool<ConnectionManager<DbConnection>>;
 
@@ -69,7 +66,7 @@ type Pool = r2d2::Pool<ConnectionManager<DbConnection>>;
 type PooledConnection = r2d2::PooledConnection<ConnectionManager<DbConnection>>;
 
 /// Initializes a new connection pool for the database at `url`.
-pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::Error>
+pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::PoolError>
 where
     S: Into<String>,
 {

@@ -4,6 +4,7 @@ use pwhash::bcrypt;
 use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
 use Connection;
+use LOCAL_ACCOUNT_DOMAIN;
 
 use models::Account;
 use schema::users;
@@ -65,7 +66,7 @@ impl User {
             use schema::accounts::dsl;
             dsl::accounts
                 .filter(dsl::username.eq(username.as_ref()))
-                .filter(dsl::domain.is_null())
+                .filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN))
                 .first::<Account>(&**db_conn)
                 .optional()
         });

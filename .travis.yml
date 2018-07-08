@@ -1,7 +1,7 @@
 language: rust
 
 rust:
-  - nightly-2018-05-15
+  - nightly-2018-06-28
 
 addons:
   config:
@@ -32,7 +32,7 @@ before_script:
   - CI=1 scripts/setup
 
 script:
-  - cargo fmt -- --write-mode=diff
+  - cargo fmt -- --check
   - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release --no-default-features --features="${FEATURES}"; else cargo build --no-default-features --features="${FEATURES}"; fi
   - scripts/test
 

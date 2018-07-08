@@ -26,7 +26,53 @@
                 <button type="submit">post</button>
             </form>
         </section>
-        {% when None %}
+        <section class="statuses">
+            <header>
+                <h2 class="title">{{timeline}} timeline</h2>
+                <nav>
+                    <span>Switch to: </span>
+                    <span><a href="?timeline=local">local</a></span>
+                    <span><a href="?timeline=federated">federated</a></span>
+                </nav>
+            </header>
+            {% for status in statuses %}
+                <article class="status">
+                    {% match status.get_uri(connection.as_ref()) %}
+                    {% when Ok with (uri) %}
+                        <header>
+                                {% match status.account(connection.as_ref()) %}
+                                {% when Ok with (status_account) %}
+                                    <a href="{{status_account.get_uri()|safe}}"><div>by: {{status_account.fully_qualified_username()}}</div></a>
+                                {% when Err with (e) %}
+                                    <div>[error getting account username]</div>
+                                {% endmatch %}
+                            <a href="{{uri|safe}}"><div>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></div></a>
+                        </header>
+                    {% when Err with (e) %}
+
+                    {% endmatch %}
+                    <section>
+                        {% match status.content_warning %}
+                        {% when Some with (cw) %}
+                            <span>{{cw}}</span>
+                            <input class="collapse--toggle" id="collapsible-{{status.id}}" type="checkbox" />
+                            <label class="collapse--lbl-toggle" for="collapsible-{{status.id}}" tabindex="0">Toggle CW</label>
+                            <div class="content collapse--content">{{status.text}}</div>
+                        {% when None %}
+                            <div class="content">{{status.text}}</div>
+                        {% endmatch %}
+                    </section>
+                </article>
+            {% endfor %}
+            <nav class="pagination">
+                {% match prev_page_id %}
+                {% when Some with (backlink) %}
+                    <a href="?timeline={{timeline}}&max_id={{backlink|safe}}" rel="next">older posts</a>
+                {% when None %}
+                {% endmatch %}
+            </nav>
+        </section>
+    {% when None %}
         <header>
             <h1>Rustodon</h1>
             <nav>

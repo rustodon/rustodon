@@ -10,13 +10,9 @@ sqlite = ["diesel/sqlite"]
 [dependencies]
 lazy_static = "1.0"
 regex = "1.0"
-maplit = "1.0"
 
-
-diesel = { version = "1.0.0", features = ["chrono"] }
+diesel = { version = "1.3.2", features = ["chrono", "r2d2"] }
 flaken = "0.2.2"
-r2d2 = "0.8.1"
-r2d2-diesel = "1.0.0"
 
 rocket = "0.3.10"
 
