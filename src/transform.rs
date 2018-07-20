@@ -3,8 +3,8 @@ use failure::Error;
 use maud_htmlescape::Escaper;
 use posticle::{self, EntityKind};
 
-use db;
 use db::models::Account;
+use error::Perhaps;
 
 fn escape_html(text: impl AsRef<str>) -> Result<String, Error> {
     use std::fmt::Write;
@@ -16,9 +16,10 @@ fn escape_html(text: impl AsRef<str>) -> Result<String, Error> {
     Ok(out)
 }
 
-/// TODO: This should likely not require a db connection, the caller should provide a map of usernames to
-/// urls or similar.
-pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
+pub fn bio<L>(text: &str, account_lookup: L) -> Result<String, Error>
+where
+    L: Fn(&str, Option<&str>) -> Perhaps<Account>,
+{
     let mut html = String::new();
     let mut cursor = 0;
 
@@ -31,7 +32,7 @@ pub fn bio(text: &str, db_conn: &db::Connection) -> Result<String, Error> {
             EntityKind::Url => format!("<a href=\"{url}\">{url}</a>", url = entity_text),
             EntityKind::Hashtag => format!("<a href=\"#\">{hashtag}</a>", hashtag = entity_text),
             EntityKind::Mention(user, domain) => {
-                if let Some(account) = Account::fetch_by_username_domain(db_conn, user, domain)? {
+                if let Some(account) = account_lookup(&user, domain.as_ref().map(String::as_str))? {
                     format!(
                         "<a href=\"{url}\">{mention}</a>",
                         url = account.profile_path(),
