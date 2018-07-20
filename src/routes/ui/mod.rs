@@ -118,7 +118,10 @@ pub fn create_status(
     Ok(Either::Right(Redirect::to("/")))
 }
 
-#[get("/users/<username>/statuses/<status_id>", format = "text/html")]
+#[get(
+    "/users/<username>/statuses/<status_id>",
+    format = "text/html"
+)]
 pub fn status_page(
     username: String,
     status_id: u64,
