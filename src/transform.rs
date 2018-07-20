@@ -48,9 +48,34 @@ where
     }
     html.push_str(&escape_html(&text[cursor..])?);
 
+    println!("{}", html);
+
     Ok(Builder::default()
         .tags(hashset!["a", "p", "br"])
         .link_rel(Some("noopener nofollow"))
         .clean(&html)
         .to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn passes_through_text() {
+        assert_eq!(bio("foo", |_, _| Ok(None)).unwrap(), "foo");
+        assert_eq!(bio("foo:bar", |_, _| Ok(None)).unwrap(), "foo:bar");
+    }
+
+    #[test]
+    fn escapes_html_characters() {
+        assert_eq!(bio("<>&", |_, _| Ok(None)).unwrap(), "&lt;&gt;&amp;");
+        assert_eq!(bio("<a></a>", |_, _| Ok(None)).unwrap(), "&lt;a&gt;&lt;/a&gt;");
+    }
+
+    #[test]
+    fn converts_newlines_to_br() {
+        assert_eq!(bio("\n", |_, _| Ok(None)).unwrap(), "<br>");
+        assert_eq!(bio("\r\n", |_, _| Ok(None)).unwrap(), "<br>");
+    }
 }
