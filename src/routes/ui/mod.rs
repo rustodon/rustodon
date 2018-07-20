@@ -16,7 +16,7 @@ use validator::Validate;
 #[macro_use]
 mod templates;
 mod auth;
-mod view_helpers;
+pub mod view_helpers;
 
 use self::templates::*;
 
