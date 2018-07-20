@@ -4,9 +4,9 @@ use failure::Error;
 use rocket::http::{self, Accept, ContentType, MediaType};
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::{self, Content, Responder};
+use routes::ui::view_helpers::HasBio;
 use serde::Serialize;
 use serde_json::{self, Value};
-use transform;
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
@@ -91,7 +91,7 @@ impl AsActivityPub for Account {
 
             "preferredUsername": self.username,
             "name": self.display_name.as_ref().map(String::as_str).unwrap_or(""),
-            "summary": transform::bio(self.summary.as_ref().map(String::as_str).unwrap_or("<p></p>"), conn)?,
+            "summary": self.transformed_bio(&conn).unwrap_or("<p></p>".to_string()),
         })))
     }
 }
