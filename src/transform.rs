@@ -70,12 +70,31 @@ mod tests {
     #[test]
     fn escapes_html_characters() {
         assert_eq!(bio("<>&", |_, _| Ok(None)).unwrap(), "&lt;&gt;&amp;");
-        assert_eq!(bio("<a></a>", |_, _| Ok(None)).unwrap(), "&lt;a&gt;&lt;/a&gt;");
+        assert_eq!(
+            bio("<a></a>", |_, _| Ok(None)).unwrap(),
+            "&lt;a&gt;&lt;/a&gt;"
+        );
     }
 
     #[test]
     fn converts_newlines_to_br() {
         assert_eq!(bio("\n", |_, _| Ok(None)).unwrap(), "<br>");
         assert_eq!(bio("\r\n", |_, _| Ok(None)).unwrap(), "<br>");
+    }
+
+    #[test]
+    fn converts_links_to_a_tags() {
+        assert_eq!(
+            bio("https://example.com", |_, _| Ok(None)).unwrap(),
+            "<a href=\"https://example.com\" rel=\"noopener nofollow\">https://example.com</a>"
+        );
+        assert_eq!(
+            bio("http://example.com", |_, _| Ok(None)).unwrap(),
+            "<a href=\"http://example.com\" rel=\"noopener nofollow\">http://example.com</a>"
+        );
+        assert_eq!(
+            bio("http://‽.com/∰/", |_, _| Ok(None)).unwrap(),
+            "<a href=\"http://‽.com/∰/\" rel=\"noopener nofollow\">http://‽.com/∰/</a>"
+        );
     }
 }
