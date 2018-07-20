@@ -97,4 +97,13 @@ mod tests {
             "<a href=\"http://‽.com/∰/\" rel=\"noopener nofollow\">http://‽.com/∰/</a>"
         );
     }
+
+    #[test]
+    fn converts_hashtags_to_links() {
+        // TODO: we don't have hashtags atm, so we just fake-link them!
+        assert_eq!(
+            bio("#hashtag", |_, _| Ok(None)).unwrap(),
+            "<a href=\"#\" rel=\"noopener nofollow\">#hashtag</a>"
+        );
+    }
 }
