@@ -35,7 +35,7 @@ where
                 if let Some(account) = account_lookup(&user, domain.as_ref().map(String::as_str))? {
                     format!(
                         "<a href=\"{url}\">{mention}</a>",
-                        url = account.profile_path(),
+                        url = account.get_uri(),
                         mention = entity_text
                     )
                 } else {
