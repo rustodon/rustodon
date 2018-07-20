@@ -106,4 +106,42 @@ mod tests {
             "<a href=\"#\" rel=\"noopener nofollow\">#hashtag</a>"
         );
     }
+
+    #[test]
+    fn converts_mentions_to_links() {
+        use std::env;
+        env::set_var("DOMAIN", "localhost"); // TODO: this is bad and should go away, _somehow_.
+
+        fn acct_lookup(user: &str, domain: Option<&str>) -> Perhaps<Account> {
+            Ok(match (user, domain) {
+                ("localfoo", None) => Some(Account {
+                    id: 0,
+                    uri: None,
+                    domain: Some("".to_string()),
+                    username: "localfoo".to_string(),
+                    display_name: None,
+                    summary: None,
+                }),
+                ("remotefoo", Some("remote.example")) => Some(Account {
+                    id: 1,
+                    uri: Some("https://remote.example/remotefoo".to_string()),
+                    domain: Some("remote.example".to_string()),
+                    username: "remotefoo".to_string(),
+                    display_name: None,
+                    summary: None,
+                }),
+                _ => None,
+            })
+        }
+
+        assert_eq!(
+            bio("@localfoo", acct_lookup).unwrap(),
+            "<a href=\"https://localhost/users/localfoo\" rel=\"noopener nofollow\">@localfoo</a>"
+        );
+        assert_eq!(
+            bio("@remotefoo@remote.example", acct_lookup).unwrap(),
+            "<a href=\"https://remote.example/remotefoo\" rel=\"noopener nofollow\">@remotefoo@remote.example</a>"
+        );
+        assert_eq!(bio("@invalid", acct_lookup).unwrap(), "@invalid");
+    }
 }
