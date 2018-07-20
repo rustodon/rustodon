@@ -120,7 +120,7 @@ impl AsActivityPub for Status {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]

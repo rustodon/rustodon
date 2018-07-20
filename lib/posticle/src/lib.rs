@@ -107,7 +107,7 @@ pub fn extract_mentions(text: &str, existing: &[Entity]) -> Vec<Entity> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     extern crate yaml_rust;
     use super::*;
     use std::collections::HashSet;
