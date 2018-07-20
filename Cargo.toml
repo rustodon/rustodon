@@ -18,8 +18,8 @@ resopt = { path = "lib/resopt/" }
 posticle = { path = "lib/posticle/" }
 regex = "1.0.0"
 
-rocket = "0.3.10"
-rocket_codegen = "0.3.10"
+rocket = "0.3.15"
+rocket_codegen = "0.3.15"
 
 serde = "1.0"
 serde_derive = "1.0"
