@@ -16,6 +16,7 @@ lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
 posticle = { path = "lib/posticle/" }
+turnstile = { path = "lib/turnstile/" }
 regex = "1.0.0"
 
 rocket = "0.3.15"

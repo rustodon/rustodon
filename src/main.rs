@@ -28,6 +28,7 @@ extern crate validator_derive;
 extern crate maplit;
 extern crate posticle;
 extern crate regex;
+extern crate turnstile;
 
 extern crate rustodon_database as db;
 
