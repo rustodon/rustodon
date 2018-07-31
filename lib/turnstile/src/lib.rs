@@ -1,3 +1,3 @@
-pub trait Job<T> {
-    fn run(&self) -> T;
+pub trait Job<E> {
+    fn run(&self) -> Result<(), E>;
 }

@@ -26,6 +26,7 @@ extern crate validator;
 extern crate validator_derive;
 #[macro_use]
 extern crate maplit;
+extern crate bincode;
 extern crate posticle;
 extern crate regex;
 extern crate turnstile;
@@ -35,6 +36,7 @@ extern crate rustodon_database as db;
 #[macro_use]
 mod error;
 mod activitypub;
+mod jobs;
 mod routes;
 mod transform;
 mod util;
