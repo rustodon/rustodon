@@ -26,7 +26,6 @@ extern crate validator;
 extern crate validator_derive;
 #[macro_use]
 extern crate maplit;
-extern crate bincode;
 extern crate posticle;
 extern crate regex;
 extern crate turnstile;
