@@ -1,0 +1,61 @@
+$text_color:  	    hsl(200, 13%, 3%) !default;
+$border_color_alt:  hsl(200, 11%, 47%) !default;
+$border_color:      hsl(200, 22%, 78%) !default;
+$background_color:  hsl(42, 12%, 97%) !default;
+$invert_color:      hsl(0, 0, 100%) !default; // only for maximum contrast on mid-tone backgrounds
+$action_color:      hsl(120, 39%, 26%) !default;
+$active_color:      hsl(120, 65%, 42%)  !default;
+$active_color_alt:  hsl(120, 64%, 70%) !default;
+$link_color:  	    hsl(200, 69%, 39%) !default;
+$hover_color:       hsl(200, 100%, 48%) !default;
+$focused_color:     hsl(200, 100%, 63%) !default;
+$visited_color:     hsl(272, 33%, 38%) !default;
+$visited_color_alt: hsl(272, 47%, 73%) !default;
+$error_color:      	hsl(358, 56%, 44%) !default;
+$error_color_alt:   hsl(358, 100%, 75%) !default;
+$warning_color:     hsl(42, 75%, 48%) !default;
+$warning_color_alt: hsl(42, 100%, 73%) !default;
+
+$shadow_color: hsla(42, 50%, 27%, 0.25) !default;
+
+$base_font:  'Linux Libertine', FreeSerif, 'Gentium Plus', Georgia, 'Noto Serif', serif !default;
+$mono_font: 'Noto Mono', 'Droid Sans Mono', Consolas, monospace !default;
+$line_height: 1.4 !default;
+
+$column_width: 24em;
+$border_radius: 2px;
+$border_width: 1px;
+$standard_border: $border_width solid $border-color;
+
+
+%big-shadow {
+    box-shadow: 0 3px 5px $shadow_color;
+}
+
+%small-shadow {
+    box-shadow: 0 1px 2px $shadow_color;
+}
+
+%inset-shadow {
+    box-shadow: inset 0 1px 2px $shadow_color;
+}
+
+%button-styling {
+    @extend %small-shadow;
+    display: inline-block;
+    padding: 0.3rem;
+    border: none;
+    border-radius: $border_radius;
+    font-weight: bold;
+    font-family: inherit;
+    font-variant: small-caps;
+    color: $invert_color;
+    background-color: $action_color;
+  
+    cursor: pointer;
+    user-select: none;
+  
+    &:hover {
+      background-color: $active_color;
+    }
+}

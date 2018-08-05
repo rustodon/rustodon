@@ -2,22 +2,38 @@
 
 {% block title %}Edit your profile{% endblock %}
 
+{% block topmenu %}
+        <nav class="top-menu__primary">
+            <ul>
+                <li class="top-menu__home"><h1><a class="top-menu__home-link" href="/">Rustodon</a></h1></li>
+                <li class="top-menu__profile"><span class="top-menu__current-item">Profile</span></li>
+                <li class="top-menu__logout">
+                    <form class="inline" method="post" action="/auth/sign_out">
+                        <input type="hidden" name="stub" />
+                        <button class="link" type="submit" name="submit">Sign&#160;out</button>
+                    </form>
+                </li>
+                <li class="top-menu__settings"><a href="" disabled>Settings</a></li>
+            </ul>
+        </nav>
+{% endblock %}
+
 {% block content %}
-<header>
-    <h2>Edit your profile</h2>
-</header>
-<section>
-    <form method="post" action="/settings/profile">
-        <div>
-            <textarea name="summary">
-            {%- match account.summary %}
-            {%- when Some with (summary) -%}
-            {{summary}}
-            {%- when None -%}
-            {% endmatch -%}
-            </textarea>
-        </div>
-        <button type="submit">update</button>
-    </form>
-</section>
+        <header>
+            <h2>Edit your profile</h2>
+        </header>
+        <section>
+            <form method="post" action="/settings/profile">
+                <div>
+                    <textarea name="summary">
+                    {%- match account.summary %}
+                    {% when Some with(summary) %}
+                        {{summary}}
+                    {% when None %}
+                    {% endmatch -%}
+                    </textarea>
+                </div>
+                <button type="submit">Update</button>
+            </form>
+        </section>
 {% endblock %}
