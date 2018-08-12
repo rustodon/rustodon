@@ -20,7 +20,7 @@ body {
   background-color: $background_color;
   font-family: $base_font;
   line-height: $line_height;
-  font-feature-settings: "liga", "dlig", "hlig", "frac", "swsh", "onum", "pnum", "opbd";
+  font-feature-settings: "liga", "dlig", "hlig", "swsh", "onum", "pnum", "opbd";
 }
 
 // show focus outlines on everything!! tab accessibility~
