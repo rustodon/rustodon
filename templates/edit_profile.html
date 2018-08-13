@@ -26,11 +26,11 @@
             <form method="post" action="/settings/profile">
                 <div>
                     <textarea name="summary">
-                    {%- match account.summary %}
-                    {% when Some with(summary) %}
+                    {%- match account.summary -%}
+                    {%- when Some with (summary) -%}
                         {{summary}}
-                    {% when None %}
-                    {% endmatch -%}
+                    {%- when None -%}
+                    {%- endmatch -%}
                     </textarea>
                 </div>
                 <button type="submit">Update</button>
