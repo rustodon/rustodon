@@ -43,6 +43,8 @@ a {
   &[disabled] {
     opacity: .5;
     cursor: default;
+    // prevent clicks on disabled links
+    pointer-events: none;
   }
 }
 
