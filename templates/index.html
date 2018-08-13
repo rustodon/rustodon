@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 
+{%- macro active(a, b) -%}
+    {%- if a == b -%}
+        active
+    {%- else -%}
+    {%- endif -%}
+{%- endmacro -%}
+
 {% block title %}Home{% endblock %}
 
 {% block topmenu %}
@@ -27,10 +34,9 @@
         <nav class="top-menu__secondary">
             <ul>
                 <li class="top-menu__write"><a class="small-screen-only top-menu__write-link" href="#write-status">New&#160;post</a></li>
-                <li class="top-menu__tl-home"><a class="tab" href="?timeline=home">Home</a></li>
-                <li class="top-menu__tl-local"><a class="tab active" href="?timeline=local">Local</a></li>
-                <li class="top-menu__tl-fed"><a class="tab" href="?timeline=federated" disabled>Federated</a></li>
-                <li class="top-menu__search"><a class="small-screen-only top-menu__search-link" disabled>Search</a></li>
+                <li class="top-menu__tl-home"><a class="{%- call active(timeline, "home") %} tab" href="?timeline=home" disabled>Home</a></li>
+                <li class="top-menu__tl-local"><a class="{%- call active(timeline, "local") %} tab" href="?timeline=local">Local</a></li>
+                <li class="top-menu__tl-fed"><a class="{%- call active(timeline, "federated") %} tab" href="?timeline=federated">Federated</a></li>
             </ul>
         </nav>
     {% when None %}
@@ -43,7 +49,6 @@
 {% block content %}
     {% match account %}
     {% when Some with (a) %}
-       
         <section id="write-status" class="write-status">
             <form class="write-status-form" method="post" action="/statuses/create">
                 <div class="write-content-warning-container">
