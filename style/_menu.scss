@@ -52,13 +52,12 @@
 
     &__settings,
     &__logout,
-    &__profile,
-    &__search {
+    &__profile {
         text-align: end;
     }
 
     &__write,
-    &__search {
+    &__space {
         flex-basis: 48%;
     }
     &__a11y {

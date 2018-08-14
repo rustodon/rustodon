@@ -82,7 +82,8 @@ a.button {
   cursor: pointer;
 }
 
-.write-status-controls {
+.write-status-controls, 
+.edit-profile-controls {
   padding: .5rem 0;
   button {
     min-width: 5rem;

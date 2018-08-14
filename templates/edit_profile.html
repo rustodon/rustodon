@@ -6,7 +6,7 @@
         <nav class="top-menu__primary">
             <ul>
                 <li class="top-menu__home"><h1><a class="top-menu__home-link" href="/">Rustodon</a></h1></li>
-                <li class="top-menu__profile"><span class="top-menu__current-item">Profile</span></li>
+                <li class="top-menu__profile"><a class="top-menu__current-item" disabled>Profile</a></li>
                 <li class="top-menu__logout">
                     <form class="inline" method="post" action="/auth/sign_out">
                         <input type="hidden" name="stub" />
@@ -16,15 +16,24 @@
                 <li class="top-menu__settings"><a href="" disabled>Settings</a></li>
             </ul>
         </nav>
+        <nav class="top-menu__secondary">
+            <ul>
+                <li class="top-menu__space"></li>
+                <li class="top-menu__tl-home"><a class="tab" href="/?timeline=home" disabled>Home</a></li>
+                <li class="top-menu__tl-local"><a class="tab" href="/?timeline=local">Local</a></li>
+                <li class="top-menu__tl-fed"><a class="tab" href="/?timeline=federated" disabled>Federated</a></li>
+                <li class="top-menu__space"></li>
+            </ul>
+        </nav>
 {% endblock %}
 
 {% block content %}
-        <header>
-            <h2>Edit your profile</h2>
-        </header>
-        <section>
+        <section class="edit-profile">
+            <header>
+                <h2 class="title">Edit your profile</h2>
+            </header>
             <form method="post" action="/settings/profile">
-                <div>
+                <div class="write-content-container">
                     <textarea name="summary">
                     {%- match account.summary -%}
                     {%- when Some with (summary) -%}
@@ -33,7 +42,9 @@
                     {%- endmatch -%}
                     </textarea>
                 </div>
-                <button type="submit">Update</button>
+                <div class="edit-profile-controls">
+                    <button class="button--post" type="submit">Update</button>
+                </div>
             </form>
         </section>
 {% endblock %}
