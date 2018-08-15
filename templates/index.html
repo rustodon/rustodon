@@ -1,60 +1,93 @@
 {% extends "base.html" %}
 
+{%- macro active(a, b) -%}
+    {%- if a == b -%}
+        active
+    {%- else -%}
+    {%- endif -%}
+{%- endmacro -%}
+
 {% block title %}Home{% endblock %}
+
+{% block topmenu %}
+    {% match account %}
+    {% when Some with (a) %}
+        <nav class="top-menu__a11y sr-only">
+            <ul>
+                <li><a href="#timeline">Skip to the timeline</a></li>
+                <li><a href="#write-status">New post</a></li>
+            </ul>
+        </nav>
+        <nav class="top-menu__primary">
+            <ul>
+                <li class="top-menu__home"><h1><a class="top-menu__home-link" href="/">Rustodon</a></h1></li>
+                <li class="top-menu__profile"><a class="top-menu__profile-link" href="{{a.profile_path()|safe}}">Profile</a></li>
+                <li class="top-menu__logout">
+                    <form class="inline" method="post" action="/auth/sign_out">
+                        <input type="hidden" name="stub" />
+                        <button class="link" type="submit" name="submit">Sign&#160;out</button>
+                    </form>
+                </li>
+                <li class="top-menu__settings"><a href="" disabled>Settings</a></li>
+            </ul>
+        </nav>
+        <nav class="top-menu__secondary">
+            <ul>
+                <li class="top-menu__write"><a class="small-screen-only top-menu__write-link" href="#write-status">New&#160;post</a></li>
+                <li class="top-menu__tl-home"><a class="{%- call active(timeline, "home") %} tab" href="?timeline=home" disabled>Home</a></li>
+                <li class="top-menu__tl-local"><a class="{%- call active(timeline, "local") %} tab" href="?timeline=local">Local</a></li>
+                <li class="top-menu__tl-fed"><a class="{%- call active(timeline, "federated") %} tab" href="?timeline=federated" disabled>Federated</a></li>
+                <li class="top-menu__space"></li>
+            </ul>
+        </nav>
+    {% when None %}
+        <nav class="top-menu__home">
+            <h1><a class="top-menu__home-link" href="/">Rustodon</a></h1>
+        </nav>
+    {% endmatch %}
+{% endblock %}
 
 {% block content %}
     {% match account %}
     {% when Some with (a) %}
-        <header>
-            <h1>Rustodon</h1>
-            <nav>
-                <a href="{{a.profile_path()|safe}}">your profile</a> |
-                <form class="inline" method="post" action="/auth/sign_out">
-                    <input type="hidden" name="stub" />
-                    <button class="link" type="submit" name="submit">sign out.</button>
-                </form>
-            </nav>
-        </header>
-        <section>
-            <form method="post" action="/statuses/create">
-                <div>
+        <section id="write-status" class="write-status">
+            <form class="write-status-form" method="post" action="/statuses/create">
+                <div class="write-content-warning-container">
                     <input type="text" name="content_warning" placeholder="content warning" />
                 </div>
-                <div>
+                <div class="write-content-container">
                     <textarea name="content"></textarea>
                 </div>
-                <button type="submit">post</button>
+                <div class="write-status-controls">
+                    <button class="button--cancel" type="reset">Cancel</button>
+                    <button class="button--post" type="submit">Post</button>
+                </div>
             </form>
         </section>
-        <section class="statuses">
+        <section id="timeline" class="statuses">
             <header>
                 <h2 class="title">{{timeline}} timeline</h2>
-                <nav>
-                    <span>Switch to: </span>
-                    <span><a href="?timeline=local">local</a></span>
-                    <span><a href="?timeline=federated">federated</a></span>
-                </nav>
             </header>
             {% for status in statuses %}
                 <article class="status">
                     {% match status.get_uri(connection.as_ref()) %}
                     {% when Ok with (uri) %}
-                        <header>
-                                {% match status.account(connection.as_ref()) %}
-                                {% when Ok with (status_account) %}
+                        {% match status.account(connection.as_ref()) %}
+                        {% when Ok with (status_account) %}
+                            <a class="timeline-avatar" title="{{status_account.fully_qualified_username()}}"></a>
+                            <header>
                                     <a href="{{status_account.get_uri()|safe}}"><div>by: {{status_account.fully_qualified_username()}}</div></a>
-                                {% when Err with (e) %}
-                                    <div>[error getting account username]</div>
-                                {% endmatch %}
-                            <a href="{{uri|safe}}"><div>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></div></a>
-                        </header>
+                                    <a href="{{uri|safe}}"><div>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></div></a>
+                            </header>
+                        {% when Err with (e) %}
+                            <div>[error getting account username]</div>
+                        {% endmatch %}
                     {% when Err with (e) %}
-
                     {% endmatch %}
                     <section>
                         {% match status.content_warning %}
                         {% when Some with (cw) %}
-                            <span>{{cw}}</span>
+                            <span class="cw">{{cw}}</span>
                             <input class="collapse--toggle" id="collapsible-{{status.id}}" type="checkbox" />
                             <label class="collapse--lbl-toggle" for="collapsible-{{status.id}}" tabindex="0">Toggle CW</label>
                             <div class="content collapse--content">{{status.text}}</div>
@@ -67,19 +100,18 @@
             <nav class="pagination">
                 {% match prev_page_id %}
                 {% when Some with (backlink) %}
-                    <a href="?timeline={{timeline}}&max_id={{backlink|safe}}" rel="next">older posts</a>
+                    <a href="?timeline={{timeline}}&amp;max_id={{backlink|safe}}" rel="next">Older posts</a>
                 {% when None %}
                 {% endmatch %}
             </nav>
         </section>
     {% when None %}
-        <header>
-            <h1>Rustodon</h1>
-            <nav>
-                <a href="/auth/sign_in">sign in!</a> |
-                <a href="/auth/sign_up">sign up?</a>
+        <section class="anon-user-controls">
+            <nav class="sign-in">
+                <a class="button sign-in-link" href="/auth/sign_in">Sign in!</a>
+                <a class="button sign-up-link" href="/auth/sign_up">Sign up?</a>
             </nav>
-        </header>
+        </section>
     {% endmatch %}
 
 {% endblock %}

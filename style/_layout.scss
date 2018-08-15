@@ -1,28 +1,51 @@
+@import 'defaults';
+
 html {
   // make html and body fill (at least) 100% of the height of the page.
   height: 100%;
 }
 
 body {
-  // normalize
-  margin: 0;
-
-  // sticky footer via flexbox
   display: flex;
   flex-direction: column;
   height: 100vh; // work around a silly ie11 issue
 }
 
 main {
-  // sticky footer via flexbox
   flex: 1 0 auto;
-
-  padding: 1rem; // let the content breathe
+  padding: 2rem 0;
+  margin-top: 5rem;
+  display: flex;
+  border-bottom: $border_width solid $border_color; // set the footer off
+  @extend %big-shadow;
 }
 
 footer {
   flex-shrink: 0; // prevent flexbox shrinkage (looking @ u, blink flexbox)
-
-  border-top: 1px solid $border_color; // set the footer off
-  padding: 1rem; // let the content breathe
+  padding: 1rem 2rem;
+  margin: 1rem 0;
+  text-align: end;
 }
+
+main>section {
+  margin-bottom: 3rem;
+  padding: 0 2rem;
+}
+
+.write-status {
+  flex: 38%;
+  height: 6rem;
+}
+
+.write-status-form {
+  max-width: $column_width;
+  input, textarea {
+    width: 100%;
+  }
+}
+
+.statuses {
+  clear: right;
+  flex: 62%;
+}
+

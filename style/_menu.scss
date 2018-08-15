@@ -1,0 +1,136 @@
+@import 'defaults';
+
+.top-menu {
+    @extend %big-shadow;
+    position: fixed;
+    right: 0;
+    left: 0;
+    background: $background_color;
+    padding: 0 1rem;
+    flex-direction: column;
+    flex: 0 0 auto;
+
+    a,
+    a:visited,
+    button {
+        padding: 0.5rem 1rem;
+        display: inline-block;
+        color: $text_color;
+        text-decoration: none;
+    }
+
+    ul {
+        padding: 0;
+        margin:0;
+        display: flex;
+        text-align: center;
+    }
+    li {
+        display: inline-block;
+    }
+
+    &__home {
+        flex-basis: 90%;
+        font-size: 1.6rem;
+    }
+
+    &__home,
+    &__write {
+        text-align: start;
+    }
+
+    &__settings,
+    &__logout,
+    &__profile,
+    &__tl-home,
+    &__tl-local,
+    &__tl-fed {
+        text-align: center;
+        flex-basis: 9rem;
+        white-space: nowrap;
+    }
+
+    &__settings,
+    &__logout,
+    &__profile {
+        text-align: end;
+    }
+
+    &__write,
+    &__space {
+        flex-basis: 48%;
+    }
+    &__a11y {
+        // Hidden off the top of the screen unless focused
+        position: absolute;
+        top: -20em;
+        right: 0;
+        left: 0;
+        text-align: center;
+        ul {
+            margin: 0 auto;
+            display: block;
+        }
+        a:focus {
+            margin-top:20em;
+        }
+    }
+    &__logout button {
+        font-weight: 400;
+         &:hover {
+            background: $error_color;
+            color: $invert_color;
+        }
+    }
+}
+
+.tab {
+    border-radius: $border_radius $border_radius 0 0;
+    width: 8rem;
+}
+.tab:hover {
+    color: $text_color;
+    background: $background_color;
+    border-bottom: 3px solid;
+}
+.tab:active, .tab:focus {
+    color: $text_color;
+    background: $focused_color;;
+}
+.tab.active {
+    border-bottom: 3px solid $active_color;
+}
+
+.top-menu__write a::before,
+.top-menu__search a::before,
+.top-menu__settings a::before,
+.top-menu__logout button::before,
+.top-menu__tl-home a::before,
+.top-menu__tl-local a::before,
+.top-menu__tl-fed a::before,
+.top-menu__profile a::before  {
+    background: no-repeat url(img/icons.png);
+    background-size: 199px;
+    width: 20px;
+    height: 20px;
+    content: "";
+    display: inline-block;
+    margin-right: .5em;
+}
+
+.top-menu__write a::before {background-position: 0 0;}
+.top-menu__search a::before {background-position: -180px 0;}
+.top-menu__settings a::before {background-position: -150px 0;}
+.top-menu__logout button::before {background-position: -120px 0;}
+.top-menu__tl-home a::before {background-position: -60px 0;}
+.top-menu__tl-local a::before {background-position: -30px 0;}
+.top-menu__tl-fed a::before {background-position: -90px 0;}
+
+.top-menu__profile a::before {
+    content: "⚇";
+    background: $visited_color;
+    color: $visited_color_alt;
+    border-radius: $border_radius;
+    text-align: center;
+    overflow: hidden;
+}

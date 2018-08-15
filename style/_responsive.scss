@@ -1,0 +1,36 @@
+@media screen and (min-width: 800px) {
+    .small-screen-only {
+        display: none; 
+        visibility: hidden;
+    }
+}
+@media screen and (max-width: 799px) {
+    html {font-size: 16px;}
+    .main-content {
+        margin-top: 0;
+        flex-direction: column;
+    }
+    .write-status {
+        margin-top: 5rem;
+    }
+    .write-status-form,
+    .status {
+        max-width: 100%;
+    }
+    .top-menu a, .top-menu a:visited, .top-menu button {
+        padding: .5rem 5px;
+        overflow: hidden;
+        white-space: nowrap;
+        max-width: 30px;
+    }
+    .top-menu a.top-menu__home-link {
+        max-width: 8em;
+    }
+    .anon-user-controls {
+        margin: 5rem auto;
+        text-align: center;
+    }
+}
+@media screen and (max-width: 480px) {
+    html {font-size: 14px;}
+}

@@ -3,6 +3,7 @@
 
 {% block content %}
     <section class="status">
+        <a class="timeline-avatar" title="@{{account.username}}"></a>
         <header>
             <span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span>
         </header>
@@ -18,6 +19,6 @@
                     <div class="content">{{status.text}}</div>
                 {% endmatch %}
             </div>
-        </section>
+        </article>
     </section>
 {% endblock %}

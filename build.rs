@@ -36,7 +36,7 @@ fn main() {
         .unwrap();
 
     Command::new("bundle")
-        .args(&["exec", "sass", "style/main.scss", "static/style.css"])
+        .args(&["exec", "sass", "style/style.scss", "static/style.css"])
         .status()
         .unwrap();
 }
