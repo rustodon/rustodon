@@ -1,13 +1,26 @@
 // it's 2018. please tell me that nobody is using box-sizing != border-box.
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+  font: inherit;
+  color: inherit;
+  background-color: inherit;
+  border: 0 currentcolor solid;
+}
+
+html {
+  font-size: 18px;
+}
 
 body {
   // aesthetics
   color: $text_color;
   background-color: $background_color;
-
   font-family: $base_font;
-  font-size: 1em;
+  line-height: $line_height;
+  font-feature-settings: "liga", "dlig", "hlig", "swsh", "onum", "pnum", "opbd";
 }
 
 // show focus outlines on everything!! tab accessibility~
@@ -15,43 +28,92 @@ body {
   outline: $focused_color auto 1px;
 }
 
-a:active { color: $active_color; }
+a {
+  color: $link_color;
+  &:hover {
+    color: $hover_color;
+    text-decoration: underline;
+  }
+  &:active {
+    color: $active_color;
+  }
+  &:visited {
+    color: $visited_color;
+  }
+  &[disabled] {
+    opacity: .5;
+    cursor: default;
+    // prevent clicks on disabled links
+    pointer-events: none;
+  }
+}
 
-code, pre {
+code,
+pre {
   font-family: $mono_font;
+  color: inherit;
+}
+
+small {
+  font-size: .8em;
 }
 
 // restyle inputs so they look consistent across browsers
-input {
+input,
+textarea {
   color: $text_color;
-  background-color: white;
-  border: 1px solid $border_color;
+  background-color: $background_color;
+  border: $border_width solid $border_color;
   padding: 1px 0px;
-
-  // fix for built-in browser styles
-  &:focus { outline-offset: 0; }
+  font-family: inherit; // fix for built-in browser styles
+  &:focus {
+    outline-offset: 0;
+  }
 }
 
 // restyle buttons so they look consistent across browsers
-button {
-  font-family: inherit;
-  font-size: 1em;
-  color: $text_color;
-  background-color: $background_color;
-
-  border: 1px solid $border_color;
+button,
+a.button {
+  @extend %button-styling;
   display: inline-block;
-  padding: 1px 6px;
+  padding: 1px 1rem;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
+}
+
+.write-status-controls, 
+.edit-profile-controls {
+  padding: .5rem 0;
+  button {
+    min-width: 5rem;
+  }
+}
+
+.button--cancel {
+  float: left;
+  background: $border_color_alt;
+  &:hover {
+    background: $warning_color;
+  }
+}
+
+.button--post {
+  float: right;
+  background: $action_color;
+  color: $background_color;
+  &:hover {
+    background: $active_color;
+  }
 }
 
 form {
   margin-top: 1em;
 }
 
-form.inline { display: inline; }
+form.inline {
+  display: inline;
+}
 
 // space out form inputs a bit
 form input {
@@ -63,36 +125,75 @@ form input {
 button.link {
   background: none;
   border: none;
-  margin: 0; padding: 0;
-  color: blue;
+  margin: 0;
+  padding: 0;
+  color: $link_color;
   cursor: pointer;
   text-decoration: underline;
   font-size: 1em;
-
-  &:active { color: $active_color; }
+  font-variant: normal;
+  box-shadow: none;
+  &:active {
+    color: $active_color;
+  }
+  &:hover {
+    color: $hover_color;
+  }
 }
 
 .flash {
   border: 2px dashed $border_color;
   padding: 1rem;
-
+  position: absolute;
+  top: 0;
+  left: 30%;
+  right: 30%;
+  text-align: center;
+  @extend %big-shadow;
   &.error {
-    border-color: #900C3F;
-    background-color: #D29DB2;
+    border-color: $error_color;
+    background-color: $error_color_alt;
   }
-
   &.success {
-    border-color: #1D8348;
-    background-color: #58D68D;
+    border-color: $active_color;
+    background-color: $active_color_alt;
   }
-}
-
-textarea {
-  font: 1em $mono_font;
-  background-color: $background_color;
-  border: 1px solid $border_color;
+  &-hider {
+    &,
+    &:checked~.flash,
+    &:checked~.flash-hider-label {
+      display: none;
+    }
+    &-label {
+      color: $error_color;
+      position: absolute;
+      top: 0;
+      right: 30%;
+      z-index: 5;
+      margin: .5em;
+      background: transparent;
+    }
+  }
 }
 
 .title {
   text-transform: capitalize;
+  font-variant: small-caps;
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.status {
+  max-width: $column_width;
+  border-top: $standard_border;
+  padding: 1rem 0;
+}
+
+.timeline-avatar {
+  width: 3rem;
+  height: 3rem;
+  margin-right: 1rem;
+  border-radius: $border_radius;
+  float: left;
+  background: $visited_color;
 }

@@ -69,7 +69,7 @@ if [ -z "${DATABASE_URL}" ]; then
       if [ -z "${POSTGRES_PASSWORD}" ]; then
         DB_CREDENTIALS="${POSTGRES_USER}@"
       else
-        DB_CREDENTIALS="${POSTGRES_USER}:${POSTGRES_PASSWORD}@" 
+        DB_CREDENTIALS="${POSTGRES_USER}:${POSTGRES_PASSWORD}@"
       fi
     fi
     if [ -z "${POSTGRES_PASSWORD}" ]; then
@@ -99,7 +99,7 @@ if ! which diesel 2>/dev/null 1>&2 ; then
 fi
 if ! which cargo-watch 2>/dev/null 1>&2 ; then
   infoMsg "Installing cargo-watch..."
-  cargo install cargo-watch 
+  cargo install cargo-watch
 fi
 
 # Database creation and migration
@@ -112,7 +112,7 @@ if [ ! -f "Rocket.toml" ]; then
 [development]
 address = "localhost"
 port = 8000
-workers = 1
+workers = 2
 log = "normal"
 secret_key = "$(openssl rand -base64 32)"
 

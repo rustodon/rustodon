@@ -1,3 +1,5 @@
+@import 'defaults';
+
 .h-card header {
   font-size: 200%;
 }
@@ -15,8 +17,4 @@
 
 .h-card .action-edit-note {
   margin-left: 1.5em;
-}
-
-.status {
-  margin: 1em 0;
 }
