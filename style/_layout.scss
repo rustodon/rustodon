@@ -49,3 +49,13 @@ main>section {
   flex: 62%;
 }
 
+.status .content {
+  white-space: pre-wrap;
+}
+
+.view-status {
+  .status {
+    border-top: none;
+    font-size: 1.25rem;
+  }
+}
