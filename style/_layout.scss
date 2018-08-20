@@ -54,6 +54,7 @@ main>section {
 }
 
 .view-status {
+  flex: 1 1 auto;
   .status {
     border-top: none;
     font-size: 1.25rem;
