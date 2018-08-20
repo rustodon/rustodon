@@ -136,7 +136,8 @@ pub fn status_page(
 
     PerhapsHtmlTemplate!(StatusTemplate, {
         status:  status,
-        account: account
+        account: account,
+        connection: db_conn
     })
 }
 
