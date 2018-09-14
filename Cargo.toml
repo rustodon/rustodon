@@ -31,6 +31,8 @@ validator_derive = "0.7"
 ammonia = "1.1.0"
 maud_htmlescape = "0.17.0"
 
+diesel = { version = "1.3.2", features = ["postgres", "chrono", "serde_json", "r2d2"] }
+
 [dependencies.rustodon_database]
 path = "database/"
 
