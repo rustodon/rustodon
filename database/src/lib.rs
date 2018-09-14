@@ -1,9 +1,13 @@
 #![recursion_limit = "128"]
+// silence warnings due to diesel-rs/diesel#1785
+#![allow(proc_macro_derive_resolution_fallback, unused_imports)]
 
 extern crate chrono;
 extern crate chrono_humanize;
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate diesel_derive_enum;
 extern crate flaken;
 #[macro_use]
 extern crate lazy_static;
@@ -12,6 +16,10 @@ extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
+extern crate serde;
+extern crate serde_json;
+extern crate turnstile;
+
 
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
@@ -24,6 +32,7 @@ use std::ops::Deref;
 
 pub mod idgen;
 pub mod models;
+pub mod types;
 pub mod schema;
 pub mod validators;
 
@@ -41,7 +50,7 @@ lazy_static! {
 pub static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
 
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
-type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 /// Type alias for the pooled connection.
 type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;

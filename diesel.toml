@@ -1,3 +1,4 @@
 [print_schema]
 file = "database/src/schema.rs"
 with_docs = true
+import_types = ["diesel::sql_types::*", "types::Job_status"]
