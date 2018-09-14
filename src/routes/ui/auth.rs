@@ -69,13 +69,11 @@ pub struct SignupForm {
     username: String,
     #[validate(email)]
     email: String,
-    #[validate(
-        length(
-            min = "3",
-            max = "64",
-            message = "Password must be between 3 and 64 characters long."
-        )
-    )]
+    #[validate(length(
+        min = "3",
+        max = "64",
+        message = "Password must be between 3 and 64 characters long."
+    ))]
     password: String,
 }
 
@@ -101,8 +99,7 @@ pub fn signup_post(
             .map(|e| {
                 let msg = e.message.to_owned();
                 msg.unwrap_or(Cow::Borrowed("unknown error"))
-            })
-            .join(", ");
+            }).join(", ");
 
         return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
     }

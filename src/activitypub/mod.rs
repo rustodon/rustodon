@@ -23,8 +23,7 @@ where
                 let ap_json = ContentType::new("application", "activity+json");
 
                 Content(ap_json, string).respond_to(req).unwrap()
-            })
-            .map_err(|e| {
+            }).map_err(|e| {
                 // TODO: logging (what happens if the Value won't serialize?)
                 // the code i cribbed this from did some internal Rocket thing.
                 http::Status::InternalServerError
