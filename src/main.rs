@@ -14,6 +14,7 @@ extern crate lazy_static;
 extern crate maud_htmlescape;
 #[macro_use]
 extern crate resopt;
+extern crate diesel;
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
@@ -39,6 +40,7 @@ mod jobs;
 mod routes;
 mod transform;
 mod util;
+mod workers;
 
 use dotenv::dotenv;
 use std::env;
@@ -64,6 +66,9 @@ fn main() {
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_connection_pool =
         db::init_connection_pool(db_url).expect("Couldn't establish connection to database!");
+
+    // initialize the worker queues
+    workers::init(db_connection_pool.clone());
 
     rocket::ignite()
         .mount("/", routes::ui::routes())
