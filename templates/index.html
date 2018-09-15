@@ -9,9 +9,9 @@
 
 {% block title %}Home{% endblock %}
 
-{% block topmenu %}
-    {% match account %}
-    {% when Some with (a) %}
+{% block topmenu -%}
+    {%- match account -%}
+    {%- when Some with (a) -%}
         <nav class="top-menu__a11y sr-only">
             <ul>
                 <li><a href="#timeline">Skip to the timeline</a></li>
@@ -40,16 +40,16 @@
                 <li class="top-menu__space"></li>
             </ul>
         </nav>
-    {% when None %}
+    {%- when None -%}
         <nav class="top-menu__home">
             <h1><a class="top-menu__home-link" href="/">Rustodon</a></h1>
         </nav>
-    {% endmatch %}
-{% endblock %}
+    {%- endmatch -%}
+{%- endblock -%}
 
-{% block content %}
-    {% match account %}
-    {% when Some with (a) %}
+{%- block content -%}
+    {%- match account -%}
+    {%- when Some with (a) -%}
         <section id="write-status" class="write-status">
             <form class="write-status-form" method="post" action="/statuses/create">
                 <div class="write-content-warning-container">
@@ -58,7 +58,7 @@
                 <div class="write-content-container">
                     <textarea name="content"></textarea>
                 </div>
-                <div class="write-status-controls">
+                <div class="button-row">
                     <button class="button--cancel" type="reset">Cancel</button>
                     <button class="button--post" type="submit">Post</button>
                 </div>

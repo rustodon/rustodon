@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}@{{account.username}}: {{status.id}}{% endblock %}
 
-{% block content %}
+{% block content -%}
     <section class="status">
         <a class="timeline-avatar" title="@{{account.username}}"></a>
         <header>
@@ -9,16 +9,16 @@
         </header>
         <article>
             <div>
-                {% match status.content_warning %}
-                {% when Some with (cw) %}
+                {%- match status.content_warning -%}
+                {%- when Some with (cw) -%}
                     <span>{{cw}}</span>
                     <input class="collapse--toggle" id="collapsible-{{status.id}}" type="checkbox" />
                     <label class="collapse--lbl-toggle" for="collapsible-{{status.id}}" tabindex="0">Toggle CW</label>
                     <div class="content collapse--content">{{status.text}}</div>
-                {% when None %}
+                {%- when None -%}
                     <div class="content">{{status.text}}</div>
-                {% endmatch %}
+                {%- endmatch -%}
             </div>
         </article>
     </section>
-{% endblock %}
+{%- endblock %}
