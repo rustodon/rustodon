@@ -63,8 +63,7 @@ pub fn extract_urls(text: &str) -> Vec<Entity> {
         .map(|mat| Entity {
             kind:  EntityKind::Url,
             range: (mat.start(), mat.end()),
-        })
-        .collect()
+        }).collect()
 }
 
 /// Given `text` and some `existing` entities, extract all [Hashtag](EntityKind::Hashtag) entities
@@ -75,13 +74,11 @@ pub fn extract_hashtags(text: &str, existing: &[Entity]) -> Vec<Entity> {
         .map(|mat| Entity {
             kind:  EntityKind::Hashtag,
             range: (mat.start(), mat.end()),
-        })
-        .filter(|en| {
+        }).filter(|en| {
             existing
                 .iter()
                 .all(|existing_en| !en.overlaps_with(existing_en))
-        })
-        .collect()
+        }).collect()
 }
 
 /// Given `text` and some `existing` entities, extract all [Mention](EntityKind::Mention) entities
@@ -97,13 +94,11 @@ pub fn extract_mentions(text: &str, existing: &[Entity]) -> Vec<Entity> {
                 kind:  EntityKind::Mention(user, domain),
                 range: (whole.start(), whole.end()),
             }
-        })
-        .filter(|en| {
+        }).filter(|en| {
             existing
                 .iter()
                 .all(|existing_en| !en.overlaps_with(existing_en))
-        })
-        .collect()
+        }).collect()
 }
 
 #[cfg(test)]

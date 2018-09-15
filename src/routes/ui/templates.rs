@@ -44,10 +44,11 @@ macro_rules! PerhapsHtmlTemplate {
 #[derive(Template)]
 #[template(path = "status.html")]
 pub struct StatusTemplate<'a> {
-    pub status:   Status,
-    pub account:  Account,
+    pub status: Status,
+    pub account: Account,
     pub revision: &'a str,
-    pub flash:    Option<FlashMessage>,
+    pub flash: Option<FlashMessage>,
+    pub connection: db::Connection,
 }
 
 #[derive(Template)]

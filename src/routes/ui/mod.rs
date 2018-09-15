@@ -94,8 +94,7 @@ pub fn create_status(
             .map(|e| {
                 let msg = e.message.to_owned();
                 msg.unwrap_or(Cow::Borrowed("unknown error"))
-            })
-            .join(", ");
+            }).join(", ");
 
         return Ok(Either::Left(Flash::error(Redirect::to("/"), error_desc)));
     }
@@ -136,7 +135,8 @@ pub fn status_page(
 
     PerhapsHtmlTemplate!(StatusTemplate, {
         status:  status,
-        account: account
+        account: account,
+        connection: db_conn
     })
 }
 

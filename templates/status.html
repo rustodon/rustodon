@@ -1,24 +1,42 @@
 {% extends "base.html" %}
-{% block title %}@{{account.username}}: {{status.id}}{% endblock %}
+{%- block title -%}
+@{{account.username}}: {{status.id}}
+{%- endblock -%}
 
-{% block content -%}
-    <section class="status">
-        <a class="timeline-avatar" title="@{{account.username}}"></a>
-        <header>
-            <span>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></span>
-        </header>
-        <article>
-            <div>
-                {%- match status.content_warning -%}
-                {%- when Some with (cw) -%}
-                    <span>{{cw}}</span>
+{%- block topmenu -%}
+    <nav class="top-menu__home">
+        <h1><a class="top-menu__home-link" href="/">Rustodon</a></h1>
+    </nav>
+{%- endblock -%}
+
+{%- block content -%}
+    <section class="view-status">
+        <article class="status">
+            {% match status.get_uri(connection.as_ref()) %}
+            {% when Ok with (uri) %}
+                {% match status.account(connection.as_ref()) %}
+                {% when Ok with (status_account) %}
+                    <a class="timeline-avatar" href="{{status_account.get_uri()|safe}}" title="{{status_account.fully_qualified_username()}}"></a>
+                    <header>
+                            <a href="{{status_account.get_uri()|safe}}"><div>{{status_account.fully_qualified_username()}}</div></a>
+                            <div>Published <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></div>
+                    </header>
+                {% when Err with (e) %}
+                    <div>[error getting account username]</div>
+                {% endmatch %}
+            {% when Err with (e) %}
+            {% endmatch %}
+            <section>
+                {% match status.content_warning %}
+                {% when Some with (cw) %}
+                    <span class="cw">{{cw}}</span>
                     <input class="collapse--toggle" id="collapsible-{{status.id}}" type="checkbox" />
                     <label class="collapse--lbl-toggle" for="collapsible-{{status.id}}" tabindex="0">Toggle CW</label>
                     <div class="content collapse--content">{{status.text}}</div>
                 {%- when None -%}
                     <div class="content">{{status.text}}</div>
-                {%- endmatch -%}
-            </div>
+                {% endmatch %}
+            </section>
         </article>
     </section>
-{%- endblock %}
+{%- endblock -%}
