@@ -20,6 +20,7 @@ body {
   background-color: $background_color;
   font-family: $base_font;
   line-height: $line_height;
+  text-rendering: optimizeLegibility;
   font-feature-settings: "liga", "dlig", "hlig", "swsh", "onum", "pnum", "opbd";
 }
 
@@ -52,6 +53,7 @@ code,
 pre {
   font-family: $mono_font;
   color: inherit;
+  font-feature-settings: "tnum";
 }
 
 small {
@@ -62,10 +64,14 @@ small {
 input,
 textarea {
   color: $text_color;
-  background-color: $background_color;
+  background: $invert_color;
   border: $border_width solid $border_color;
-  padding: 1px 0px;
+  border-radius: $border_radius;
+  padding: .25em .5em;
+  margin: .5em 0;
   font-family: inherit; // fix for built-in browser styles
+  width: 100%;
+
   &:focus {
     outline-offset: 0;
   }
@@ -73,7 +79,8 @@ textarea {
 
 // restyle buttons so they look consistent across browsers
 button,
-a.button {
+a.button,
+a.button:visited {
   @extend %button-styling;
   display: inline-block;
   padding: 1px 1rem;
@@ -82,11 +89,13 @@ a.button {
   cursor: pointer;
 }
 
-.write-status-controls, 
-.edit-profile-controls {
+.button-row {
   padding: .5rem 0;
   button {
     min-width: 5rem;
+  }
+  button[type=submit] {
+    float: right;
   }
 }
 
@@ -98,26 +107,12 @@ a.button {
   }
 }
 
-.button--post {
-  float: right;
-  background: $action_color;
-  color: $background_color;
-  &:hover {
-    background: $active_color;
-  }
-}
-
 form {
   margin-top: 1em;
 }
 
 form.inline {
   display: inline;
-}
-
-// space out form inputs a bit
-form input {
-  margin: 0.1em 0;
 }
 
 // turn buttons with the .link class into links
@@ -174,6 +169,15 @@ button.link {
       background: transparent;
     }
   }
+  &-container {
+    animation: 5s forwards disappear;
+  }
+}
+
+@keyframes disappear {
+	from { opacity: 1; margin-top: 0; }
+	95% { opacity: .9; margin-top: 0; }
+	to { opacity: 0; margin-top: -100%; display: none; }
 }
 
 .title {
