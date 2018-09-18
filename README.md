@@ -5,12 +5,12 @@
 Rustodon is an [Mastodon](https://joinmastodon.org)-compatible _federated social microblogging server_. It utilizes [_ActivityPub_](http://activitypub.rocks) to _federate_ with a constellation of _other servers_, connecting their communities with yours.
 
 ## Current Status
-**You probably don't want to use this, yet**. Federation is WIP, UI is WIP, we don't have timelines, etc.
+**You probably don't want to use this, yet**. Federation is WIP, etc.
 
-We currently have authentication, users, profiles, statuses, content warnings, actor and status visibility as both HTML and AS2.
-We **do not** have timelines, status delivery, inboxes, outboxes, notifcations, mentions, post privacy, or account privacy.
+We currently have authentication, users, profiles, statuses, content warnings, actors and statuses published as both HTML and AS2, and timelines.
+We **do not** have a job system, status delivery, inboxes, outboxes, notifcations, mentions, post privacy, or account privacy.
 
-If you want to work on making Rustodon feature-complete, check out the [issue tracker](https://github.com/rustodon/rustodon/issues)! We're not just looking for Rust devs, either; CSS witches, brainstormers, and documentation enthusiasts are highly welcome :smiley:
+If you want to work on making Rustodon feature-complete, check out the [issue tracker](https://github.com/rustodon/rustodon/issues)! We're not just looking for Rust devs, either; CSS witches, documentarians, UI/UX aficionados, etc, are highly welcome :smiley:
 
 ## Hacking on the code
 
@@ -31,6 +31,9 @@ You will need to install several base dependencies:
    On some operating systems, you may need to separately install the Postgres client library:
    * Debian/Ubuntu/etc: `apt install libpq-dev`
    * Arch: `pacman -S postgresql-libs`
+1. [Ruby](https://www.ruby-lang.org/en/) + [Bundler](https://bundler.io/)
+   Install these using your favorite method (apt, [rbenv](https://github.com/rbenv/rbenv), etc).
+   We only use them for `foreman` and `sass`; since SASS is switching to a Dart-based compiler, we will likely end up dropping the dependency on Ruby entirely.
 
 Once you have installed these base components, you should run `scripts/setup` to install the remainder of the application dependencies.
 
@@ -52,4 +55,3 @@ Federation requires that the application know where it's hosted, and (thanks to 
 ### Running the tests
 
 `cargo test --all`
-
