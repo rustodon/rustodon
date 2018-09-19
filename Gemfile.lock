@@ -2,8 +2,6 @@ GEM
   remote: https://rubygems.org/
   specs:
     ffi (1.9.25)
-    foreman (0.85.0)
-      thor (~> 0.19.1)
     rb-fsevent (0.10.3)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
@@ -12,13 +10,11 @@ GEM
     sass-listen (4.0.0)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
-    thor (0.19.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  foreman
   sass
 
 BUNDLED WITH

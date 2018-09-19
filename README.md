@@ -19,7 +19,7 @@ You will need to install several base dependencies:
 1. [Rust](https://www.rust-lang.org/en-US/install.html). Make sure you have followed the official instructions regarding your `PATH` variable.
    > In the Rust development environment, all tools are installed to the ~/.cargo/bin directory, and this is where you will find the Rust toolchain, including rustc, cargo, and rustup.
    > Accordingly, it is customary for Rust developers to include this directory in their PATH environment variable. During installation rustup will attempt to configure the PATH. Because of differences between platforms, command shells, and bugs in rustup, the modifications to PATH may not take effect until the console is restarted, or the user is logged out, or it may not succeed at all.
-   > If, after installation, running rustc --version in the console fails, this is the most likely reason. 
+   > If, after installation, running rustc --version in the console fails, this is the most likely reason.
 1. [Postgres](https://www.postgresql.org/download/). If you don't have a Postgres instance available, you can use the supplied [docker-compose](https://github.com/docker/compose/) configuration file to start an instance:
    ```
    docker-compose up -d
@@ -31,9 +31,9 @@ You will need to install several base dependencies:
    On some operating systems, you may need to separately install the Postgres client library:
    * Debian/Ubuntu/etc: `apt install libpq-dev`
    * Arch: `pacman -S postgresql-libs`
-1. [Ruby](https://www.ruby-lang.org/en/) + [Bundler](https://bundler.io/)
+1. [Ruby](https://www.ruby-lang.org/en/) + [Bundler](https://bundler.io/).
    Install these using your favorite method (apt, [rbenv](https://github.com/rbenv/rbenv), etc).
-   We only use them for `foreman` and `sass`; since SASS is switching to a Dart-based compiler, we will likely end up dropping the dependency on Ruby entirely.
+   We only use them for `sass`; since SASS is switching to a Dart-based compiler, we will likely end up dropping the dependency on Ruby entirely.
 
 Once you have installed these base components, you should run `scripts/setup` to install the remainder of the application dependencies.
 
@@ -42,7 +42,7 @@ Once you have installed these base components, you should run `scripts/setup` to
 To run the application once you have installed all dependencies, you should run either:
 
 * `cargo run`: Runs just the server
-* `bundle exec foreman start`: Runs the server and additional helper processes
+* `fors start`: Runs the server and additional helper processes
 
 Rustodon will launch on `http://localhost:8000` by default; this can be overriden by setting [certain environment variables](https://rocket.rs/guide/configuration/#environment-variables).
 
