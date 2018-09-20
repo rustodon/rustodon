@@ -25,7 +25,7 @@ serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
 validator = "0.7"
-validator_derive = "0.7"
+validator_derive = "0.8"
 
 ammonia = "1.1.0"
 maud_htmlescape = "0.17.0"
