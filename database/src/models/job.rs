@@ -15,6 +15,7 @@ pub struct JobRecord {
 
     pub status: JobStatus,
 
+    pub queue: String,
     pub kind: String,
     pub data: Value,
 }

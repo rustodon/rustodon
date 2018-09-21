@@ -6,6 +6,7 @@ CREATE TABLE jobs (
 
     status job_status NOT NULL,
 
+    queue VARCHAR NOT NULL,
     kind VARCHAR NOT NULL,
     job_data JSONB NOT NULL
 )
