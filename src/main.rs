@@ -36,7 +36,6 @@ extern crate rustodon_database as db;
 #[macro_use]
 mod error;
 mod activitypub;
-mod jobs;
 mod routes;
 mod transform;
 mod util;

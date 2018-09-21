@@ -4,11 +4,15 @@ use diesel::prelude::*;
 use db::models::JobRecord;
 use db::types::JobStatus;
 use db::Pool;
-
+use turnstile::Worker;
 
 const BATCH_SIZE: i64 = 10;
+const CHECK_PERIOD: f32 = 1.0; // 1/(1 hz)
+
 
 pub fn init(pool: Pool) {
+    let worker = Worker::new();
+
     thread::Builder::new()
         .name("job_collector".to_string())
         .spawn(move || loop {
@@ -23,6 +27,8 @@ pub fn init(pool: Pool) {
                     .load::<JobRecord>(&conn)
                     .expect("h*ck")
             };
+
+            // worker.collector_tick(&top_of_queue[..]);
 
             // .filter(|j| j.should_run())
         }).unwrap(); // TODO: don't unwrap
