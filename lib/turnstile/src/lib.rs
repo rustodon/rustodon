@@ -1,20 +1,5 @@
-use std::time::Duration;
+pub mod job;
+pub mod worker;
 
-pub trait Job<E> {
-    fn run(&self) -> Result<(), E>;
-}
-
-enum Backoff {
-    ConstantWait(Duration),
-    Exponential { base: Duration },
-}
-
-enum FailBehavior {
-    Retry(Backoff),
-    Destroy,
-}
-
-struct ExecutionContract {
-    timeout: Option<Duration>,
-    fail_behavior: FailBehavior,
-}
+pub use job::{Job, Perform, ExecutionContract, Backoff, FailBehavior};
+pub use worker::Worker;
