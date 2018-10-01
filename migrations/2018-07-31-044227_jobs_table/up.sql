@@ -8,5 +8,5 @@ CREATE TABLE jobs (
 
     queue VARCHAR NOT NULL,
     kind VARCHAR NOT NULL,
-    job_data JSONB NOT NULL
+    data JSONB NOT NULL
 )
