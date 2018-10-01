@@ -1,7 +1,14 @@
 use std::time::Duration;
+use std::error::Error;
 
 pub trait Job {
+    /// Returns a textual identifier for this job.
+    fn kind() -> &'static str;
+
+    /// Returns true, if this job is due to execute.
     fn should_run(&self) -> bool;
+
+    /// Returns the execution contract of this job.
     fn execution_contract(&self) -> ExecutionContract;
 }
 
@@ -16,11 +23,11 @@ pub enum FailBehavior {
 }
 
 pub struct ExecutionContract {
-    timeout: Option<Duration>,
-    fail_behavior: FailBehavior,
+    pub timeout: Option<Duration>,
+    pub fail_behavior: FailBehavior,
 }
 
 pub trait Perform {
-    /// Runs the job's duty
-    fn perform(&self);
+    /// Runs this job's action.
+    fn perform(&self) -> Result<(), Box<Error>>;
 }
