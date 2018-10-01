@@ -34,7 +34,7 @@ maud_htmlescape = "0.17.0"
 path = "database/"
 
 [dependencies.rocket_contrib]
-version = "0.3.8"
+version = "0.3.17"
 default-features = false
 features = ["json"]
 
