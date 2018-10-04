@@ -69,6 +69,17 @@ fn main() {
     // initialize the worker queues
     workers::init(db_connection_pool.clone());
 
+    {
+        use diesel::prelude::*;
+        let conn = db_connection_pool.get().unwrap();
+
+        use db::models::NewJobRecord;
+        let r = NewJobRecord::on_queue(workers::TestJob {msg: "snug".to_string()}, "default_queue").unwrap();
+        diesel::insert_into(db::schema::jobs::table).values(&r).execute(&conn).unwrap();
+
+        // println!("{:?}", r);
+    }
+
     rocket::ignite()
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
