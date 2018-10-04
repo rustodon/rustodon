@@ -101,6 +101,10 @@ if ! which cargo-watch 2>/dev/null 1>&2 ; then
   infoMsg "Installing cargo-watch..."
   cargo install cargo-watch
 fi
+if ! which fors 2>/dev/null 1>&2 ; then
+  infoMsg "Installing fors..."
+  cargo install fors
+fi
 
 # Database creation and migration
 infoMsg "Running migrations..."
@@ -126,5 +130,5 @@ EOTOML
 fi
 
 # Setup complete
-infoMsg "Setup is complete, you may run the server with:"
-echo "bundle exec foreman start"
+infoMsg "Setup is complete, you may run the development server with:"
+echo "fors start"

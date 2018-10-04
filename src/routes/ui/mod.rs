@@ -84,7 +84,7 @@ pub fn create_status(
     let form_data = form.get();
 
     if let Err(errs) = form_data.validate() {
-        let errs = errs.inner();
+        let errs = errs.field_errors();
 
         // concatenate the error descriptions, with commas between them.
         // TODO: make this less ugly :(

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#f8f8f6">
     <title>Rustodon - {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css" />
 </head>
@@ -14,7 +15,7 @@
     <main class="main-content">
         {%- match flash -%}
         {%- when Some with (flashmessage) -%}
-            <div>
+            <div class="flash-container">
                 <input type="checkbox" class="flash-hider" id="flash-hider"/>
                 <label class="flash-hider-label" for="flash-hider">❌</label>
                 <div class="flash {{flashmessage.name()}}">{{flashmessage.msg()}}</div>

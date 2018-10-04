@@ -29,7 +29,7 @@ $standard_border: $border_width solid $border-color;
 
 
 %big-shadow {
-    box-shadow: 0 3px 5px $shadow_color;
+    box-shadow: 0 3px 3px $shadow_color;
 }
 
 %small-shadow {
@@ -49,13 +49,13 @@ $standard_border: $border_width solid $border-color;
     font-weight: bold;
     font-family: inherit;
     font-variant: small-caps;
-    color: $invert_color;
+    color: $background_color;
     background-color: $action_color;
-  
     cursor: pointer;
     user-select: none;
   
     &:hover {
       background-color: $active_color;
+      color: $invert_color;
     }
 }
