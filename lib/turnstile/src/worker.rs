@@ -44,7 +44,12 @@ impl Worker {
         );
     }
 
-    pub fn job_tick(&mut self, kind: &str, data: Value, on_success: impl Fn() + Send + 'static) -> Result<(), Error> {
+    pub fn job_tick(
+        &mut self,
+        kind: &str,
+        data: Value,
+        on_success: impl Fn() + Send + 'static,
+    ) -> Result<(), Error> {
         let handler = self.handlers.get(kind).ok_or(Error::InvalidKind)?.clone();
         self.thread_pool.execute(move || {
             // TODO: don't discard error?

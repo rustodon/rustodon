@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate quick_error;
-extern crate serde_json;
 extern crate serde;
+extern crate serde_json;
 extern crate threadpool;
 
 mod error;

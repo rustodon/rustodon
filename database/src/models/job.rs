@@ -32,8 +32,8 @@ pub struct NewJobRecord<'a> {
     pub status: JobStatus,
 
     pub queue: &'a str,
-    pub kind: &'a str,
-    pub data: Value,
+    pub kind:  &'a str,
+    pub data:  Value,
 }
 
 impl<'a> NewJobRecord<'a> {

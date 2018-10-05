@@ -20,7 +20,6 @@ extern crate serde;
 extern crate serde_json;
 extern crate turnstile;
 
-
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{self, ConnectionManager};
@@ -32,8 +31,8 @@ use std::ops::Deref;
 
 pub mod idgen;
 pub mod models;
-pub mod types;
 pub mod schema;
+pub mod types;
 pub mod validators;
 
 pub use idgen::id_generator;

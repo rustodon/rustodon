@@ -1,6 +1,6 @@
-use std::error::Error as StdError;
-use std::any::Any;
 use serde_json;
+use std::any::Any;
+use std::error::Error as StdError;
 
 quick_error! {
     #[derive(Debug)]

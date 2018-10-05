@@ -1,5 +1,5 @@
-use std::time::Duration;
 use std::error::Error;
+use std::time::Duration;
 
 pub trait Job {
     /// Returns a textual identifier for this job.
