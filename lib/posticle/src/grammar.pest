@@ -1,0 +1,113 @@
+post = _{
+    (hashtag | mention | url | text | space)*
+}
+
+text = _{
+    (!("#" | "@" | space) ~ ANY)+
+}
+
+hashtag = {
+    "#" ~ hashtag_name
+}
+
+hashtag_name = {
+    alphabetic+
+}
+
+mention = {
+    "@" ~ mention_username ~ ("@" ~ mention_domain)?
+}
+
+mention_username = {
+    alphanumeric{1,32}
+}
+
+mention_domain = {
+    domain
+}
+
+url = {
+    url_schema ~ domain ~ url_port? ~ url_path? ~ url_query?
+}
+
+url_schema = _{
+    alphabetic+ ~ "://"
+}
+
+url_port = _{
+    ":" ~ '0'..'9'+
+}
+
+url_path = {
+    "/" ~ (!("?" | "&" | "#" | space | punctuation) ~ ANY)*
+}
+
+url_query = {
+    ("?" | "&" | "#") ~ (!(space | punctuation) ~ ANY)*
+}
+
+domain = _{
+    (domain_segment ~ ".")* ~ domain_segment
+}
+
+domain_segment = _{
+    domain_extrema
+    ~ domain_middle*
+    ~ domain_extrema?
+}
+
+domain_extrema = _{
+    !(punctuation | ctrl | invalid | space) ~ ANY
+}
+
+domain_middle = _{
+    (!(punctuation_no_hyphen_underscore | ctrl | invalid | space) ~ ANY)
+}
+
+alphabetic = _{
+    'a'..'z' | 'A'..'Z'
+}
+
+numeric = _{
+    '0'..'9'
+}
+
+alphanumeric = _{
+    alphabetic | numeric
+}
+
+ctrl = _{
+    '\x00'..'\x1F' | "\x7F"
+}
+
+invalid = _{
+    "\u{FFFE}" | "\u{FEFF}" | "\u{FFFF}" | '\u{202A}'..'\u{202E}'
+}
+
+punctuation = _{
+    "-" | "_" | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "|" | "}" | "~"
+}
+
+punctuation_no_hyphen = _{
+    !"-" ~ punctuation
+}
+
+punctuation_no_hyphen_underscore = _{
+    !"_" ~ punctuation
+}
+
+space = _{
+    " " | "\r" | "\n" | "\t"
+    | '\u{09}'..'\u{0D}'
+    | "\u{20}"
+    | "\u{85}"
+    | "\u{A0}"
+    | "\u{1680}"
+    | "\u{180E}"
+    | '\u{2000}'..'\u{200A}'
+    | "\u{2028}"
+    | "\u{2029}"
+    | "\u{202F}"
+    | "\u{205F}"
+    | "\u{3000}"
+}
