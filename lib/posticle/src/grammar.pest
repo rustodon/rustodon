@@ -1,34 +1,34 @@
 post = _{
-    (hashtag | mention | url | text | space ~ ("#" | "@") | space)*
+    (symbol | url | text | space)*
 }
 
 text = _{
-    (!(space ~ "#" | space ~ "@" | space) ~ ANY)+
+    (!((SOI | space) ~ ("#" | "@") | space) ~ ANY)+
+}
+
+symbol = _{
+    (SOI | space)
+    ~ (hashtag | mention)
+    ~ &(space | punctuation | EOI)
 }
 
 hashtag = {
-    (SOI | space)
-    ~ "#"
-    ~ hashtag_name
-    ~ &(space | punctuation | EOI)
+    "#" ~ hashtag_name
 }
 
 hashtag_name = {
-    (!("@" | space | terminator ~ (space | EOI)) ~ ANY)+
+    (!("@" | space | terminator+ ~ (space | EOI)) ~ ANY)+
 }
 
 mention = {
-    (SOI | space)
-    ~ "@"
-    ~ (
+    "@" ~ (
         mention_with_username_and_domain
         | mention_with_username
     )
-    ~ &(space | punctuation | EOI)
 }
 
 mention_with_username = _{
-    mention_username
+    mention_username ~ !"@"
 }
 
 mention_with_username_and_domain = _{
@@ -36,11 +36,11 @@ mention_with_username_and_domain = _{
 }
 
 mention_username = {
-    (!("@" | space) ~ ANY){1,32}
+    (!("@" | space | punctuation+ ~ (space | EOI)) ~ ANY){1,32}
 }
 
 mention_domain = {
-    (!("@" | space | punctuation ~ (space | EOI)) ~ ANY){,60}
+    (!("@" | space | punctuation+ ~ (space | EOI)) ~ ANY){1,60}
 }
 
 url = {
@@ -97,12 +97,12 @@ url_schema = _{
 }
 
 url_domain = _{
-    (!("/" | "?" | "&" | "#" | space | terminator ~ (space | EOI)) ~ ANY)+
+    (!("/" | "?" | "&" | "#" | space | terminator+ ~ (space | EOI)) ~ ANY)+
 }
 
 url_tail = _{
     ("/" | ("?" | "&" | "#") ~ !(space | EOI))
-    ~ (!(space | terminator ~ (space | EOI)) ~ ANY)*
+    ~ (!(space | terminator+ ~ (space | EOI)) ~ ANY)*
 }
 
 terminator = _{

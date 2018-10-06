@@ -1,23 +1,30 @@
 #![feature(nll)]
 
+#[macro_use]
+extern crate lazy_static;
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
-
-// extern crate regex;
-// #[macro_use]
-// extern crate lazy_static;
-
-#[macro_use]
 #[cfg(test)]
 #[macro_use]
 extern crate pretty_assertions;
+extern crate regex;
+extern crate validator;
 
 mod grammar;
 
 use grammar::{Grammar, Rule};
 use pest::iterators::Pair;
 use pest::Parser;
+use regex::Regex;
+
+lazy_static! {
+    /// Matches all valid characters in a hashtag name (after the first #).
+    static ref VALID_HASHTAG_NAME_RE: Regex = Regex::new(r"^[[:word:]_]*[[:alpha:]_·][[:word:]_]*$").unwrap();
+
+    /// Matches all valid characters in a mention username (after the first @).
+    static ref VALID_MENTION_USERNAME_RE: Regex = Regex::new(r"^[a-z0-9_]+([a-z0-9_\.]+[a-z0-9_]+)?$").unwrap();
+}
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 /// Tags a given [Entity]'s semantic kind.
@@ -51,60 +58,86 @@ impl Entity {
     }
 
     /// Create an Entity of `EntityKind::Hashtag` from parser result.
-    pub fn from_hashtag(pair: Pair<Rule>) -> Self {
-        let span = pair.as_span();
-        let start = span.start_pos().pos();
-        let end = span.end_pos().pos();
-
-        Entity {
-            kind:  EntityKind::Hashtag,
-            range: (start, end),
-        }
-    }
-
-    /// Create an Entity of `EntityKind::Mention` from parser result.
-    pub fn from_mention(pair: Pair<Rule>) -> Self {
+    pub fn from_hashtag(pair: Pair<Rule>) -> Option<Self> {
         let span = pair.as_span();
         let start = span.start_pos().pos();
         let end = span.end_pos().pos();
         let pairs = pair.into_inner();
-        let mut username = String::new();
-        let mut domain = String::new();
 
         for pair in pairs {
             match pair.as_rule() {
-                Rule::mention_username => {
-                    username.push_str(pair.as_str());
-                },
-                Rule::mention_domain => {
-                    domain.push_str(pair.as_str());
+                Rule::hashtag_name => {
+                    if validate_hashtag_name(pair.as_str()) {
+                        return Some(Entity {
+                            kind:  EntityKind::Hashtag,
+                            range: (start, end),
+                        });
+                    }
                 },
                 _ => unreachable!(),
             }
         }
 
-        if domain.len() > 0 {
-            Entity {
-                kind:  EntityKind::Mention(username, Some(domain)),
-                range: (start, end),
+        None
+    }
+
+    /// Create an Entity of `EntityKind::Mention` from parser result.
+    pub fn from_mention(pair: Pair<Rule>) -> Option<Self> {
+        let span = pair.as_span();
+        let start = span.start_pos().pos();
+        let end = span.end_pos().pos();
+        let pairs = pair.into_inner();
+        let mut username = "";
+        let mut domain = "";
+        let mut with_domain = false;
+
+        for pair in pairs {
+            match pair.as_rule() {
+                Rule::mention_username => {
+                    username = pair.as_str();
+                },
+                Rule::mention_domain => {
+                    with_domain = true;
+                    domain = pair.as_str();
+                },
+                _ => unreachable!(),
+            }
+        }
+
+        if validate_mention_username(&username) {
+            if with_domain {
+                if validate_mention_domain(&domain) {
+                    Some(Entity {
+                        kind:  EntityKind::Mention(username.to_string(), Some(domain.to_string())),
+                        range: (start, end),
+                    })
+                } else {
+                    None
+                }
+            } else {
+                Some(Entity {
+                    kind:  EntityKind::Mention(username.to_string(), None),
+                    range: (start, end),
+                })
             }
         } else {
-            Entity {
-                kind:  EntityKind::Mention(username, None),
-                range: (start, end),
-            }
+            None
         }
     }
 
     /// Create an Entity of `EntityKind::Url` from parser result.
-    pub fn from_url(pair: Pair<Rule>) -> Self {
+    pub fn from_url(pair: Pair<Rule>) -> Option<Self> {
         let span = pair.as_span();
         let start = span.start_pos().pos();
         let end = span.end_pos().pos();
 
-        Entity {
-            kind:  EntityKind::Url,
-            range: (start, end),
+        if validate_url(pair.as_str()) {
+            Some(Entity {
+                kind:  EntityKind::Url,
+                range: (start, end),
+            })
+        } else {
+            None
         }
     }
 }
@@ -115,24 +148,45 @@ pub fn entities(text: &str) -> Vec<Entity> {
     let mut results = Vec::new();
 
     for pair in pairs {
-        results.push(match pair.as_rule() {
+        match match pair.as_rule() {
             Rule::hashtag => Entity::from_hashtag(pair),
             Rule::mention => Entity::from_mention(pair),
             Rule::url => Entity::from_url(pair),
             _ => unreachable!(),
-        });
+        } {
+            Some(entity) => results.push(entity),
+            None => {},
+        }
     }
 
     results
+}
+
+/// Check that a hashtag name (after the first #) is valid.
+pub fn validate_hashtag_name(name: &str) -> bool {
+    VALID_HASHTAG_NAME_RE.is_match(name)
+}
+
+/// Check that a mentioned username is valid.
+pub fn validate_mention_username(username: &str) -> bool {
+    VALID_MENTION_USERNAME_RE.is_match(username)
+}
+
+/// Check that a mentioned instance domain is valid.
+pub fn validate_mention_domain(domain: &str) -> bool {
+    validator::validate_url(format!("https://{}", domain))
+}
+
+pub fn validate_url(url: &str) -> bool {
+    validator::validate_url(url)
 }
 
 #[cfg(test)]
 mod tests {
     extern crate yaml_rust;
     use super::*;
-    // use std::collections::HashSet;
 
-    // const TLDS_YAML: &'static str = include_str!("../vendor/test/tlds.yml");
+    const TLDS_YAML: &'static str = include_str!("../vendor/test/tlds.yml");
 
     #[test]
     fn extracts_nothing() {
@@ -155,6 +209,13 @@ mod tests {
                 range: (0, 21),
             }]
         );
+    }
+
+    #[test]
+    fn ignores_invalid_mentions() {
+        assert_eq!(entities("@@yuser@domain"), vec![]);
+        assert_eq!(entities("@xuser@@domain"), vec![]);
+        assert_eq!(entities("@zuser@-domain-.com"), vec![]);
     }
 
     #[test]
@@ -182,54 +243,47 @@ mod tests {
     #[test]
     fn extracts_all() {
         assert_eq!(
-            entities("#hashtag https://example.com @mention"),
+            entities("text #hashtag https://example.com @mention text"),
             vec![
                 Entity {
                     kind:  EntityKind::Hashtag,
-                    range: (0, 8),
+                    range: (5, 13),
                 },
                 Entity {
                     kind:  EntityKind::Url,
-                    range: (9, 28),
+                    range: (14, 33),
                 },
                 Entity {
                     kind:  EntityKind::Mention("mention".to_string(), None),
-                    range: (29, 37),
+                    range: (34, 42),
                 },
             ]
         );
     }
 
-    // #[test]
-    // fn all_tlds_parse() {
-    //     let tests = yaml_rust::YamlLoader::load_from_str(TLDS_YAML).unwrap();
-    //     let tests = tests.first().unwrap();
-    //     let ref tests = tests["tests"];
-    //     for (suite, test_cases) in tests.as_hash().expect("could not load tests document") {
-    //         let suite = suite.as_str().expect("suite could not be loaded");
-    //         for test in test_cases.as_vec().expect("suite could not be loaded") {
-    //             let description = test["description"]
-    //                 .as_str()
-    //                 .expect("test was missing 'description'");
-    //             let text = test["text"].as_str().expect("test was missing 'text'");
-    //             let expected = test["expected"]
-    //                 .as_vec()
-    //                 .expect("test was missing 'expected'")
-    //                 .iter()
-    //                 .map(|s| s.as_str().expect("non-string found in 'expected'"))
-    //                 .collect::<HashSet<_>>();
+    #[test]
+    fn all_tlds_validate() {
+        let tests = yaml_rust::YamlLoader::load_from_str(TLDS_YAML).unwrap();
+        let tests = tests.first().unwrap();
+        let ref tests = tests["tests"];
 
-    //             let actual = extract_urls(text)
-    //                 .into_iter()
-    //                 .map(|e| e.substr(text))
-    //                 .collect::<HashSet<_>>();
+        for (suite, test_cases) in tests.as_hash().expect("could not load tests document") {
+            let suite = suite.as_str().expect("suite could not be loaded");
 
-    //             assert_eq!(
-    //                 actual, expected,
-    //                 "test {}/\"{}\" failed on text \"{}\"",
-    //                 suite, description, text
-    //             );
-    //         }
-    //     }
-    // }
+            for test in test_cases.as_vec().expect("suite could not be loaded") {
+                let description = test["description"]
+                    .as_str()
+                    .expect("test was missing 'description'");
+                let text = test["text"].as_str().expect("test was missing 'text'");
+
+                assert!(
+                    validate_mention_domain(text),
+                    "test {}/\"{}\" failed on text \"{}\"",
+                    suite,
+                    description,
+                    text
+                );
+            }
+        }
+    }
 }

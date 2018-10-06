@@ -6,8 +6,11 @@ authors = ["Erin Moon <erin@hashbang.sh>"]
 categories = ["text-processing"]
 
 [dependencies]
+lazy_static = "1.1.0"
 pest = "2.0.1"
 pest_derive = "2.0.1"
+regex = "1.0.5"
+validator = "0.8"
 
 [dev-dependencies]
 yaml-rust = "0.4.2"
