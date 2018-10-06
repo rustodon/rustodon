@@ -1,113 +1,121 @@
 post = _{
-    (hashtag | mention | url | text | space)*
+    (hashtag | mention | url | text | space ~ ("#" | "@") | space)*
 }
 
 text = _{
-    (!("#" | "@" | space) ~ ANY)+
+    (!(space ~ "#" | space ~ "@" | space) ~ ANY)+
 }
 
 hashtag = {
-    "#" ~ hashtag_name
+    (SOI | space)
+    ~ "#"
+    ~ hashtag_name
+    ~ &(space | punctuation | EOI)
 }
 
 hashtag_name = {
-    alphabetic+
+    (!("@" | space | terminator ~ (space | EOI)) ~ ANY)+
 }
 
 mention = {
-    "@" ~ mention_username ~ ("@" ~ mention_domain)?
+    (SOI | space)
+    ~ "@"
+    ~ (
+        mention_with_username_and_domain
+        | mention_with_username
+    )
+    ~ &(space | punctuation | EOI)
+}
+
+mention_with_username = _{
+    mention_username
+}
+
+mention_with_username_and_domain = _{
+    mention_username ~ "@" ~ mention_domain
 }
 
 mention_username = {
-    alphanumeric{1,32}
+    (!("@" | space) ~ ANY){1,32}
 }
 
 mention_domain = {
-    domain
+    (!("@" | space | punctuation ~ (space | EOI)) ~ ANY){,60}
 }
 
 url = {
-    url_schema ~ domain ~ url_port? ~ url_path? ~ url_query?
+    url_schema ~ url_domain ~ url_tail?
 }
 
 url_schema = _{
-    alphabetic+ ~ "://"
+    (^"microsoft.windows.camera.multipicker" | ^"microsoft.windows.camera.picker"
+    | ^"ms-settings-connectabledevices" | ^"ms-secondary-screen-controller"
+    | ^"ms-lockscreencomponent-config" | ^"ms-settings-displays-topology"
+    | ^"ms-settings-emailandaccounts" | ^"ms-settings-nfctransactions"
+    | ^"ms-settings-screenrotation" | ^"ms-secondary-screen-setup" | ^"ms-settings-notifications"
+    | ^"microsoft.windows.camera" | ^"ms-settings-airplanemode" | ^"ms-settings-cloudstorage"
+    | ^"com-eventbrite-attendee" | ^"ms-restoretabcompanion" | ^"ms-mixedrealitycapture"
+    | ^"ms-settings-bluetooth" | ^"ms-settings-proximity" | ^"ms-settings-workplace"
+    | ^"ms-browser-extension" | ^"ms-settings-cellular" | ^"ms-settings-language"
+    | ^"ms-settings-location" | ^"ms-settings-privacy" | ^"ms-settings-camera"
+    | ^"ms-media-stream-id" | ^"ms-gamebarservices" | ^"ms-useractivityset" | ^"ms-virtualtouchpad"
+    | ^"dlna-playcontainer" | ^"ms-whiteboard-cmd" | ^"ms-settings-power" | ^"ms-gamingoverlay"
+    | ^"ms-search-repair" | ^"ms-settings-wifi" | ^"chrome-extension" | ^"ms-settings-lock"
+    | ^"dlna-playsingle" | ^"ms-screensketch" | ^"opaquelocktoken" | ^"ms-sttoverlay"
+    | ^"ms-enrollment" | ^"ms-whiteboard" | ^"ms-powerpoint" | ^"ms-screenclip" | ^"ms-transit-to"
+    | ^"xmlrpc.beeps" | ^"simpleledger" | ^"gizmoproject" | ^"ms-officeapp" | ^"ms-getoffice"
+    | ^"ms-publisher" | ^"onenote-cmd" | ^"ms-drive-to" | ^"ms-settings" | ^"thismessage"
+    | ^"xmlrpc.beep" | ^"bitcoincash" | ^"xcon-userid" | ^"view-source" | ^"ms-infopath"
+    | ^"ms-inputapp" | ^"openpgp4fpr" | ^"soap.beeps" | ^"ms-walk-to" | ^"ms-project" | ^"secondlife"
+    | ^"mailserver" | ^"browserext" | ^"attachment" | ^"filesystem" | ^"coaps+tcp" | ^"soap.beep"
+    | ^"feedready" | ^"ms-people" | ^"iris.beep" | ^"adiumxtra" | ^"teamspeak" | ^"iris.xpcs"
+    | ^"hydrazone" | ^"paparazzi" | ^"ms-access" | ^"ms-excel" | ^"ventrilo" | ^"isostore"
+    | ^"iris.xpc" | ^"iris.lwz" | ^"iotdisco" | ^"teliaeid" | ^"coap+tcp" | ^"videotex" | ^"coaps+ws"
+    | ^"resource" | ^"prospero" | ^"ms-visio" | ^"facetime" | ^"diaspora" | ^"platform" | ^"example"
+    | ^"bitcoin" | ^"keyparc" | ^"appdata" | ^"session" | ^"ms-help" | ^"wyciwyg" | ^"coap+ws"
+    | ^"service" | ^"z39.50s" | ^"v-event" | ^"spotify" | ^"message" | ^"onenote" | ^"mupdate"
+    | ^"ms-word" | ^"content" | ^"z39.50r" | ^"beshare" | ^"mongodb" | ^"mailto" | ^"webcal"
+    | ^"lastfm" | ^"jabber" | ^"gopher" | ^"z39.50" | ^"ms-spd" | ^"finger" | ^"mumble" | ^"pkcs11"
+    | ^"market" | ^"rediss" | ^"reload" | ^"magnet" | ^"chrome" | ^"soldat" | ^"spiffe" | ^"callto"
+    | ^"submit" | ^"telnet" | ^"things" | ^"barion" | ^"tn3270" | ^"unreal" | ^"ut2004" | ^"rsync"
+    | ^"ldaps" | ^"ymsgr" | ^"rtmfp" | ^"rtsps" | ^"rtspu" | ^"conti" | ^"coaps" | ^"shttp" | ^"sieve"
+    | ^"skype" | ^"snews" | ^"about" | ^"hxxps" | ^"msnim" | ^"msrps" | ^"steam" | ^"stuns" | ^"https"
+    | ^"notes" | ^"gtalk" | ^"graph" | ^"modem" | ^"turns" | ^"query" | ^"redis" | ^"vemmi" | ^"proxy"
+    | ^"xfire" | ^"ldap" | ^"hxxp" | ^"psyc" | ^"xmpp" | ^"maps" | ^"http" | ^"hcap" | ^"h323"
+    | ^"crid" | ^"lvlt" | ^"itms" | ^"rtmp" | ^"rtsp" | ^"iris" | ^"ircs" | ^"irc6" | ^"ipps"
+    | ^"coap" | ^"sftp" | ^"fish" | ^"info" | ^"sips" | ^"file" | ^"smtp" | ^"feed" | ^"snmp"
+    | ^"elsi" | ^"ed2k" | ^"imap" | ^"msrp" | ^"aaas" | ^"stun" | ^"mtqp" | ^"pwid" | ^"bolo"
+    | ^"blob" | ^"dntp" | ^"tftp" | ^"news" | ^"nntp" | ^"icon" | ^"tool" | ^"turn" | ^"dict"
+    | ^"acap" | ^"pack" | ^"palm" | ^"acct" | ^"icap" | ^"wais" | ^"data" | ^"wpid" | ^"pres"
+    | ^"wtai" | ^"xcon" | ^"jms" | ^"ham" | ^"smb" | ^"sms" | ^"dav" | ^"fax" | ^"jar" | ^"pop"
+    | ^"cap" | ^"irc" | ^"cvs" | ^"dvb" | ^"ssh" | ^"dtn" | ^"mid" | ^"iax" | ^"ipp" | ^"svn"
+    | ^"tag" | ^"git" | ^"tel" | ^"ipn" | ^"geo" | ^"res" | ^"mvn" | ^"rmi" | ^"tip" | ^"ftp"
+    | ^"nfs" | ^"xri" | ^"nih" | ^"moz" | ^"udp" | ^"mms" | ^"urn" | ^"ocf" | ^"oid" | ^"dns"
+    | ^"apt" | ^"aim" | ^"vnc" | ^"afs" | ^"dis" | ^"sgn" | ^"did" | ^"hcp" | ^"wss" | ^"cid"
+    | ^"afp" | ^"sip" | ^"acr" | ^"aaa" | ^"ws" | ^"aw" | ^"tv" | ^"qb" | ^"ni" | ^"gg" | ^"go"
+    | ^"im") ~ "://"
 }
 
-url_port = _{
-    ":" ~ '0'..'9'+
+url_domain = _{
+    (!("/" | "?" | "&" | "#" | space | terminator ~ (space | EOI)) ~ ANY)+
 }
 
-url_path = {
-    "/" ~ (!("?" | "&" | "#" | space | punctuation) ~ ANY)*
+url_tail = _{
+    ("/" | ("?" | "&" | "#") ~ !(space | EOI))
+    ~ (!(space | terminator ~ (space | EOI)) ~ ANY)*
 }
 
-url_query = {
-    ("?" | "&" | "#") ~ (!(space | punctuation) ~ ANY)*
-}
-
-domain = _{
-    (domain_segment ~ ".")* ~ domain_segment
-}
-
-domain_segment = _{
-    domain_extrema
-    ~ domain_middle*
-    ~ domain_extrema?
-}
-
-domain_extrema = _{
-    !(punctuation | ctrl | invalid | space) ~ ANY
-}
-
-domain_middle = _{
-    (!(punctuation_no_hyphen_underscore | ctrl | invalid | space) ~ ANY)
-}
-
-alphabetic = _{
-    'a'..'z' | 'A'..'Z'
-}
-
-numeric = _{
-    '0'..'9'
-}
-
-alphanumeric = _{
-    alphabetic | numeric
-}
-
-ctrl = _{
-    '\x00'..'\x1F' | "\x7F"
-}
-
-invalid = _{
-    "\u{FFFE}" | "\u{FEFF}" | "\u{FFFF}" | '\u{202A}'..'\u{202E}'
+terminator = _{
+    "(" | ")" | "?" | "!" | "*" | "'" | ";" | ":" | "=" | "," | "." | "$" | "%" | "[" | "]"
+    | "~" | "&" | "|" | "@" | "\"" | "<" | ">"
 }
 
 punctuation = _{
     "-" | "_" | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "|" | "}" | "~"
 }
 
-punctuation_no_hyphen = _{
-    !"-" ~ punctuation
-}
-
-punctuation_no_hyphen_underscore = _{
-    !"_" ~ punctuation
-}
-
 space = _{
-    " " | "\r" | "\n" | "\t"
-    | '\u{09}'..'\u{0D}'
-    | "\u{20}"
-    | "\u{85}"
-    | "\u{A0}"
-    | "\u{1680}"
-    | "\u{180E}"
-    | '\u{2000}'..'\u{200A}'
-    | "\u{2028}"
-    | "\u{2029}"
-    | "\u{202F}"
-    | "\u{205F}"
+    " " | "\r" | "\n" | "\t" | '\u{09}'..'\u{0D}' | "\u{20}" | "\u{85}" | "\u{A0}" | "\u{1680}"
+    | "\u{180E}" | '\u{2000}'..'\u{200A}' | "\u{2028}" | "\u{2029}" | "\u{202F}" | "\u{205F}"
     | "\u{3000}"
 }
