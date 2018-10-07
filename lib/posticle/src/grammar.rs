@@ -7,7 +7,10 @@ pub struct Grammar;
 
 #[cfg(test)]
 mod tests {
+    extern crate yaml_rust;
     use super::*;
+
+    const TLDS_YAML: &'static str = include_str!("../vendor/test/tlds.yml");
 
     #[test]
     fn parses_hashtag() {
@@ -88,6 +91,38 @@ mod tests {
                     .unwrap_or_else(|e| panic!("{}", e))
                     .as_str()
             );
+        }
+    }
+
+    #[test]
+    fn all_tlds_parse() {
+        let tests = yaml_rust::YamlLoader::load_from_str(TLDS_YAML).unwrap();
+        let tests = tests.first().unwrap();
+        let ref tests = tests["tests"];
+
+        for (suite, test_cases) in tests.as_hash().expect("could not load tests document") {
+            let suite = suite.as_str().expect("suite could not be loaded");
+
+            for test in test_cases.as_vec().expect("suite could not be loaded") {
+                let description = test["description"]
+                    .as_str()
+                    .expect("test was missing 'description'");
+                let text = test["text"].as_str().expect("test was missing 'text'");
+                let expected = test["expected"]
+                    .as_vec()
+                    .expect("test was missing 'expected'")
+                    .first()
+                    .expect("test was missing items for 'expected'")
+                    .as_str()
+                    .expect("non-string found in 'expected'");
+                let result = Grammar::parse(Rule::url, text).unwrap().as_str();
+
+                assert_eq!(
+                    result, expected,
+                    "test {}/\"{}\" failed on text \"{}\"",
+                    suite, description, text
+                );
+            }
         }
     }
 }
