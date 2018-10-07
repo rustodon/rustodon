@@ -141,18 +141,19 @@ impl Entity {
 
 /// Given `text`, extract all [Entities](Entity)
 pub fn entities(text: &str) -> Vec<Entity> {
-    let pairs = Grammar::parse(Rule::post, text).unwrap_or_else(|e| panic!("{}", e));
     let mut results = Vec::new();
 
-    for pair in pairs {
-        match match pair.as_rule() {
-            Rule::hashtag => Entity::from_hashtag(pair),
-            Rule::mention => Entity::from_mention(pair),
-            Rule::url => Entity::from_url(pair),
-            _ => unreachable!(),
-        } {
-            Some(entity) => results.push(entity),
-            None => {},
+    if let Ok(pairs) = Grammar::parse(Rule::post, text) {
+        for pair in pairs {
+            match match pair.as_rule() {
+                Rule::hashtag => Entity::from_hashtag(pair),
+                Rule::mention => Entity::from_mention(pair),
+                Rule::url => Entity::from_url(pair),
+                _ => unreachable!(),
+            } {
+                Some(entity) => results.push(entity),
+                None => {},
+            }
         }
     }
 
