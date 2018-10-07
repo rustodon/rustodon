@@ -27,7 +27,7 @@ mod tests {
     #[test]
     fn parses_mention() {
         let valid_mentions = vec!["@noot", "@noot@noot.social", "@no_ot3@noot.social"];
-        let invalid_mentions = vec!["@noot@@noot.social"];
+        let invalid_mentions = vec!["@noot@@noot.social", "@@noot@noot.social"];
 
         for mention in valid_mentions {
             assert_eq!(
@@ -39,12 +39,7 @@ mod tests {
         }
 
         for mention in invalid_mentions {
-            assert_ne!(
-                mention,
-                Grammar::parse(Rule::mention, mention)
-                    .unwrap_or_else(|e| panic!("{}", e))
-                    .as_str()
-            );
+            assert!(Grammar::parse(Rule::mention, mention).is_err());
         }
     }
 
