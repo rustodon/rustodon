@@ -131,7 +131,7 @@ impl Entity {
         let start = span.start_pos().pos();
         let end = span.end_pos().pos();
 
-        if validate_url(pair.as_str()) {
+        if validator::validate_url(pair.as_str()) {
             Some(Entity {
                 kind:  EntityKind::Url,
                 range: (start, end),
@@ -163,22 +163,18 @@ pub fn entities(text: &str) -> Vec<Entity> {
 }
 
 /// Check that a hashtag name (after the first #) is valid.
-pub fn validate_hashtag_name(name: &str) -> bool {
+fn validate_hashtag_name(name: &str) -> bool {
     VALID_HASHTAG_NAME_RE.is_match(name)
 }
 
 /// Check that a mentioned username is valid.
-pub fn validate_mention_username(username: &str) -> bool {
+fn validate_mention_username(username: &str) -> bool {
     VALID_MENTION_USERNAME_RE.is_match(username)
 }
 
 /// Check that a mentioned instance domain is valid.
-pub fn validate_mention_domain(domain: &str) -> bool {
+fn validate_mention_domain(domain: &str) -> bool {
     validator::validate_url(format!("https://{}", domain))
-}
-
-pub fn validate_url(url: &str) -> bool {
-    validator::validate_url(url)
 }
 
 #[cfg(test)]
