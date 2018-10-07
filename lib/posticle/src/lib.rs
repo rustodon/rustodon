@@ -87,39 +87,36 @@ impl Entity {
         let start = span.start_pos().pos();
         let end = span.end_pos().pos();
         let pairs = pair.into_inner();
-        let mut username = "";
-        let mut domain = "";
-        let mut with_domain = false;
+        let mut username = None;
+        let mut domain = None;
 
         for pair in pairs {
             match pair.as_rule() {
                 Rule::mention_username => {
-                    username = pair.as_str();
+                    let value = pair.as_str();
+
+                    if validate_mention_username(&value) {
+                        username = Some(value.to_string());
+                    }
                 },
                 Rule::mention_domain => {
-                    with_domain = true;
-                    domain = pair.as_str();
+                    let value = pair.as_str();
+
+                    if validate_mention_domain(&value) {
+                        domain = Some(value.to_string());
+                    } else {
+                        username = None;
+                    }
                 },
                 _ => unreachable!(),
             }
         }
 
-        if validate_mention_username(&username) {
-            if with_domain {
-                if validate_mention_domain(&domain) {
-                    Some(Entity {
-                        kind:  EntityKind::Mention(username.to_string(), Some(domain.to_string())),
-                        range: (start, end),
-                    })
-                } else {
-                    None
-                }
-            } else {
-                Some(Entity {
-                    kind:  EntityKind::Mention(username.to_string(), None),
-                    range: (start, end),
-                })
-            }
+        if let Some(username) = username {
+            Some(Entity {
+                kind:  EntityKind::Mention(username, domain),
+                range: (start, end),
+            })
         } else {
             None
         }
