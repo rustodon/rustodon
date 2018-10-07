@@ -2,7 +2,7 @@
 name = "posticle"
 description = "tools for working with Twitter-post-like text"
 version = "0.2.0"
-authors = ["Erin Moon <erin@hashbang.sh>"]
+authors = ["Erin Moon <erin@hashbang.sh>", "Measly Twerp <measlytwerp@gmail.com>"]
 categories = ["text-processing"]
 
 [dependencies]
