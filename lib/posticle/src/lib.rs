@@ -20,10 +20,10 @@ use regex::Regex;
 
 lazy_static! {
     /// Matches all valid characters in a hashtag name (after the first #).
-    static ref VALID_HASHTAG_NAME_RE: Regex = Regex::new(r"^[[:word:]_]*[[:alpha:]_·][[:word:]_]*$").unwrap();
+    static ref VALID_HASHTAG_NAME_RE: Regex = Regex::new(r"^[\w_]*[\p{Alphabetic}_·][\w_]*$").unwrap();
 
     /// Matches all valid characters in a mention username (after the first @).
-    static ref VALID_MENTION_USERNAME_RE: Regex = Regex::new(r"^[a-z0-9_]+([a-z0-9_\.]+[a-z0-9_]+)?$").unwrap();
+    static ref VALID_MENTION_USERNAME_RE: Regex = Regex::new(r"^(?i)[a-z0-9_]+([a-z0-9_\.]+[a-z0-9_]+)?$").unwrap();
 }
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -203,6 +203,13 @@ mod tests {
                 range: (0, 21),
             }]
         );
+        assert_eq!(
+            entities("@Mention@Domain.Place"),
+            vec![Entity {
+                kind:  EntityKind::Mention("Mention".to_string(), Some("Domain.Place".to_string())),
+                range: (0, 21),
+            }]
+        );
     }
 
     #[test]
@@ -226,7 +233,7 @@ mod tests {
 
     #[test]
     fn extracts_hashtags() {
-        let hashtags = vec!["#hashtag", "#文字化け"];
+        let hashtags = vec!["#hashtag", "#HASHTAG", "#1000followers", "#文字化け"];
 
         for hashtag in hashtags {
             assert_eq!(
