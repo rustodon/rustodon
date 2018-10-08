@@ -207,31 +207,104 @@ mod tests {
 
     #[test]
     fn ignores_invalid_mentions() {
-        assert_eq!(entities("@@yuser@domain"), vec![]);
-        assert_eq!(entities("@xuser@@domain"), vec![]);
-        assert_eq!(entities("@zuser@-domain-.com"), vec![]);
+        let mentions = vec![
+            "some text @ yo",
+            "@@yuser@domain",
+            "@xuser@@domain",
+            "@zuser@-domain-.com",
+        ];
+
+        for mention in mentions {
+            assert_eq!(
+                entities(mention),
+                vec![],
+                "ignores_invalid_mentions failed on {}",
+                mention
+            );
+        }
     }
 
     #[test]
     fn extracts_hashtags() {
-        assert_eq!(
-            entities("#hashtag"),
-            vec![Entity {
-                kind:  EntityKind::Hashtag,
-                range: (0, 8),
-            }]
-        );
+        let hashtags = vec!["#hashtag", "#文字化け"];
+
+        for hashtag in hashtags {
+            assert_eq!(
+                entities(hashtag),
+                vec![Entity {
+                    kind:  EntityKind::Hashtag,
+                    range: (0, hashtag.len()),
+                }],
+                "extracts_hashtags failed on {}",
+                hashtag
+            );
+        }
+    }
+
+    #[test]
+    fn ignores_invalid_hashtags() {
+        let hashtags = vec!["some text # yo", "#---bite-my-entire---", "#123"];
+
+        for hashtag in hashtags {
+            assert_eq!(
+                entities(hashtag),
+                vec![],
+                "ignores_invalid_hashtags failed on {}",
+                hashtag
+            );
+        }
     }
 
     #[test]
     fn extracts_urls() {
-        assert_eq!(
-            entities("https://example.com"),
-            vec![Entity {
-                kind:  EntityKind::Url,
-                range: (0, 19),
-            }]
-        );
+        let urls = vec![
+            "http://example.com",
+            "https://example.com/path/to/resource?search=foo&lang=en",
+            "http://example.com/#!/heck",
+            "HTTPS://www.ExaMPLE.COM/index.html",
+            "https://example.com:8080/",
+            "http://test_underscore.example.com",
+            "http://☃.net/",
+            "http://example.com/Русские_слова",
+            "http://example.com/الكلمات_العربية",
+            "http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook",
+            "http://example.com?foo=$bar.;baz?BAZ&c=d-#top/?stories",
+            "https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-",
+            "ftp://www.example.com/",
+        ];
+
+        for url in urls {
+            assert_eq!(
+                entities(url),
+                vec![Entity {
+                    kind:  EntityKind::Url,
+                    range: (0, url.len()),
+                }],
+                "extracts_urls failed on {}",
+                url
+            );
+        }
+    }
+
+    #[test]
+    fn ignores_invalid_urls() {
+        let urls = vec![
+            "some text http:// yo",
+            "some:thing",
+            "some://thing/else yo",
+            "http://www.-domain4352.com/",
+            "http://www.domain4352-.com/",
+            "http://☃-.net/",
+        ];
+
+        for url in urls {
+            assert_eq!(
+                entities(url),
+                vec![],
+                "ignores_invalid_urls failed on {}",
+                url
+            );
+        }
     }
 
     #[test]
