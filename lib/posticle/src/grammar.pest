@@ -1,15 +1,30 @@
 post = _{
-    (symbol | url | text | space)*
+    (symbol | text | space)*
 }
 
 text = _{
-    (!((SOI | space) ~ ("#" | "@") | space) ~ ANY)+
+    (!(symbol | space) ~ ANY)+
 }
 
 symbol = _{
-    (SOI | space)
-    ~ (hashtag | mention)
-    ~ &(space | punctuation | EOI)
+    symbol_hashtag | symbol_mention | symbol_url
+}
+
+symbol_hashtag = _{
+    (space | (!"#" ~ punctuation) | SOI)
+    ~ hashtag
+    ~ &(space | (!"#" ~ punctuation) | EOI)
+}
+
+symbol_mention = _{
+    (space | (!"@" ~ punctuation) | SOI)
+    ~ mention
+    ~ &(space | (!"@" ~ punctuation) | EOI)
+}
+
+symbol_url = _{
+    (space | punctuation | SOI)
+    ~ url
 }
 
 hashtag = {
@@ -17,15 +32,15 @@ hashtag = {
 }
 
 hashtag_name = {
-    (!("@" | space | terminator+ ~ (space | EOI)) ~ ANY)+
+    (!("@" | space | punctuation+ ~ (space | EOI)) ~ ANY)+
 }
 
 mention = {
     "@" ~ (
           (mention_username ~ !"@")
-        | (mention_username ~ "@" ~ mention_domain))
+        | (mention_username ~ "@" ~ mention_domain)
+    )
 }
-
 
 mention_username = {
     (!("@" | space | punctuation+ ~ (space | EOI)) ~ ANY){1,32}
@@ -103,9 +118,7 @@ terminator = _{
 }
 
 punctuation = _{
-    "-" | "_" | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "."
-    | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "|" | "}"
-    | "~"
+    terminator | "-" | "_" | "#" | "+" | "/" | "^" | "`" | "{" | "}" | "‹" | "›" | "»" | "«" | "「" | "」«" | "《" | "》" | "‘" | "’" | "‚" | "‛" | "“" | "”" | "„" | "‟" | "…"
 }
 
 space = _{

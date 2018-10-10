@@ -168,12 +168,27 @@ mod tests {
     }
 
     #[test]
+    fn extracts_mentions_in_punctuation() {
+        assert_eq!(
+            entities("(@mention)"),
+            vec![Entity {
+                kind: EntityKind::Mention("mention".to_string(), None),
+                span: (1, 9),
+            }]
+        );
+    }
+
+    #[test]
     fn ignores_invalid_mentions() {
         let mentions = vec![
             "some text @ yo",
             "@@yuser@domain",
             "@xuser@@domain",
             "@zuser@-domain-.com",
+            "@@not",
+            "@not@",
+            "@not@@not",
+            "@not@not@not",
         ];
 
         for mention in mentions {
@@ -204,8 +219,35 @@ mod tests {
     }
 
     #[test]
+    fn extracts_hashtags_in_punctuation() {
+        let hashtags = vec!["#hashtag", "#HASHTAG", "#1000followers", "#文字化け"];
+
+        for hashtag in hashtags {
+            let hashtag = format!("({})", hashtag);
+
+            assert_eq!(
+                entities(&hashtag),
+                vec![Entity {
+                    kind: EntityKind::Hashtag,
+                    span: (1, hashtag.len() - 1),
+                }],
+                "extracts_hashtags_in_punctuation failed on {}",
+                hashtag
+            );
+        }
+    }
+
+    #[test]
     fn ignores_invalid_hashtags() {
-        let hashtags = vec!["some text # yo", "#---bite-my-entire---", "#123"];
+        let hashtags = vec![
+            "some text # yo",
+            "#---bite-my-entire---",
+            "#123",
+            "##not",
+            "#not#",
+            "#not##not",
+            "#not#not#not",
+        ];
 
         for hashtag in hashtags {
             assert_eq!(
@@ -243,6 +285,39 @@ mod tests {
                     span: (0, url.len()),
                 }],
                 "extracts_urls failed on {}",
+                url
+            );
+        }
+    }
+
+    #[test]
+    fn extracts_urls_in_punctuation() {
+        let urls = vec![
+            "http://example.com",
+            "https://example.com/path/to/resource?search=foo&lang=en",
+            "http://example.com/#!/heck",
+            "HTTPS://www.ExaMPLE.COM/index.html",
+            "https://example.com:8080/",
+            "http://test_underscore.example.com",
+            "http://☃.net/",
+            "http://example.com/Русские_слова",
+            "http://example.com/الكلمات_العربية",
+            "http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook",
+            "http://example.com?foo=$bar.;baz?BAZ&c=d-#top/?stories",
+            "https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-",
+            "ftp://www.example.com/",
+        ];
+
+        for url in urls {
+            let url = format!("({})", url);
+
+            assert_eq!(
+                entities(&url),
+                vec![Entity {
+                    kind: EntityKind::Url,
+                    span: (1, url.len() - 1),
+                }],
+                "extracts_urls_in_punctuation failed on {}",
                 url
             );
         }
