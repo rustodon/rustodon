@@ -57,107 +57,51 @@ impl Entity {
         self.span.0 <= other.span.1 && other.span.0 <= self.span.1
     }
 
-    /// Create an Entity of `EntityKind::Hashtag` from parser result.
-    pub fn from_hashtag(pair: Pair<Rule>) -> Option<Self> {
-        let span = pair.as_span();
-        let start = span.start_pos().pos();
-        let end = span.end_pos().pos();
-        let pairs = pair.into_inner();
+    fn from_parse_pair(pair: Pair<Rule>) -> Option<Self> {
+        let span = (pair.as_span().start_pos().pos(), pair.as_span().end_pos().pos());
 
-        for pair in pairs {
-            match pair.as_rule() {
-                Rule::hashtag_name => {
-                    if validate_hashtag_name(pair.as_str()) {
-                        return Some(Entity {
-                            kind:  EntityKind::Hashtag,
-                            range: (start, end),
-                        });
-                    }
-                },
-                _ => unreachable!(),
-            }
-        }
+        match pair.as_rule() {
+            Rule::mention => {
+                let mut inner = pair.into_inner();
+                let username = inner.next().unwrap().as_str();
+                let domain = inner.next().as_ref().map(Pair::as_str);
 
-        None
-    }
-
-    /// Create an Entity of `EntityKind::Mention` from parser result.
-    pub fn from_mention(pair: Pair<Rule>) -> Option<Self> {
-        let span = pair.as_span();
-        let start = span.start_pos().pos();
-        let end = span.end_pos().pos();
-        let pairs = pair.into_inner();
-        let mut username = None;
-        let mut domain = None;
-
-        for pair in pairs {
-            match pair.as_rule() {
-                Rule::mention_username => {
-                    let value = pair.as_str();
-
-                    if validate_mention_username(&value) {
-                        username = Some(value.to_string());
-                    }
-                },
-                Rule::mention_domain => {
-                    let value = pair.as_str();
-
-                    if validate_mention_domain(&value) {
-                        domain = Some(value.to_string());
-                    } else {
-                        username = None;
-                    }
-                },
-                _ => unreachable!(),
-            }
-        }
-
-        if let Some(username) = username {
-            Some(Entity {
-                kind:  EntityKind::Mention(username, domain),
-                range: (start, end),
-            })
-        } else {
-            None
-        }
-    }
-
-    /// Create an Entity of `EntityKind::Url` from parser result.
-    pub fn from_url(pair: Pair<Rule>) -> Option<Self> {
-        let span = pair.as_span();
-        let start = span.start_pos().pos();
-        let end = span.end_pos().pos();
-
-        if validator::validate_url(pair.as_str()) {
-            Some(Entity {
-                kind:  EntityKind::Url,
-                range: (start, end),
-            })
-        } else {
-            None
+                if validate_mention_username(username) && (domain.map(validate_mention_domain).unwrap_or(true)) {
+                    Some(Entity {
+                        kind: EntityKind::Mention(username.to_string(), domain.map(str::to_string)),
+                        span,
+                    })
+                } else { None }
+            },
+            Rule::url => {
+                if validator::validate_url(pair.as_str()) {
+                    Some(Entity {
+                        kind: EntityKind::Url,
+                        span,
+                    })
+                } else { None }
+            },
+            Rule::hashtag => {
+                let name = pair.into_inner().next().unwrap().as_str();
+                if validate_hashtag_name(name) {
+                    Some(Entity {
+                        kind: EntityKind::Hashtag,
+                        span
+                    })
+                } else { None }
+            },
+            _ => None,
         }
     }
 }
 
 /// Given `text`, extract all [Entities](Entity)
 pub fn entities(text: &str) -> Vec<Entity> {
-    let mut results = Vec::new();
-
-    if let Ok(pairs) = Grammar::parse(Rule::post, text) {
-        for pair in pairs {
-            match match pair.as_rule() {
-                Rule::hashtag => Entity::from_hashtag(pair),
-                Rule::mention => Entity::from_mention(pair),
-                Rule::url => Entity::from_url(pair),
-                _ => unreachable!(),
-            } {
-                Some(entity) => results.push(entity),
-                None => {},
-            }
-        }
-    }
-
-    results
+    // If the parse succeeded, run Entity::from_parse_pair on each pair, dropping those which returned None;
+    // collect to a vec of entities. If the parse errored, just return an empty vec.
+    Grammar::parse(Rule::post, text)
+        .map(|pairs| pairs.filter_map(Entity::from_parse_pair).collect())
+        .unwrap_or_default()
 }
 
 /// Check that a hashtag name (after the first #) is valid.
