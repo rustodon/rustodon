@@ -42,7 +42,7 @@ pub enum EntityKind {
 ///
 /// The entity is described by its `kind` and the `span` of indices it occupies within the string.
 pub struct Entity {
-    pub kind:  EntityKind,
+    pub kind: EntityKind,
     pub span: (usize, usize),
 }
 
@@ -58,7 +58,10 @@ impl Entity {
     }
 
     fn from_parse_pair(pair: Pair<Rule>) -> Option<Self> {
-        let span = (pair.as_span().start_pos().pos(), pair.as_span().end_pos().pos());
+        let span = (
+            pair.as_span().start_pos().pos(),
+            pair.as_span().end_pos().pos(),
+        );
 
         match pair.as_rule() {
             Rule::mention => {
@@ -66,12 +69,16 @@ impl Entity {
                 let username = inner.next().unwrap().as_str();
                 let domain = inner.next().as_ref().map(Pair::as_str);
 
-                if validate_mention_username(username) && (domain.map(validate_mention_domain).unwrap_or(true)) {
+                if validate_mention_username(username)
+                    && (domain.map(validate_mention_domain).unwrap_or(true))
+                {
                     Some(Entity {
                         kind: EntityKind::Mention(username.to_string(), domain.map(str::to_string)),
                         span,
                     })
-                } else { None }
+                } else {
+                    None
+                }
             },
             Rule::url => {
                 if validator::validate_url(pair.as_str()) {
@@ -79,16 +86,20 @@ impl Entity {
                         kind: EntityKind::Url,
                         span,
                     })
-                } else { None }
+                } else {
+                    None
+                }
             },
             Rule::hashtag => {
                 let name = pair.into_inner().next().unwrap().as_str();
                 if validate_hashtag_name(name) {
                     Some(Entity {
                         kind: EntityKind::Hashtag,
-                        span
+                        span,
                     })
-                } else { None }
+                } else {
+                    None
+                }
             },
             _ => None,
         }
@@ -136,21 +147,21 @@ mod tests {
         assert_eq!(
             entities("@mention"),
             vec![Entity {
-                kind:  EntityKind::Mention("mention".to_string(), None),
+                kind: EntityKind::Mention("mention".to_string(), None),
                 span: (0, 8),
             }]
         );
         assert_eq!(
             entities("@mention@domain.place"),
             vec![Entity {
-                kind:  EntityKind::Mention("mention".to_string(), Some("domain.place".to_string())),
+                kind: EntityKind::Mention("mention".to_string(), Some("domain.place".to_string())),
                 span: (0, 21),
             }]
         );
         assert_eq!(
             entities("@Mention@Domain.Place"),
             vec![Entity {
-                kind:  EntityKind::Mention("Mention".to_string(), Some("Domain.Place".to_string())),
+                kind: EntityKind::Mention("Mention".to_string(), Some("Domain.Place".to_string())),
                 span: (0, 21),
             }]
         );
@@ -183,7 +194,7 @@ mod tests {
             assert_eq!(
                 entities(hashtag),
                 vec![Entity {
-                    kind:  EntityKind::Hashtag,
+                    kind: EntityKind::Hashtag,
                     span: (0, hashtag.len()),
                 }],
                 "extracts_hashtags failed on {}",
@@ -228,7 +239,7 @@ mod tests {
             assert_eq!(
                 entities(url),
                 vec![Entity {
-                    kind:  EntityKind::Url,
+                    kind: EntityKind::Url,
                     span: (0, url.len()),
                 }],
                 "extracts_urls failed on {}",
@@ -264,15 +275,15 @@ mod tests {
             entities("text #hashtag https://example.com @mention text"),
             vec![
                 Entity {
-                    kind:  EntityKind::Hashtag,
+                    kind: EntityKind::Hashtag,
                     span: (5, 13),
                 },
                 Entity {
-                    kind:  EntityKind::Url,
+                    kind: EntityKind::Url,
                     span: (14, 33),
                 },
                 Entity {
-                    kind:  EntityKind::Mention("mention".to_string(), None),
+                    kind: EntityKind::Mention("mention".to_string(), None),
                     span: (34, 42),
                 },
             ]
