@@ -22,18 +22,10 @@ hashtag_name = {
 
 mention = {
     "@" ~ (
-        mention_with_username_and_domain
-        | mention_with_username
-    )
+          (mention_username ~ !"@")
+        | (mention_username ~ "@" ~ mention_domain))
 }
 
-mention_with_username = _{
-    mention_username ~ !"@"
-}
-
-mention_with_username_and_domain = _{
-    mention_username ~ "@" ~ mention_domain
-}
 
 mention_username = {
     (!("@" | space | punctuation+ ~ (space | EOI)) ~ ANY){1,32}
