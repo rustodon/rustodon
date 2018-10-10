@@ -40,21 +40,21 @@ pub enum EntityKind {
 #[derive(Debug, PartialEq, Eq, Hash)]
 /// Represents an entity extracted from a given string of text.
 ///
-/// The entity is described by its `kind` and the `range` of indices it occupies within the string.
+/// The entity is described by its `kind` and the `span` of indices it occupies within the string.
 pub struct Entity {
     pub kind:  EntityKind,
-    pub range: (usize, usize),
+    pub span: (usize, usize),
 }
 
 impl Entity {
-    /// Extracts the range described by this Entity from the passed `text`.
+    /// Extracts the span described by this Entity from the passed `text`.
     pub fn substr<'a>(&self, text: &'a str) -> &'a str {
-        &text[self.range.0..self.range.1]
+        &text[self.span.0..self.span.1]
     }
 
     /// Returns `true` if this entity overlaps with some `other` entity.
     pub fn overlaps_with(&self, other: &Entity) -> bool {
-        self.range.0 <= other.range.1 && other.range.0 <= self.range.1
+        self.span.0 <= other.span.1 && other.span.0 <= self.span.1
     }
 
     /// Create an Entity of `EntityKind::Hashtag` from parser result.
@@ -193,21 +193,21 @@ mod tests {
             entities("@mention"),
             vec![Entity {
                 kind:  EntityKind::Mention("mention".to_string(), None),
-                range: (0, 8),
+                span: (0, 8),
             }]
         );
         assert_eq!(
             entities("@mention@domain.place"),
             vec![Entity {
                 kind:  EntityKind::Mention("mention".to_string(), Some("domain.place".to_string())),
-                range: (0, 21),
+                span: (0, 21),
             }]
         );
         assert_eq!(
             entities("@Mention@Domain.Place"),
             vec![Entity {
                 kind:  EntityKind::Mention("Mention".to_string(), Some("Domain.Place".to_string())),
-                range: (0, 21),
+                span: (0, 21),
             }]
         );
     }
@@ -240,7 +240,7 @@ mod tests {
                 entities(hashtag),
                 vec![Entity {
                     kind:  EntityKind::Hashtag,
-                    range: (0, hashtag.len()),
+                    span: (0, hashtag.len()),
                 }],
                 "extracts_hashtags failed on {}",
                 hashtag
@@ -285,7 +285,7 @@ mod tests {
                 entities(url),
                 vec![Entity {
                     kind:  EntityKind::Url,
-                    range: (0, url.len()),
+                    span: (0, url.len()),
                 }],
                 "extracts_urls failed on {}",
                 url
@@ -321,15 +321,15 @@ mod tests {
             vec![
                 Entity {
                     kind:  EntityKind::Hashtag,
-                    range: (5, 13),
+                    span: (5, 13),
                 },
                 Entity {
                     kind:  EntityKind::Url,
-                    range: (14, 33),
+                    span: (14, 33),
                 },
                 Entity {
                     kind:  EntityKind::Mention("mention".to_string(), None),
-                    range: (34, 42),
+                    span: (34, 42),
                 },
             ]
         );
