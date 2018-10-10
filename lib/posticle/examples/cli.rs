@@ -7,10 +7,9 @@ fn main() {
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
         let text = line.unwrap();
-        let entities = posticle::entities(&text);
+        let entities = posticle::entities(&text).expect("Failed entities parse");
         for entity in entities {
-            println!("entity: {:#?}", entity);
-            println!("raw text: {}", entity.substr(&text));
+            println!("entity: {:?}", entity);
         }
     }
 }
