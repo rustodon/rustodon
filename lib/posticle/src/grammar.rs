@@ -13,7 +13,22 @@ mod tests {
     const TLDS_YAML: &'static str = include_str!("../vendor/test/tlds.yml");
 
     #[test]
-    fn parses_hashtag() {
+    fn parses_emoticons() {
+        let english = ":rustodon:";
+        let japanese = ":文字化け:";
+
+        assert_eq!(
+            english,
+            Grammar::parse(Rule::emoticon, english).unwrap().as_str()
+        );
+        assert_eq!(
+            japanese,
+            Grammar::parse(Rule::emoticon, japanese).unwrap().as_str()
+        );
+    }
+
+    #[test]
+    fn parses_hashtags() {
         let english = "#rustodon";
         let japanese = "#文字化け";
 
@@ -28,7 +43,7 @@ mod tests {
     }
 
     #[test]
-    fn parses_mention() {
+    fn parses_mentions() {
         let valid_mentions = vec!["@noot", "@noot@noot.social", "@no_ot3@noot.social"];
         let invalid_mentions = vec!["@noot@@noot.social", "@@noot@noot.social"];
 
@@ -47,8 +62,8 @@ mod tests {
     }
 
     #[test]
-    fn parses_url() {
-        let valid_urls = vec![
+    fn parses_links() {
+        let valid_links = vec![
             "http://example.com",
             "https://example.com/path/to/resource?search=foo&lang=en",
             "http://example.com/#!/heck",
@@ -67,27 +82,27 @@ mod tests {
             "http://☃-.net/",
             "http://%e2%98%83.net/",
         ];
-        let invalid_urls = vec![
-            "http://example.com/\">",
+        let invalid_links = vec![
+            "http://example.com/\"> ",
             "http://example.com/\">xyz ",
             "http://example.com/#anchor ",
             "https://example.com.",
             "https://example.com?",
         ];
 
-        for url in valid_urls {
+        for link in valid_links {
             assert_eq!(
-                url,
-                Grammar::parse(Rule::url, url)
+                link,
+                Grammar::parse(Rule::link, link)
                     .unwrap_or_else(|e| panic!("{}", e))
                     .as_str()
             );
         }
 
-        for url in invalid_urls {
+        for link in invalid_links {
             assert_ne!(
-                url,
-                Grammar::parse(Rule::url, url)
+                link,
+                Grammar::parse(Rule::link, link)
                     .unwrap_or_else(|e| panic!("{}", e))
                     .as_str()
             );
@@ -115,7 +130,7 @@ mod tests {
                     .expect("test was missing items for 'expected'")
                     .as_str()
                     .expect("non-string found in 'expected'");
-                let result = Grammar::parse(Rule::url, text).unwrap().as_str();
+                let result = Grammar::parse(Rule::link, text).unwrap().as_str();
 
                 assert_eq!(
                     result, expected,

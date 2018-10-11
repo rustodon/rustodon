@@ -1,190 +1,146 @@
 #![feature(nll)]
 
-#[macro_use]
-extern crate lazy_static;
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 #[cfg(test)]
 #[macro_use]
 extern crate pretty_assertions;
-extern crate regex;
-extern crate validator;
 
 mod grammar;
+pub mod tokens;
 
-use grammar::{Grammar, Rule};
-use pest::iterators::Pair;
+use grammar::*;
 use pest::Parser;
-use regex::Regex;
+use tokens::*;
 
-lazy_static! {
-    /// Matches all valid characters in a hashtag name (after the first #).
-    static ref VALID_HASHTAG_NAME_RE: Regex = Regex::new(r"^[\w_]*[\p{Alphabetic}_·][\w_]*$").unwrap();
-
-    /// Matches all valid characters in a mention username (after the first @).
-    static ref VALID_MENTION_USERNAME_RE: Regex = Regex::new(r"^(?i)[a-z0-9_]+([a-z0-9_\.]+[a-z0-9_]+)?$").unwrap();
+pub struct Posticle<'t> {
+    transformer: &'t TokenTransformer,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
-/// Tags a given [Entity]'s semantic kind.
-pub enum EntityKind {
-    /// A URL.
-    Url,
-    /// A hashtag.
-    Hashtag,
-    /// A mention; the inner data is `(username, optional domain)`.
-    Mention(String, Option<String>),
-}
-
-#[derive(Debug, PartialEq, Eq, Hash)]
-/// Represents an entity extracted from a given string of text.
-///
-/// The entity is described by its `kind` and the `span` of indices it occupies within the string.
-pub struct Entity {
-    pub kind: EntityKind,
-    pub span: (usize, usize),
-}
-
-impl Entity {
-    /// Extracts the span described by this Entity from the passed `text`.
-    pub fn substr<'a>(&self, text: &'a str) -> &'a str {
-        &text[self.span.0..self.span.1]
-    }
-
-    /// Returns `true` if this entity overlaps with some `other` entity.
-    pub fn overlaps_with(&self, other: &Entity) -> bool {
-        self.span.0 <= other.span.1 && other.span.0 <= self.span.1
-    }
-
-    fn from_parse_pair(pair: Pair<Rule>) -> Option<Self> {
-        let span = (
-            pair.as_span().start_pos().pos(),
-            pair.as_span().end_pos().pos(),
-        );
-
-        match pair.as_rule() {
-            Rule::mention => {
-                let mut inner = pair.into_inner();
-                let username = inner.next().unwrap().as_str();
-                let domain = inner.next().as_ref().map(Pair::as_str);
-
-                if validate_mention_username(username)
-                    && (domain.map(validate_mention_domain).unwrap_or(true))
-                {
-                    Some(Entity {
-                        kind: EntityKind::Mention(username.to_string(), domain.map(str::to_string)),
-                        span,
-                    })
-                } else {
-                    None
-                }
-            },
-            Rule::url => {
-                if validator::validate_url(pair.as_str()) {
-                    Some(Entity {
-                        kind: EntityKind::Url,
-                        span,
-                    })
-                } else {
-                    None
-                }
-            },
-            Rule::hashtag => {
-                let name = pair.into_inner().next().unwrap().as_str();
-                if validate_hashtag_name(name) {
-                    Some(Entity {
-                        kind: EntityKind::Hashtag,
-                        span,
-                    })
-                } else {
-                    None
-                }
-            },
-            _ => None,
+impl<'t> Posticle<'t> {
+    pub fn new() -> Self {
+        Self {
+            transformer: &DefaultTransformer,
         }
     }
-}
 
-/// Given `text`, extract all [Entities](Entity)
-pub fn entities(text: &str) -> Vec<Entity> {
-    // If the parse succeeded, run Entity::from_parse_pair on each pair, dropping those which returned None;
-    // collect to a vec of entities. If the parse errored, just return an empty vec.
-    Grammar::parse(Rule::post, text)
-        .map(|pairs| pairs.filter_map(Entity::from_parse_pair).collect())
-        .unwrap_or_default()
-}
+    pub fn from_transformer(transformer: &'t TokenTransformer) -> Self {
+        Self { transformer }
+    }
 
-/// Check that a hashtag name (after the first #) is valid.
-fn validate_hashtag_name(name: &str) -> bool {
-    VALID_HASHTAG_NAME_RE.is_match(name)
-}
+    /// Given `text`, extract all [Entities](Token)
+    pub fn parse(&self, text: &str) -> Vec<Token> {
+        let mut tokens: Vec<Token> = Vec::new();
 
-/// Check that a mentioned username is valid.
-fn validate_mention_username(username: &str) -> bool {
-    VALID_MENTION_USERNAME_RE.is_match(username)
-}
+        if let Ok(pairs) = Grammar::parse(Rule::document, text) {
+            for pair in pairs {
+                tokens.append(&mut Token::from_parse_pair(pair));
+            }
+        }
 
-/// Check that a mentioned instance domain is valid.
-fn validate_mention_domain(domain: &str) -> bool {
-    validator::validate_url(format!("https://{}", domain))
+        self.apply_transformer(tokens)
+    }
+
+    /// The parser has a tendency to produce rows of text tokens, combine any text token that follows another text token into a new text token.
+    fn normalize_text_tokens(&self, input: Vec<Token>) -> Vec<Token> {
+        let mut output = Vec::new();
+        let mut replacement = String::new();
+
+        for token in input {
+            match token {
+                Token::Text(Text(text)) => {
+                    replacement.push_str(&text);
+                },
+                _ => {
+                    if replacement.len() > 0 {
+                        output.push(Token::Text(Text(replacement)));
+                        replacement = String::new();
+                    }
+
+                    output.push(token);
+                },
+            }
+        }
+
+        if replacement.len() > 0 {
+            output.push(Token::Text(Text(replacement)));
+        }
+
+        output
+    }
+
+    fn apply_transformer(&self, input: Vec<Token>) -> Vec<Token> {
+        let transformer = self.transformer;
+        let mut output = Vec::new();
+
+        for token in input {
+            output.append(&mut transformer.transform(token));
+        }
+
+        self.normalize_text_tokens(output)
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    extern crate yaml_rust;
     use super::*;
-
-    const TLDS_YAML: &'static str = include_str!("../vendor/test/tlds.yml");
 
     #[test]
     fn extracts_nothing() {
-        assert_eq!(entities("a string without at signs"), vec![]);
+        let posticle = Posticle::new();
+
+        assert_eq!(
+            posticle.parse("a string without at signs"),
+            vec![Token::Text(Text("a string without at signs".to_string()))]
+        );
     }
 
     #[test]
     fn extracts_mentions() {
+        let posticle = Posticle::new();
+
         assert_eq!(
-            entities("@mention"),
-            vec![Entity {
-                kind: EntityKind::Mention("mention".to_string(), None),
-                span: (0, 8),
-            }]
+            posticle.parse("@mention"),
+            vec![Token::Mention(Mention("mention".to_string(), None))]
         );
         assert_eq!(
-            entities("@mention@domain.place"),
-            vec![Entity {
-                kind: EntityKind::Mention("mention".to_string(), Some("domain.place".to_string())),
-                span: (0, 21),
-            }]
+            posticle.parse("@mention@domain.place"),
+            vec![Token::Mention(Mention(
+                "mention".to_string(),
+                Some("domain.place".to_string())
+            ))]
         );
         assert_eq!(
-            entities("@Mention@Domain.Place"),
-            vec![Entity {
-                kind: EntityKind::Mention("Mention".to_string(), Some("Domain.Place".to_string())),
-                span: (0, 21),
-            }]
+            posticle.parse("@Mention@Domain.Place"),
+            vec![Token::Mention(Mention(
+                "Mention".to_string(),
+                Some("Domain.Place".to_string())
+            ))]
         );
     }
 
     #[test]
     fn extracts_mentions_in_punctuation() {
+        let posticle = Posticle::new();
+
         assert_eq!(
-            entities("(@mention)"),
-            vec![Entity {
-                kind: EntityKind::Mention("mention".to_string(), None),
-                span: (1, 9),
-            }]
+            posticle.parse("(@mention)"),
+            vec![
+                Token::Text(Text("(".to_string())),
+                Token::Mention(Mention("mention".to_string(), None)),
+                Token::Text(Text(")".to_string()))
+            ]
         );
     }
 
     #[test]
     fn ignores_invalid_mentions() {
+        let posticle = Posticle::new();
         let mentions = vec![
             "some text @ yo",
             "@@yuser@domain",
             "@xuser@@domain",
-            "@zuser@-domain-.com",
             "@@not",
             "@not@",
             "@not@@not",
@@ -193,8 +149,8 @@ mod tests {
 
         for mention in mentions {
             assert_eq!(
-                entities(mention),
-                vec![],
+                posticle.parse(mention),
+                vec![Token::Text(Text(mention.to_string()))],
                 "ignores_invalid_mentions failed on {}",
                 mention
             );
@@ -203,15 +159,13 @@ mod tests {
 
     #[test]
     fn extracts_hashtags() {
+        let posticle = Posticle::new();
         let hashtags = vec!["#hashtag", "#HASHTAG", "#1000followers", "#文字化け"];
 
         for hashtag in hashtags {
             assert_eq!(
-                entities(hashtag),
-                vec![Entity {
-                    kind: EntityKind::Hashtag,
-                    span: (0, hashtag.len()),
-                }],
+                posticle.parse(hashtag),
+                vec![Token::Hashtag(Hashtag(hashtag[1..].to_string()))],
                 "extracts_hashtags failed on {}",
                 hashtag
             );
@@ -220,17 +174,17 @@ mod tests {
 
     #[test]
     fn extracts_hashtags_in_punctuation() {
+        let posticle = Posticle::new();
         let hashtags = vec!["#hashtag", "#HASHTAG", "#1000followers", "#文字化け"];
 
         for hashtag in hashtags {
-            let hashtag = format!("({})", hashtag);
-
             assert_eq!(
-                entities(&hashtag),
-                vec![Entity {
-                    kind: EntityKind::Hashtag,
-                    span: (1, hashtag.len() - 1),
-                }],
+                posticle.parse(&format!("({})", hashtag)),
+                vec![
+                    Token::Text(Text("(".to_string())),
+                    Token::Hashtag(Hashtag(hashtag[1..].to_string())),
+                    Token::Text(Text(")".to_string()))
+                ],
                 "extracts_hashtags_in_punctuation failed on {}",
                 hashtag
             );
@@ -239,10 +193,9 @@ mod tests {
 
     #[test]
     fn ignores_invalid_hashtags() {
+        let posticle = Posticle::new();
         let hashtags = vec![
             "some text # yo",
-            "#---bite-my-entire---",
-            "#123",
             "##not",
             "#not#",
             "#not##not",
@@ -251,8 +204,8 @@ mod tests {
 
         for hashtag in hashtags {
             assert_eq!(
-                entities(hashtag),
-                vec![],
+                posticle.parse(hashtag),
+                vec![Token::Text(Text(hashtag.to_string()))],
                 "ignores_invalid_hashtags failed on {}",
                 hashtag
             );
@@ -260,134 +213,100 @@ mod tests {
     }
 
     #[test]
-    fn extracts_urls() {
-        let urls = vec![
+    fn extracts_links() {
+        let posticle = Posticle::new();
+        let links = vec![
             "http://example.com",
-            "https://example.com/path/to/resource?search=foo&lang=en",
+            "http://example.com/path/to/resource?search=foo&lang=en",
             "http://example.com/#!/heck",
-            "HTTPS://www.ExaMPLE.COM/index.html",
-            "https://example.com:8080/",
+            "HTTP://www.ExaMPLE.COM/index.html",
+            "http://example.com:8080/",
             "http://test_underscore.example.com",
             "http://☃.net/",
             "http://example.com/Русские_слова",
             "http://example.com/الكلمات_العربية",
             "http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook",
             "http://example.com?foo=$bar.;baz?BAZ&c=d-#top/?stories",
-            "https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-",
-            "ftp://www.example.com/",
+            "http://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-",
+            "http://www.example.com/",
         ];
 
-        for url in urls {
+        for link in links {
             assert_eq!(
-                entities(url),
-                vec![Entity {
-                    kind: EntityKind::Url,
-                    span: (0, url.len()),
-                }],
-                "extracts_urls failed on {}",
-                url
+                posticle.parse(link),
+                vec![Token::Link(Link(link[7..].to_string(), link.to_string()))],
+                "extracts_links failed on {}",
+                link
             );
         }
     }
 
     #[test]
-    fn extracts_urls_in_punctuation() {
-        let urls = vec![
+    fn extracts_links_in_punctuation() {
+        let posticle = Posticle::new();
+        let links = vec![
             "http://example.com",
-            "https://example.com/path/to/resource?search=foo&lang=en",
+            "http://example.com/path/to/resource?search=foo&lang=en",
             "http://example.com/#!/heck",
-            "HTTPS://www.ExaMPLE.COM/index.html",
-            "https://example.com:8080/",
+            "HTTP://www.ExaMPLE.COM/index.html",
+            "http://example.com:8080/",
             "http://test_underscore.example.com",
             "http://☃.net/",
             "http://example.com/Русские_слова",
             "http://example.com/الكلمات_العربية",
             "http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook",
             "http://example.com?foo=$bar.;baz?BAZ&c=d-#top/?stories",
-            "https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-",
-            "ftp://www.example.com/",
+            "http://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-",
+            "http://www.example.com/",
         ];
 
-        for url in urls {
-            let url = format!("({})", url);
-
+        for link in links {
             assert_eq!(
-                entities(&url),
-                vec![Entity {
-                    kind: EntityKind::Url,
-                    span: (1, url.len() - 1),
-                }],
-                "extracts_urls_in_punctuation failed on {}",
-                url
+                posticle.parse(&format!("({})", link)),
+                vec![
+                    Token::Text(Text("(".to_string())),
+                    Token::Link(Link(link[7..].to_string(), link.to_string())),
+                    Token::Text(Text(")".to_string()))
+                ],
+                "extracts_links_in_punctuation failed on {}",
+                link
             );
         }
     }
 
     #[test]
-    fn ignores_invalid_urls() {
-        let urls = vec![
-            "some text http:// yo",
-            "some:thing",
-            "some://thing/else yo",
-            "http://www.-domain4352.com/",
-            "http://www.domain4352-.com/",
-            "http://☃-.net/",
-        ];
+    fn ignores_invalid_links() {
+        let posticle = Posticle::new();
+        let links = vec!["x- text http:// yo", "x-:thing", "x-://thing/else yo"];
 
-        for url in urls {
+        for link in links {
             assert_eq!(
-                entities(url),
-                vec![],
-                "ignores_invalid_urls failed on {}",
-                url
+                posticle.parse(link),
+                vec![Token::Text(Text(link.to_string()))],
+                "ignores_invalid_links failed on {}",
+                link
             );
         }
     }
 
     #[test]
     fn extracts_all() {
+        let posticle = Posticle::new();
+
         assert_eq!(
-            entities("text #hashtag https://example.com @mention text"),
+            posticle.parse("text #hashtag https://example.com @mention text"),
             vec![
-                Entity {
-                    kind: EntityKind::Hashtag,
-                    span: (5, 13),
-                },
-                Entity {
-                    kind: EntityKind::Url,
-                    span: (14, 33),
-                },
-                Entity {
-                    kind: EntityKind::Mention("mention".to_string(), None),
-                    span: (34, 42),
-                },
+                Token::Text(Text("text ".to_string())),
+                Token::Hashtag(Hashtag("hashtag".to_string())),
+                Token::Text(Text(" ".to_string())),
+                Token::Link(Link(
+                    "example.com".to_string(),
+                    "https://example.com".to_string()
+                )),
+                Token::Text(Text(" ".to_string())),
+                Token::Mention(Mention("mention".to_string(), None)),
+                Token::Text(Text(" text".to_string())),
             ]
         );
-    }
-
-    #[test]
-    fn all_tlds_validate() {
-        let tests = yaml_rust::YamlLoader::load_from_str(TLDS_YAML).unwrap();
-        let tests = tests.first().unwrap();
-        let ref tests = tests["tests"];
-
-        for (suite, test_cases) in tests.as_hash().expect("could not load tests document") {
-            let suite = suite.as_str().expect("suite could not be loaded");
-
-            for test in test_cases.as_vec().expect("suite could not be loaded") {
-                let description = test["description"]
-                    .as_str()
-                    .expect("test was missing 'description'");
-                let text = test["text"].as_str().expect("test was missing 'text'");
-
-                assert!(
-                    validate_mention_domain(text),
-                    "test {}/\"{}\" failed on text \"{}\"",
-                    suite,
-                    description,
-                    text
-                );
-            }
-        }
     }
 }
