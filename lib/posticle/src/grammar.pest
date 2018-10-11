@@ -118,7 +118,7 @@ terminator = _{
 }
 
 punctuation = _{
-    terminator | "-" | "_" | "#" | "+" | "/" | "^" | "`" | "{" | "}" | "‹" | "›" | "»" | "«" | "「" | "」" | "《" | "》" | "‘" | "’" | "‚" | "‛" | "“" | "”" | "„" | "‟" | "…"
+    terminator | DASH_PUNCTUATION | OPEN_PUNCTUATION | CLOSE_PUNCTUATION | INITIAL_PUNCTUATION | FINAL_PUNCTUATION | "#" | "+" | "/" | "^" | "`" | "…"
 }
 
 space = _{
