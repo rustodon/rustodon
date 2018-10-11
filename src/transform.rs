@@ -26,7 +26,7 @@ where
     let entities = posticle::entities(&text);
 
     for entity in entities {
-        html.push_str(&escape_html(&text[cursor..entity.range.0])?);
+        html.push_str(&escape_html(&text[cursor..entity.span.0])?);
         let entity_text = entity.substr(&text);
         let replacement = match entity.kind {
             EntityKind::Url => format!("<a href=\"{url}\">{url}</a>", url = entity_text),
@@ -44,7 +44,7 @@ where
             },
         };
         html.push_str(&replacement);
-        cursor = entity.range.1;
+        cursor = entity.span.1;
     }
     html.push_str(&escape_html(&text[cursor..])?);
 
