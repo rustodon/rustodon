@@ -18,7 +18,9 @@ services:
 before_install:
   - sudo apt-get update -yqq
   - sudo apt-get install -yqq libpq-dev
-  - rvm install 2.5.0
+  - wget https://github.com/sass/dart-sass/releases/download/1.14.2/dart-sass-1.14.2-linux-x64.tar.gz -O /tmp/dart-sass.tar.gz
+  - tar xzvf /tmp/dart-sass.tar.gz
+  - export PATH=$PWD/dart-sass:$PATH
 
 env:
   global:
