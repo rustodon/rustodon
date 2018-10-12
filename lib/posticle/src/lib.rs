@@ -29,7 +29,44 @@ impl<'t> Posticle<'t> {
         Self { transformer }
     }
 
-    /// Given `text`, extract all [Entities](Token)
+    // Given `text`, render as HTML.
+    pub fn render(&self, text: &str) -> String {
+        let mut output = String::new();
+        let tokens = self.parse(text);
+
+        for token in tokens {
+            match token {
+                Token::Emoticon(token) => {
+                    token.render(&mut output);
+                },
+                Token::Hashtag(token) => {
+                    token.render(&mut output);
+                },
+                Token::LineBreak(token) => {
+                    token.render(&mut output);
+                },
+                Token::Link(token) => {
+                    token.render(&mut output);
+                },
+                Token::Mention(token) => {
+                    token.render(&mut output);
+                },
+                Token::Text(token) => {
+                    token.render(&mut output);
+                },
+                Token::Html(token) => {
+                    token.render(&mut output);
+                },
+                Token::Element(token) => {
+                    token.render(&mut output);
+                },
+            }
+        }
+
+        output
+    }
+
+    /// Given `text`, build an abstract syntax tree.
     pub fn parse(&self, text: &str) -> Vec<Token> {
         let mut tokens: Vec<Token> = Vec::new();
 
@@ -234,7 +271,7 @@ mod tests {
         for link in links {
             assert_eq!(
                 posticle.parse(link),
-                vec![Token::Link(Link(link[7..].to_string(), link.to_string()))],
+                vec![Token::Link(Link(link.to_string()))],
                 "extracts_links failed on {}",
                 link
             );
@@ -265,7 +302,7 @@ mod tests {
                 posticle.parse(&format!("({})", link)),
                 vec![
                     Token::Text(Text("(".to_string())),
-                    Token::Link(Link(link[7..].to_string(), link.to_string())),
+                    Token::Link(Link(link.to_string())),
                     Token::Text(Text(")".to_string()))
                 ],
                 "extracts_links_in_punctuation failed on {}",
@@ -299,10 +336,7 @@ mod tests {
                 Token::Text(Text("text ".to_string())),
                 Token::Hashtag(Hashtag("hashtag".to_string())),
                 Token::Text(Text(" ".to_string())),
-                Token::Link(Link(
-                    "example.com".to_string(),
-                    "https://example.com".to_string()
-                )),
+                Token::Link(Link("https://example.com".to_string())),
                 Token::Text(Text(" ".to_string())),
                 Token::Mention(Mention("mention".to_string(), None)),
                 Token::Text(Text(" text".to_string())),

@@ -1,29 +1,136 @@
 use grammar::Rule;
 use pest::iterators::Pair;
 
+fn html_escape(text: &String) -> String {
+    text.replace('&', "&amp;")
+        .replace('"', "&quot")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+}
+
 #[derive(Clone, Debug, PartialEq)]
+/// A textual emoticon.
 pub struct Emoticon(pub String);
 
+impl Emoticon {
+    pub fn render(&self, output: &mut String) {
+        output.push_str(&format!(":{}:", html_escape(&self.0)));
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
+/// A hashtag.
 pub struct Hashtag(pub String);
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct Link(pub String, pub String);
+impl Hashtag {
+    pub fn render(&self, output: &mut String) {
+        output.push_str(&format!("#{}", html_escape(&self.0)));
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
+/// A line break.
+pub struct LineBreak;
+
+impl LineBreak {
+    pub fn render(&self, output: &mut String) {
+        output.push_str("\n<br>");
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+/// A link to a resource with text and href.
+pub struct Link(pub String);
+
+impl Link {
+    pub fn render(&self, output: &mut String) {
+        output.push_str(&html_escape(&self.0));
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+/// A mention with an optional domain.
 pub struct Mention(pub String, pub Option<String>);
 
+impl Mention {
+    pub fn render(&self, output: &mut String) {
+        if let Some(domain) = &self.1 {
+            output.push_str(&format!(
+                "@{}@{}",
+                html_escape(&self.0),
+                html_escape(domain)
+            ));
+        } else {
+            output.push_str(&format!("@{}", html_escape(&self.0)));
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
+/// Plain text that will have its entities encoded on render.
 pub struct Text(pub String);
+
+impl Text {
+    pub fn render(&self, output: &mut String) {
+        output.push_str(&html_escape(&self.0));
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+/// Untrusted HTML that will be sanitized on render.
+pub struct Html(pub String);
+
+impl Html {
+    pub fn render(&self, output: &mut String) {
+        output.push_str(&self.0);
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+/// Untrusted HTML that will be sanitized on render.
+pub struct Element(
+    pub String,
+    pub Option<Vec<(String, String)>>,
+    pub Option<String>,
+);
+
+impl Element {
+    pub fn render(&self, output: &mut String) {
+        output.push_str("<");
+        output.push_str(&self.0);
+
+        if let Some(attributes) = &self.1 {
+            for (name, value) in attributes {
+                output.push_str(" ");
+                output.push_str(name);
+                output.push_str("=\"");
+                output.push_str(&html_escape(value));
+                output.push_str("\"");
+            }
+        }
+
+        output.push_str(">");
+
+        if let Some(text) = &self.2 {
+            output.push_str(&html_escape(text));
+        }
+
+        output.push_str("</");
+        output.push_str(&self.0);
+        output.push_str(">");
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
     Emoticon(Emoticon),
     Hashtag(Hashtag),
-    LineBreak,
+    LineBreak(LineBreak),
     Link(Link),
     Mention(Mention),
     Text(Text),
+    Html(Html),
+    Element(Element),
 }
 
 impl Token {
@@ -31,7 +138,7 @@ impl Token {
         match pair.as_rule() {
             Rule::emoticon => Self::from_emoticon_rule(pair),
             Rule::hashtag => Self::from_hashtag_rule(pair),
-            Rule::line_break => vec![Token::LineBreak],
+            Rule::line_break => vec![Token::LineBreak(LineBreak)],
             Rule::link => Self::from_link_rule(pair),
             Rule::mention => Self::from_mention_rule(pair),
             _ => vec![Token::Text(Text(pair.as_str().to_string()))],
@@ -48,7 +155,7 @@ impl Token {
                     name = Some(pair.as_str().to_string());
                 },
                 _ => {
-                    tokens.push(Token::Text(Text(pair.as_str().to_string())));
+                    tokens.append(&mut Self::from_symbol_prefix(pair));
                 },
             }
         }
@@ -70,7 +177,7 @@ impl Token {
                     name = Some(pair.as_str().to_string());
                 },
                 _ => {
-                    tokens.push(Token::Text(Text(pair.as_str().to_string())));
+                    tokens.append(&mut Self::from_symbol_prefix(pair));
                 },
             }
         }
@@ -96,15 +203,13 @@ impl Token {
                     tail = Some(pair.as_str().to_string());
                 },
                 _ => {
-                    tokens.push(Token::Text(Text(pair.as_str().to_string())));
+                    tokens.append(&mut Self::from_symbol_prefix(pair));
                 },
             }
         }
 
         if let (Some(schema), Some(tail)) = (schema, tail) {
-            let href = format!("{}{}", schema, tail);
-
-            tokens.push(Token::Link(Link(tail, href)));
+            tokens.push(Token::Link(Link(format!("{}{}", schema, tail))));
         }
 
         tokens
@@ -124,13 +229,30 @@ impl Token {
                     domain = Some(pair.as_str().to_string());
                 },
                 _ => {
-                    tokens.push(Token::Text(Text(pair.as_str().to_string())));
+                    tokens.append(&mut Self::from_symbol_prefix(pair));
                 },
             }
         }
 
         if let Some(username) = username {
             tokens.push(Token::Mention(Mention(username, domain)));
+        }
+
+        tokens
+    }
+
+    fn from_symbol_prefix(pair: Pair<Rule>) -> Vec<Self> {
+        let mut tokens = Vec::new();
+
+        for pair in pair.into_inner() {
+            match pair.as_rule() {
+                Rule::line_break => {
+                    tokens.push(Token::LineBreak(LineBreak));
+                },
+                _ => {
+                    tokens.push(Token::Text(Text(pair.as_str().to_string())));
+                },
+            }
         }
 
         tokens

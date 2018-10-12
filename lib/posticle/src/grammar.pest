@@ -52,7 +52,11 @@ mention_domain = {
 }
 
 symbol_prefix = {
-    WHITE_SPACE | (!symbol_identifiers ~ PUNCTUATION) | SOI
+    line_break | symbol_prefix_char | SOI
+}
+
+symbol_prefix_char = {
+    WHITE_SPACE | (!symbol_identifiers ~ PUNCTUATION)
 }
 
 symbol_suffix = _{
