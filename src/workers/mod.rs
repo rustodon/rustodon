@@ -51,20 +51,17 @@ pub fn init(pool: Pool) {
         .name("job_collector".to_string())
         .spawn(move || loop {
             println!("[job collector] doing a tick....");
-            let conn = pool.get().expect("hecking");
-            // SELECT * FROM jobs WHERE jobstatus = WAITING
+            let conn = pool.get().expect("couldn't connect to database");
             let top_of_queue = {
                 use db::schema::jobs::dsl::*;
                 jobs.filter(status.eq(JobStatus::Waiting))
                     .limit(BATCH_SIZE)
                     .order(id.asc())
                     .load::<JobRecord>(&conn)
-                    .expect("h*ck")
+                    .expect("couldn't load from job queue")
             };
 
             thread::sleep(CHECK_PERIOD);
-
-            println!("{:?}", top_of_queue);
 
             let should_run: Vec<&JobRecord> = top_of_queue.iter().filter(|_| true).collect();
             {
@@ -78,11 +75,10 @@ pub fn init(pool: Pool) {
 
             for job_record in top_of_queue {
                 let job_id = job_record.id;
-                // just assume we should run stuff
                 let pool = pool.clone();
 
                 worker
-                    .job_tick(&job_record.kind, job_record.data, move || {
+                    .job_tick(&job_record.kind, job_record.data, move |result_| {
                         use db::schema::jobs::dsl::*;
                         let conn = pool.get().unwrap();
                         diesel::delete(jobs.filter(id.eq(job_id)))
@@ -90,7 +86,5 @@ pub fn init(pool: Pool) {
                             .unwrap();
                     }).unwrap();
             }
-
-            // .filter(|j| j.should_run())
-        }).unwrap(); // TODO: don't unwrap
+        }).expect("failed to spawn job_collector thread");
 }

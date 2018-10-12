@@ -48,14 +48,14 @@ impl Worker {
         &mut self,
         kind: &str,
         data: Value,
-        on_success: impl Fn() + Send + 'static,
+        on_final: impl Fn(Result<(), Box<StdError>>) + Send + 'static,
     ) -> Result<(), Error> {
         let handler = self.handlers.get(kind).ok_or(Error::InvalidKind)?.clone();
         self.thread_pool.execute(move || {
             // TODO: don't discard error?
-            let _ = handler(data);
+            let result = handler(data);
 
-            on_success();
+            on_final(result);
         });
 
         Ok(())
