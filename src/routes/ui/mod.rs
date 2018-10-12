@@ -211,7 +211,7 @@ pub fn settings_profile_update(
     };
     account.set_summary(&db_conn, new_summary)?;
 
-    Ok(Redirect::to("/settings/profile"))
+    Ok(Redirect::to(&account.profile_path()))
 }
 
 #[get("/")]

@@ -79,6 +79,8 @@ if [ -z "${DATABASE_URL}" ]; then
     fi
     infoMsg "Database URL is ${DATABASE_URL}"
     echo "DATABASE_URL=${DATABASE_URL}" >> .env
+  else
+    source .env
   fi
 fi
 
