@@ -11,7 +11,6 @@ extern crate failure_derive;
 extern crate itertools;
 #[macro_use]
 extern crate lazy_static;
-extern crate maud_htmlescape;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;

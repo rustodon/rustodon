@@ -16,7 +16,6 @@ pub mod tokens;
 use ammonia::Builder as Ammonia;
 use grammar::*;
 use pest::Parser;
-use std::clone::Clone;
 use tokens::*;
 
 pub trait PosticleConfig {

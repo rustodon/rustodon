@@ -1,60 +1,83 @@
-use ammonia::Builder;
+use ammonia::{Builder, Url};
 use failure::Error;
-use maud_htmlescape::Escaper;
-use posticle::{self, EntityKind};
+use posticle::tokens::*;
+use posticle::{Posticle, PosticleConfig};
 
 use db::models::Account;
 use error::Perhaps;
 
-fn escape_html(text: impl AsRef<str>) -> Result<String, Error> {
-    use std::fmt::Write;
+struct Biography<'l> {
+    account_lookup: Box<Fn(&str, Option<&str>) -> Perhaps<Account> + 'l>,
+}
 
-    let mut out = String::new();
-    Escaper::new(&mut out).write_str(text.as_ref())?;
-    out = out.replace("\r", "").replace("\n", "<br>");
+impl<'l> PosticleConfig for Biography<'l> {
+    fn html_sanitizer(&self) -> Builder {
+        let mut sanitizer = Builder::default();
 
-    Ok(out)
+        sanitizer
+            .tags(hashset!["a", "br"])
+            .link_rel(Some("noopener nofollow"));
+
+        sanitizer
+    }
+
+    fn transform_token(&self, token: Token) -> Vec<Token> {
+        match token {
+            Token::Hashtag(hashtag) => vec![Token::Element(Element(
+                "a".to_string(),
+                Some(vec![("href".to_string(), "#".to_string())]),
+                Some(format!("#{}", hashtag.0)),
+            ))],
+            Token::Link(link) => {
+                let url = Url::parse(&link.0);
+
+                if let Ok(url) = url {
+                    match url.scheme() {
+                        "http" | "https" => vec![Token::Element(Element(
+                            "a".to_string(),
+                            Some(vec![("href".to_string(), link.0.clone())]),
+                            Some(link.0),
+                        ))],
+                        _ => vec![Token::Link(link)],
+                    }
+                } else {
+                    vec![Token::Link(link)]
+                }
+            },
+            Token::Mention(mention) => {
+                let account_lookup = &self.account_lookup;
+                let lookup = account_lookup(&mention.0, mention.1.as_ref().map(String::as_str));
+
+                if let Ok(Some(account)) = lookup {
+                    let mut name = format!("@{}", mention.0);
+
+                    if let Some(domain) = &mention.1 {
+                        name.push_str(&format!("@{}", domain));
+                    }
+
+                    vec![Token::Element(Element(
+                        "a".to_string(),
+                        Some(vec![("href".to_string(), account.get_uri().to_string())]),
+                        Some(name),
+                    ))]
+                } else {
+                    vec![Token::Mention(mention)]
+                }
+            },
+            _ => vec![token],
+        }
+    }
 }
 
 pub fn bio<L>(text: &str, account_lookup: L) -> Result<String, Error>
 where
     L: Fn(&str, Option<&str>) -> Perhaps<Account>,
 {
-    let mut html = String::new();
-    let mut cursor = 0;
+    let posticle = Posticle::from(Biography {
+        account_lookup: Box::new(account_lookup),
+    });
 
-    let entities = posticle::entities(&text);
-
-    for entity in entities {
-        html.push_str(&escape_html(&text[cursor..entity.span.0])?);
-        let entity_text = entity.substr(&text);
-        let replacement = match entity.kind {
-            EntityKind::Url => format!("<a href=\"{url}\">{url}</a>", url = entity_text),
-            EntityKind::Hashtag => format!("<a href=\"#\">{hashtag}</a>", hashtag = entity_text),
-            EntityKind::Mention(user, domain) => {
-                if let Some(account) = account_lookup(&user, domain.as_ref().map(String::as_str))? {
-                    format!(
-                        "<a href=\"{url}\">{mention}</a>",
-                        url = account.get_uri(),
-                        mention = entity_text
-                    )
-                } else {
-                    entity_text.into()
-                }
-            },
-        };
-        html.push_str(&replacement);
-        cursor = entity.span.1;
-    }
-    html.push_str(&escape_html(&text[cursor..])?);
-
-    println!("{}", html);
-
-    Ok(Builder::default()
-        .tags(hashset!["a", "p", "br"])
-        .link_rel(Some("noopener nofollow"))
-        .clean(&html)
-        .to_string())
+    Ok(posticle.render(&text))
 }
 
 #[cfg(test)]
@@ -78,8 +101,8 @@ mod tests {
 
     #[test]
     fn converts_newlines_to_br() {
-        assert_eq!(bio("\n", |_, _| Ok(None)).unwrap(), "<br>");
-        assert_eq!(bio("\r\n", |_, _| Ok(None)).unwrap(), "<br>");
+        assert_eq!(bio("\n", |_, _| Ok(None)).unwrap(), "\n<br>");
+        assert_eq!(bio("\r\n", |_, _| Ok(None)).unwrap(), "\n<br>");
     }
 
     #[test]
