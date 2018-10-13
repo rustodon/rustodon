@@ -6,6 +6,8 @@ authors = ["Erin Moon <erin@hashbang.sh>", "Measly Twerp <measlytwerp@gmail.com>
 categories = ["text-processing"]
 
 [dependencies]
+ammonia = "1.2"
+maplit = "1.0"
 pest = "2.0"
 pest_derive = "2.0"
 

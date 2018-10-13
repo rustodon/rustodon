@@ -77,17 +77,7 @@ impl Text {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-/// Untrusted HTML that will be sanitized on render.
-pub struct Html(pub String);
-
-impl Html {
-    pub fn render(&self, output: &mut String) {
-        output.push_str(&self.0);
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-/// Untrusted HTML that will be sanitized on render.
+/// Trusted HTML element with content that will have its entities encoded on render.
 pub struct Element(
     pub String,
     pub Option<Vec<(String, String)>>,
@@ -129,7 +119,6 @@ pub enum Token {
     Link(Link),
     Mention(Mention),
     Text(Text),
-    Html(Html),
     Element(Element),
 }
 
@@ -256,17 +245,5 @@ impl Token {
         }
 
         tokens
-    }
-}
-
-pub trait TokenTransformer {
-    fn transform(&self, token: Token) -> Vec<Token>;
-}
-
-pub struct DefaultTransformer;
-
-impl TokenTransformer for DefaultTransformer {
-    fn transform(&self, token: Token) -> Vec<Token> {
-        vec![token]
     }
 }

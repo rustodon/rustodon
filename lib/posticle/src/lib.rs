@@ -1,5 +1,8 @@
 #![feature(nll)]
 
+extern crate ammonia;
+#[macro_use]
+extern crate maplit;
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
@@ -10,29 +13,49 @@ extern crate pretty_assertions;
 mod grammar;
 pub mod tokens;
 
+use ammonia::Builder as Ammonia;
 use grammar::*;
 use pest::Parser;
+use std::clone::Clone;
 use tokens::*;
 
+pub trait PosticleConfig {
+    fn html_sanitizer(&self) -> Ammonia;
+    fn transform_token(&self, token: Token) -> Vec<Token>;
+}
+
+struct DefaultConfig;
+
+impl PosticleConfig for DefaultConfig {
+    fn html_sanitizer(&self) -> Ammonia {
+        let mut sanitizer = Ammonia::default();
+
+        sanitizer.tags(hashset!["br"]);
+
+        sanitizer
+    }
+
+    fn transform_token(&self, token: Token) -> Vec<Token> {
+        vec![token]
+    }
+}
+
 pub struct Posticle<'t> {
-    transformer: &'t TokenTransformer,
+    config: Box<PosticleConfig + 't>,
 }
 
 impl<'t> Posticle<'t> {
     pub fn new() -> Self {
         Self {
-            transformer: &DefaultTransformer,
+            config: Box::new(DefaultConfig),
         }
-    }
-
-    pub fn from_transformer(transformer: &'t TokenTransformer) -> Self {
-        Self { transformer }
     }
 
     // Given `text`, render as HTML.
     pub fn render(&self, text: &str) -> String {
+        let config = &self.config;
         let mut output = String::new();
-        let tokens = self.parse(text);
+        let tokens = &self.parse(text);
 
         for token in tokens {
             match token {
@@ -54,16 +77,13 @@ impl<'t> Posticle<'t> {
                 Token::Text(token) => {
                     token.render(&mut output);
                 },
-                Token::Html(token) => {
-                    token.render(&mut output);
-                },
                 Token::Element(token) => {
                     token.render(&mut output);
                 },
             }
         }
 
-        output
+        config.html_sanitizer().clean(&output).to_string()
     }
 
     /// Given `text`, build an abstract syntax tree.
@@ -76,7 +96,7 @@ impl<'t> Posticle<'t> {
             }
         }
 
-        self.apply_transformer(tokens)
+        self.transform_tokens(tokens)
     }
 
     /// The parser has a tendency to produce rows of text tokens, combine any text token that follows another text token into a new text token.
@@ -107,15 +127,26 @@ impl<'t> Posticle<'t> {
         output
     }
 
-    fn apply_transformer(&self, input: Vec<Token>) -> Vec<Token> {
-        let transformer = self.transformer;
+    fn transform_tokens(&self, input: Vec<Token>) -> Vec<Token> {
+        let config = &self.config;
         let mut output = Vec::new();
 
         for token in input {
-            output.append(&mut transformer.transform(token));
+            output.append(&mut config.transform_token(token));
         }
 
         self.normalize_text_tokens(output)
+    }
+}
+
+impl<'t, T> From<T> for Posticle<'t>
+where
+    T: PosticleConfig + 't,
+{
+    fn from(config: T) -> Self {
+        Self {
+            config: Box::new(config),
+        }
     }
 }
 
