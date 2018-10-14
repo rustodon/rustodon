@@ -72,7 +72,7 @@ link = {
 }
 
 link_schema = {
-    ALPHABETIC+ ~ ":" ~ "//"?
+    (ASCII_ALPHANUMERIC | "-" | "+")+ ~ ":" ~ "//"?
 }
 
 link_tail = {
