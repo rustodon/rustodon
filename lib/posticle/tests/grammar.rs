@@ -73,6 +73,25 @@ fn parses_links() {
 }
 
 #[test]
+fn parse_all_links() {
+    let tests = include_str!("data/links.yml");
+    let tests = yaml_rust::YamlLoader::load_from_str(tests).unwrap();
+    let tests = tests.first().unwrap();
+    let ref tests = tests["tests"];
+
+    for test_link in tests.as_vec().expect("error reading tests") {
+        let expected = test_link.as_str().expect("expected a string");
+        let result = link(expected).unwrap().as_str();
+
+        assert_eq!(
+            result, expected,
+            "parse_all_urls failed on url \"{}\"",
+            expected
+        );
+    }
+}
+
+#[test]
 fn parses_all_tlds() {
     let tests = include_str!("data/tlds.yml");
     let tests = yaml_rust::YamlLoader::load_from_str(tests).unwrap();
