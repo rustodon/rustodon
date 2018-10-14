@@ -76,5 +76,55 @@ link_schema = {
 }
 
 link_tail = {
-    (!((!("/" | "-") ~ PUNCTUATION)+ ~ (WHITE_SPACE | EOI) | WHITE_SPACE) ~ ANY)+
+    (
+        !link_terminator ~ ANY
+        | link_tail_dirpath
+        | link_tail_youtube
+        | link_tail_wikipedia
+    )+
+}
+
+link_terminator = _{
+    link_terminator_punctuation
+    | link_terminator_whitespace
+    | link_terminator_dirpath
+    | link_terminator_youtube
+    | link_terminator_wikipedia
+}
+
+link_terminator_punctuation = _{
+    PUNCTUATION ~ (link_terminator_whitespace)
+}
+
+link_terminator_whitespace = _{
+    WHITE_SPACE | EOI
+}
+
+// https://localhost/path/to/dir/
+link_tail_dirpath = _{
+    "/"
+}
+
+link_terminator_dirpath = _{
+    link_tail_dirpath
+}
+
+// https://www.youtube.com/watch?v=g8X0nJHrJ9-
+link_tail_youtube = _{
+    "-"
+}
+
+link_terminator_youtube = _{
+    link_tail_youtube
+}
+
+// https://en.wikipedia.org/wiki/Diaspora_(software)
+link_tail_wikipedia = _{
+    "("
+    ~ (link_tail_wikipedia | !("(" | ")") ~ ANY)*
+    ~ ")"
+}
+
+link_terminator_wikipedia = _{
+    "(" | ")"
 }

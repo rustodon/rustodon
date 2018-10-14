@@ -81,6 +81,7 @@ mod tests {
             "http://www.domain4352-.com/",
             "http://☃-.net/",
             "http://%e2%98%83.net/",
+            "https://en.wikipedia.org/wiki/Diaspora_(software)",
         ];
         let invalid_links = vec![
             "http://example.com/\"> ",
@@ -110,7 +111,7 @@ mod tests {
     }
 
     #[test]
-    fn all_tlds_parse() {
+    fn parses_all_tlds() {
         let tests = yaml_rust::YamlLoader::load_from_str(TLDS_YAML).unwrap();
         let tests = tests.first().unwrap();
         let ref tests = tests["tests"];
