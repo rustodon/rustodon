@@ -3,35 +3,31 @@ extern crate pretty_assertions;
 extern crate posticle;
 
 use posticle::tokens::*;
-use posticle::Posticle;
+use posticle::Reader;
 
 #[test]
 fn extracts_nothing() {
-    let posticle = Posticle::new();
-
     assert_eq!(
-        posticle.parse("a string without at signs"),
+        Reader::from("a string without at signs").to_vec(),
         vec![Token::Text(Text("a string without at signs".to_string()))]
     );
 }
 
 #[test]
 fn extracts_mentions() {
-    let posticle = Posticle::new();
-
     assert_eq!(
-        posticle.parse("@mention"),
+        Reader::from("@mention").to_vec(),
         vec![Token::Mention(Mention("mention".to_string(), None))]
     );
     assert_eq!(
-        posticle.parse("@mention@domain.place"),
+        Reader::from("@mention@domain.place").to_vec(),
         vec![Token::Mention(Mention(
             "mention".to_string(),
             Some("domain.place".to_string())
         ))]
     );
     assert_eq!(
-        posticle.parse("@Mention@Domain.Place"),
+        Reader::from("@Mention@Domain.Place").to_vec(),
         vec![Token::Mention(Mention(
             "Mention".to_string(),
             Some("Domain.Place".to_string())
@@ -41,10 +37,8 @@ fn extracts_mentions() {
 
 #[test]
 fn extracts_mentions_in_punctuation() {
-    let posticle = Posticle::new();
-
     assert_eq!(
-        posticle.parse("(@mention)"),
+        Reader::from("(@mention)").to_vec(),
         vec![
             Token::Text(Text("(".to_string())),
             Token::Mention(Mention("mention".to_string(), None)),
@@ -55,7 +49,6 @@ fn extracts_mentions_in_punctuation() {
 
 #[test]
 fn ignores_invalid_mentions() {
-    let posticle = Posticle::new();
     let mentions = vec![
         "some text @ yo",
         "@@yuser@domain",
@@ -68,7 +61,7 @@ fn ignores_invalid_mentions() {
 
     for mention in mentions {
         assert_eq!(
-            posticle.parse(mention),
+            Reader::from(mention).to_vec(),
             vec![Token::Text(Text(mention.to_string()))],
             "ignores_invalid_mentions failed on {}",
             mention
@@ -78,12 +71,11 @@ fn ignores_invalid_mentions() {
 
 #[test]
 fn extracts_hashtags() {
-    let posticle = Posticle::new();
     let hashtags = vec!["#hashtag", "#HASHTAG", "#1000followers", "#文字化け"];
 
     for hashtag in hashtags {
         assert_eq!(
-            posticle.parse(hashtag),
+            Reader::from(hashtag).to_vec(),
             vec![Token::Hashtag(Hashtag(hashtag[1..].to_string()))],
             "extracts_hashtags failed on {}",
             hashtag
@@ -93,12 +85,11 @@ fn extracts_hashtags() {
 
 #[test]
 fn extracts_hashtags_in_punctuation() {
-    let posticle = Posticle::new();
     let hashtags = vec!["#hashtag", "#HASHTAG", "#1000followers", "#文字化け"];
 
     for hashtag in hashtags {
         assert_eq!(
-            posticle.parse(&format!("({})", hashtag)),
+            Reader::from(format!("({})", hashtag)).to_vec(),
             vec![
                 Token::Text(Text("(".to_string())),
                 Token::Hashtag(Hashtag(hashtag[1..].to_string())),
@@ -112,7 +103,6 @@ fn extracts_hashtags_in_punctuation() {
 
 #[test]
 fn ignores_invalid_hashtags() {
-    let posticle = Posticle::new();
     let hashtags = vec![
         "some text # yo",
         "##not",
@@ -123,7 +113,7 @@ fn ignores_invalid_hashtags() {
 
     for hashtag in hashtags {
         assert_eq!(
-            posticle.parse(hashtag),
+            Reader::from(hashtag).to_vec(),
             vec![Token::Text(Text(hashtag.to_string()))],
             "ignores_invalid_hashtags failed on {}",
             hashtag
@@ -133,7 +123,6 @@ fn ignores_invalid_hashtags() {
 
 #[test]
 fn extracts_links() {
-    let posticle = Posticle::new();
     let links = vec![
         "http://example.com",
         "http://example.com/path/to/resource?search=foo&lang=en",
@@ -152,7 +141,7 @@ fn extracts_links() {
 
     for link in links {
         assert_eq!(
-            posticle.parse(link),
+            Reader::from(link).to_vec(),
             vec![Token::Link(Link(link.to_string()))],
             "extracts_links failed on {}",
             link
@@ -162,7 +151,6 @@ fn extracts_links() {
 
 #[test]
 fn extracts_links_in_punctuation() {
-    let posticle = Posticle::new();
     let links = vec![
         "http://example.com",
         "http://example.com/path/to/resource?search=foo&lang=en",
@@ -181,7 +169,7 @@ fn extracts_links_in_punctuation() {
 
     for link in links {
         assert_eq!(
-            posticle.parse(&format!("({})", link)),
+            Reader::from(format!("({})", link)).to_vec(),
             vec![
                 Token::Text(Text("(".to_string())),
                 Token::Link(Link(link.to_string())),
@@ -195,12 +183,11 @@ fn extracts_links_in_punctuation() {
 
 #[test]
 fn ignores_invalid_links() {
-    let posticle = Posticle::new();
     let links = vec!["x- text http:// yo", "_=_:thing", "nö://thing/else yo"];
 
     for link in links {
         assert_eq!(
-            posticle.parse(link),
+            Reader::from(link).to_vec(),
             vec![Token::Text(Text(link.to_string()))],
             "ignores_invalid_links failed on {}",
             link
@@ -210,10 +197,8 @@ fn ignores_invalid_links() {
 
 #[test]
 fn extracts_all() {
-    let posticle = Posticle::new();
-
     assert_eq!(
-        posticle.parse("text #hashtag https://example.com @mention text"),
+        Reader::from("text #hashtag https://example.com @mention text").to_vec(),
         vec![
             Token::Text(Text("text ".to_string())),
             Token::Hashtag(Hashtag("hashtag".to_string())),

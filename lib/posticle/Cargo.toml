@@ -1,7 +1,7 @@
 [package]
 name = "posticle"
-description = "tools for working with Twitter-post-like text"
-version = "0.2.0"
+description = "A parser and renderer for Twitter and Mastodon like text"
+version = "0.3.0"
 authors = ["Erin Moon <erin@hashbang.sh>", "Measly Twerp <measlytwerp@gmail.com>"]
 categories = ["text-processing"]
 

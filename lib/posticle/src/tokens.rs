@@ -112,6 +112,7 @@ impl Element {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+/// An item in the abstract syntax tree.
 pub enum Token {
     Emoticon(Emoticon),
     Hashtag(Hashtag),

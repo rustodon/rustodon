@@ -1,12 +1,11 @@
 extern crate posticle;
 
-use posticle::Posticle;
+use posticle::Reader;
 use std::io;
 use std::io::prelude::*;
 use std::io::Write;
 
 fn main() {
-    let posticle = Posticle::new();
     let stdin = io::stdin();
 
     println!("Posticle token debug tool.");
@@ -15,10 +14,9 @@ fn main() {
 
     for line in stdin.lock().lines() {
         let text = line.unwrap();
-        let entities = posticle.parse(&text);
 
-        for entity in entities {
-            println!("{:#?}", entity);
+        for token in Reader::from(text) {
+            println!("{:#?}", token);
         }
 
         print!("\n> ");

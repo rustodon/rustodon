@@ -5,40 +5,34 @@ extern crate posticle;
 
 use ammonia::{Builder, Url};
 use posticle::tokens::*;
-use posticle::{Posticle, PosticleConfig};
+use posticle::{Reader, Writer};
 
-struct SimpleHtml;
+fn transform(token: Token) -> Token {
+    match token {
+        Token::Link(link) => {
+            let url = Url::parse(&link.0).unwrap();
 
-impl PosticleConfig for SimpleHtml {
-    fn html_sanitizer(&self) -> Builder {
-        let mut sanitizer = Builder::default();
-
-        sanitizer.tags(hashset!["a", "br"]);
-
-        sanitizer
-    }
-
-    fn transform_token(&self, token: Token) -> Vec<Token> {
-        match token {
-            Token::Link(link) => {
-                let url = Url::parse(&link.0).unwrap();
-
-                vec![Token::Element(Element(
-                    "a".to_string(),
-                    Some(vec![("href".to_string(), link.0.clone())]),
-                    Some(url.domain().unwrap().to_string()),
-                ))]
-            },
-            _ => vec![token],
-        }
+            Token::Element(Element(
+                "a".to_string(),
+                Some(vec![("href".to_string(), link.0.clone())]),
+                Some(url.domain().unwrap().to_string()),
+            ))
+        },
+        _ => token,
     }
 }
 
 fn main() {
-    let posticle = Posticle::from(SimpleHtml);
+    let mut html_sanitizer = Builder::default();
 
-    println!(
-        "{}",
-        posticle.render("Mastodon is great! https://joinmastodon.org/")
-    )
+    html_sanitizer.tags(hashset!["br", "a"]);
+
+    let reader = Reader::from("Mastodon is great! https://joinmastodon.org/");
+    let mut writer = Writer::new().with_html_sanitizer(html_sanitizer);
+
+    for token in reader {
+        writer.push(transform(token));
+    }
+
+    println!("{}", writer.to_string());
 }

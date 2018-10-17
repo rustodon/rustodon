@@ -637,7 +637,7 @@ dependencies = [
 
 [[package]]
 name = "posticle"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ammonia 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "maplit 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -881,7 +881,7 @@ dependencies = [
  "itertools 0.7.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "maplit 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "posticle 0.2.0",
+ "posticle 0.3.0",
  "regex 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "resopt 0.1.0",
  "rocket 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
