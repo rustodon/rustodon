@@ -17,7 +17,7 @@ use grammar::document;
 use std::vec::IntoIter;
 use tokens::*;
 
-/// An iteratable reader of `posticle::tokens::Token`.
+/// Read [`Token`]s from a string.
 pub struct Reader {
     tokens: IntoIter<Token>,
 }
@@ -106,7 +106,7 @@ fn normalize_text_tokens(input: Vec<Token>) -> Vec<Token> {
     output
 }
 
-/// Write `posticle::tokens::Token`s to a String as HTML.
+/// Write [`Token`]s as HTML to a string.
 pub struct Writer<'w> {
     output: String,
     html_sanitizer: Ammonia<'w>,
