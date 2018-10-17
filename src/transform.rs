@@ -1,83 +1,70 @@
 use ammonia::{Builder, Url};
 use failure::Error;
 use posticle::tokens::*;
-use posticle::{Posticle, PosticleConfig};
+use posticle::{Reader, Writer};
 
 use db::models::Account;
 use error::Perhaps;
-
-struct Biography<'l> {
-    account_lookup: Box<Fn(&str, Option<&str>) -> Perhaps<Account> + 'l>,
-}
-
-impl<'l> PosticleConfig for Biography<'l> {
-    fn html_sanitizer(&self) -> Builder {
-        let mut sanitizer = Builder::default();
-
-        sanitizer
-            .tags(hashset!["a", "br"])
-            .link_rel(Some("noopener nofollow"));
-
-        sanitizer
-    }
-
-    fn transform_token(&self, token: Token) -> Vec<Token> {
-        match token {
-            Token::Hashtag(hashtag) => vec![Token::Element(Element(
-                "a".to_string(),
-                Some(vec![("href".to_string(), "#".to_string())]),
-                Some(format!("#{}", hashtag.0)),
-            ))],
-            Token::Link(link) => {
-                let url = Url::parse(&link.0);
-
-                if let Ok(url) = url {
-                    match url.scheme() {
-                        "http" | "https" => vec![Token::Element(Element(
-                            "a".to_string(),
-                            Some(vec![("href".to_string(), link.0.clone())]),
-                            Some(link.0),
-                        ))],
-                        _ => vec![Token::Link(link)],
-                    }
-                } else {
-                    vec![Token::Link(link)]
-                }
-            },
-            Token::Mention(mention) => {
-                let account_lookup = &self.account_lookup;
-                let lookup = account_lookup(&mention.0, mention.1.as_ref().map(String::as_str));
-
-                if let Ok(Some(account)) = lookup {
-                    let mut name = format!("@{}", mention.0);
-
-                    if let Some(domain) = &mention.1 {
-                        name.push_str(&format!("@{}", domain));
-                    }
-
-                    vec![Token::Element(Element(
-                        "a".to_string(),
-                        Some(vec![("href".to_string(), account.get_uri().to_string())]),
-                        Some(name),
-                    ))]
-                } else {
-                    vec![Token::Mention(mention)]
-                }
-            },
-            _ => vec![token],
-        }
-    }
-}
 
 pub fn bio<L>(text: &str, account_lookup: L) -> Result<String, Error>
 where
     L: Fn(&str, Option<&str>) -> Perhaps<Account>,
 {
-    let posticle = Posticle::from(Biography {
-        account_lookup: Box::new(account_lookup),
-    });
+    let transformer = |token| match token {
+        Token::Hashtag(hashtag) => Token::Element(Element(
+            "a".to_string(),
+            Some(vec![("href".to_string(), "#".to_string())]),
+            Some(format!("#{}", hashtag.0)),
+        )),
+        Token::Link(link) => {
+            let url = Url::parse(&link.0);
 
-    Ok(posticle.render(&text))
+            if let Ok(url) = url {
+                match url.scheme() {
+                    "http" | "https" => Token::Element(Element(
+                        "a".to_string(),
+                        Some(vec![("href".to_string(), link.0.clone())]),
+                        Some(link.0),
+                    )),
+                    _ => Token::Link(link),
+                }
+            } else {
+                Token::Link(link)
+            }
+        },
+        Token::Mention(mention) => {
+            // let account_lookup = &self.account_lookup;
+            let lookup = account_lookup(&mention.0, mention.1.as_ref().map(String::as_str));
+
+            if let Ok(Some(account)) = lookup {
+                let mut name = format!("@{}", mention.0);
+
+                if let Some(domain) = &mention.1 {
+                    name.push_str(&format!("@{}", domain));
+                }
+
+                Token::Element(Element(
+                    "a".to_string(),
+                    Some(vec![("href".to_string(), account.get_uri().to_string())]),
+                    Some(name),
+                ))
+            } else {
+                Token::Mention(mention)
+            }
+        },
+        _ => token,
+    };
+
+    let mut html_sanitizer = Builder::default();
+
+    html_sanitizer
+        .tags(hashset!["br", "a"])
+        .link_rel(Some("noopener nofollow"));
+
+    let tokens = Reader::from(text).map(transformer).collect::<Vec<Token>>();
+    let html = Writer::from(tokens).with_html_sanitizer(html_sanitizer);
+
+    Ok(html.to_string())
 }
 
 #[cfg(test)]

@@ -27,12 +27,13 @@ fn main() {
 
     html_sanitizer.tags(hashset!["br", "a"]);
 
-    let reader = Reader::from("Mastodon is great! https://joinmastodon.org/");
-    let mut writer = Writer::new().with_html_sanitizer(html_sanitizer);
+    let tokens = Reader::from("Mastodon is great! https://joinmastodon.org/")
+        .map(|token| transform(token))
+        .collect::<Vec<Token>>();
 
-    for token in reader {
-        writer.push(transform(token));
-    }
+    let html = Writer::from(tokens)
+        .with_html_sanitizer(html_sanitizer)
+        .to_string();
 
-    println!("{}", writer.to_string());
+    println!("{}", html);
 }

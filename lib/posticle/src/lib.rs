@@ -60,6 +60,14 @@ impl From<String> for Reader {
     }
 }
 
+impl From<Vec<Token>> for Reader {
+    fn from(tokens: Vec<Token>) -> Reader {
+        Reader {
+            tokens: tokens.into_iter(),
+        }
+    }
+}
+
 impl Reader {
     pub fn new() -> Self {
         Self::default()
@@ -120,10 +128,22 @@ impl<'w> Default for Writer<'w> {
 }
 
 impl<'w> From<Reader> for Writer<'w> {
-    fn from(reader: Reader) -> Writer<'w> {
+    fn from(reader: Reader) -> Self {
         let mut writer = Self::default();
 
         for token in reader {
+            writer.push(token);
+        }
+
+        writer
+    }
+}
+
+impl<'w> From<Vec<Token>> for Writer<'w> {
+    fn from(tokens: Vec<Token>) -> Self {
+        let mut writer = Self::default();
+
+        for token in tokens {
             writer.push(token);
         }
 
