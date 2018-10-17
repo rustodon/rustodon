@@ -28,6 +28,12 @@ extern crate validator_derive;
 extern crate maplit;
 extern crate posticle;
 extern crate regex;
+#[macro_use(slog_o, slog_info, slog_log, slog_record, slog_record_static, slog_b, slog_kv)]
+extern crate slog;
+extern crate slog_term;
+extern crate slog_async;
+#[macro_use]
+extern crate slog_scope;
 
 extern crate rustodon_database as db;
 
@@ -40,6 +46,7 @@ mod util;
 
 use dotenv::dotenv;
 use std::env;
+use slog::Drain;
 
 #[macro_use]
 extern crate askama;
@@ -54,9 +61,23 @@ lazy_static! {
 
 pub const GIT_REV: &str = include_str!(concat!(env!("OUT_DIR"), "/commit-info.txt"));
 
+fn init_logger() -> slog::Logger {
+    let decorator = slog_term::TermDecorator::new().build();
+    let drain = slog_term::CompactFormat::new(decorator).build().fuse();
+    let drain = slog_async::Async::new(drain).build().fuse();
+
+    slog::Logger::root(drain, slog_o!())
+}
+
 fn main() {
     // load environment variables fron .env
     dotenv().ok();
+
+    // set up slog logger
+    let log = init_logger();
+    let _guard = slog_scope::set_global_logger(log);
+
+    info!("hi!");
 
     // extract the database url from the environment and create the db connection pool
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
