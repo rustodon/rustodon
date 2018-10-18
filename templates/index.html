@@ -74,7 +74,7 @@
                     {% when Ok with (uri) %}
                         {% match status.account(connection.as_ref()) %}
                         {% when Ok with (status_account) %}
-                            <a class="timeline-avatar" title="{{status_account.fully_qualified_username()}}"></a>
+                            <a class="timeline-avatar" href="{{status_account.get_uri()|safe}}" title="{{status_account.fully_qualified_username()}}"></a>
                             <header>
                                     <a href="{{status_account.get_uri()|safe}}"><div>by: {{status_account.fully_qualified_username()}}</div></a>
                                     <a href="{{uri|safe}}"><div>published: <time datetime="{{status.created_at.to_rfc3339()}}">{{status.humanized_age()}}</time></div></a>

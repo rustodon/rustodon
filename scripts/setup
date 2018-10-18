@@ -42,6 +42,13 @@ if ! which psql 2>/dev/null 1>&2 ; then
   exit 1
 fi
 
+# Ensure SASS is installed
+if ! which sass 2>/dev/null 1>&2 ; then
+  # Installation deferred to user
+  alertMsg "You must install SASS, see: https://sass-lang.com/install"
+  exit 1
+fi
+
 # Don't track changes to .env
 git update-index --assume-unchanged .env
 
@@ -79,17 +86,9 @@ if [ -z "${DATABASE_URL}" ]; then
     fi
     infoMsg "Database URL is ${DATABASE_URL}"
     echo "DATABASE_URL=${DATABASE_URL}" >> .env
+  else
+    source .env
   fi
-fi
-
-# Ruby and Sass dependency checks
-if ! which bundler 2>/dev/null 1>&2 ; then
-  infoMsg "Installing Bundler..."
-  gem install bundler
-fi
-if ! bundle check 2>/dev/null 1>&2 ; then
-  infoMsg "Installing Ruby dependencies..."
-  bundle install --path=vendor/
 fi
 
 # Diesel CLI install
@@ -100,6 +99,10 @@ fi
 if ! which cargo-watch 2>/dev/null 1>&2 ; then
   infoMsg "Installing cargo-watch..."
   cargo install cargo-watch
+fi
+if ! which fors 2>/dev/null 1>&2 ; then
+  infoMsg "Installing fors..."
+  cargo install fors
 fi
 
 # Database creation and migration
@@ -126,5 +129,5 @@ EOTOML
 fi
 
 # Setup complete
-infoMsg "Setup is complete, you may run the server with:"
-echo "bundle exec foreman start"
+infoMsg "Setup is complete, you may run the development server with:"
+echo "fors start"

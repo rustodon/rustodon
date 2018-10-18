@@ -84,7 +84,7 @@ pub fn create_status(
     let form_data = form.get();
 
     if let Err(errs) = form_data.validate() {
-        let errs = errs.inner();
+        let errs = errs.field_errors();
 
         // concatenate the error descriptions, with commas between them.
         // TODO: make this less ugly :(
@@ -94,8 +94,7 @@ pub fn create_status(
             .map(|e| {
                 let msg = e.message.to_owned();
                 msg.unwrap_or(Cow::Borrowed("unknown error"))
-            })
-            .join(", ");
+            }).join(", ");
 
         return Ok(Either::Left(Flash::error(Redirect::to("/"), error_desc)));
     }
@@ -136,7 +135,8 @@ pub fn status_page(
 
     PerhapsHtmlTemplate!(StatusTemplate, {
         status:  status,
-        account: account
+        account: account,
+        connection: db_conn
     })
 }
 
@@ -211,7 +211,7 @@ pub fn settings_profile_update(
     };
     account.set_summary(&db_conn, new_summary)?;
 
-    Ok(Redirect::to("/settings/profile"))
+    Ok(Redirect::to(&account.profile_path()))
 }
 
 #[get("/")]

@@ -32,7 +32,6 @@ main>section {
 
 .write-status {
   flex: 38%;
-  height: 6rem;
 }
 
 .write-status-form {
@@ -47,3 +46,14 @@ main>section {
   flex: 62%;
 }
 
+.status .content {
+  white-space: pre-wrap;
+}
+
+.view-status {
+  flex: 1 1 auto;
+  .status {
+    border-top: none;
+    font-size: 1.25rem;
+  }
+}
