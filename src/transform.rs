@@ -2,20 +2,35 @@ use ammonia::{Builder, Url};
 use failure::Error;
 use posticle::tokens::*;
 use posticle::{Reader, Writer};
+use regex::Regex;
 
 use db::models::Account;
 use error::Perhaps;
+
+lazy_static! {
+    /// Matches all valid characters in a hashtag name (after the first #).
+    static ref VALID_HASHTAG_NAME_RE: Regex = Regex::new(r"^[\w_]*[\p{Alphabetic}_·][\w_]*$").unwrap();
+
+    /// Matches all valid characters in a mention username (after the first @).
+    static ref VALID_MENTION_USERNAME_RE: Regex = Regex::new(r"^(?i)[a-z0-9_]+([a-z0-9_\.]+[a-z0-9_]+)?$").unwrap();
+}
 
 pub fn bio<L>(text: &str, account_lookup: L) -> Result<String, Error>
 where
     L: Fn(&str, Option<&str>) -> Perhaps<Account>,
 {
     let transformer = |token| match token {
-        Token::Hashtag(hashtag) => Token::Element(Element(
-            "a".to_string(),
-            Some(vec![("href".to_string(), "#".to_string())]),
-            Some(format!("#{}", hashtag.0)),
-        )),
+        Token::Hashtag(hashtag) => {
+            if VALID_HASHTAG_NAME_RE.is_match(&hashtag.0) {
+                Token::Element(Element(
+                    "a".to_string(),
+                    Some(vec![("href".to_string(), "#".to_string())]),
+                    Some(format!("#{}", hashtag.0)),
+                ))
+            } else {
+                Token::Hashtag(hashtag)
+            }
+        },
         Token::Link(link) => {
             let url = Url::parse(&link.0);
 
@@ -33,21 +48,24 @@ where
             }
         },
         Token::Mention(mention) => {
-            // let account_lookup = &self.account_lookup;
-            let lookup = account_lookup(&mention.0, mention.1.as_ref().map(String::as_str));
+            if VALID_MENTION_USERNAME_RE.is_match(&mention.0) {
+                let lookup = account_lookup(&mention.0, mention.1.as_ref().map(String::as_str));
 
-            if let Ok(Some(account)) = lookup {
-                let mut name = format!("@{}", mention.0);
+                if let Ok(Some(account)) = lookup {
+                    let mut name = format!("@{}", mention.0);
 
-                if let Some(domain) = &mention.1 {
-                    name.push_str(&format!("@{}", domain));
+                    if let Some(domain) = &mention.1 {
+                        name.push_str(&format!("@{}", domain));
+                    }
+
+                    Token::Element(Element(
+                        "a".to_string(),
+                        Some(vec![("href".to_string(), account.get_uri().to_string())]),
+                        Some(name),
+                    ))
+                } else {
+                    Token::Mention(mention)
                 }
-
-                Token::Element(Element(
-                    "a".to_string(),
-                    Some(vec![("href".to_string(), account.get_uri().to_string())]),
-                    Some(name),
-                ))
             } else {
                 Token::Mention(mention)
             }
