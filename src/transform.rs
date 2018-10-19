@@ -48,8 +48,6 @@ where
     }
     html.push_str(&escape_html(&text[cursor..])?);
 
-    println!("{}", html);
-
     Ok(Builder::default()
         .tags(hashset!["a", "p", "br"])
         .link_rel(Some("noopener nofollow"))
