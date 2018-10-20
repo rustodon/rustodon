@@ -31,8 +31,10 @@ fn main() {
         .map(|token| transform(token))
         .collect::<Vec<Token>>();
 
-    let html = Writer::from(tokens)
+    let html = Writer::new()
+        .with_tokens(tokens)
         .with_html_sanitizer(html_sanitizer)
+        .finish()
         .to_string();
 
     println!("{}", html);
