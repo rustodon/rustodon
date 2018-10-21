@@ -10,7 +10,7 @@ impl Blacklist {
         for token in reader {
             match token {
                 Token::Text(text) => {
-                    if self.test_text(&text.0) {
+                    if self.test_text(&text.text) {
                         return true;
                     }
                 },

@@ -86,7 +86,9 @@ impl ReaderBuilder {
     ///
     /// assert_eq!(
     ///     reader.to_vec(),
-    ///     vec![Token::Text(Text("Hello world!".to_string()))]
+    ///     vec![Token::Text(Text {
+    ///         text: "Hello world!".to_string(),
+    ///     })]
     /// );
     /// ```
     pub fn with_transformer(self, transformer: Box<Fn(Token) -> Token>) -> Self {
@@ -143,7 +145,9 @@ impl<'a> From<&'a str> for Reader {
     ///
     /// assert_eq!(
     ///     reader.to_vec(),
-    ///     vec![Token::Text(Text("Nice!".to_string()))]
+    ///     vec![Token::Text(Text {
+    ///         text: "Nice!".to_string(),
+    ///     })]
     /// );
     /// ```
     fn from(input: &str) -> Self {
@@ -160,7 +164,9 @@ impl From<String> for Reader {
     ///
     /// assert_eq!(
     ///     reader.to_vec(),
-    ///     vec![Token::Text(Text("Nice!".to_string()))]
+    ///     vec![Token::Text(Text {
+    ///         text: "Nice!".to_string(),
+    ///     })]
     /// );
     /// ```
     fn from(input: String) -> Self {
@@ -173,11 +179,15 @@ impl From<Vec<Token>> for Reader {
     /// use posticle::tokens::*;
     /// use posticle::Reader;
     ///
-    /// let reader = Reader::from(vec![Token::Text(Text("Nice!".to_string()))]);
+    /// let reader = Reader::from(vec![Token::Text(Text {
+    ///     text: "Nice!".to_string(),
+    /// })]);
     ///
     /// assert_eq!(
     ///     reader.to_vec(),
-    ///     vec![Token::Text(Text("Nice!".to_string()))]
+    ///     vec![Token::Text(Text {
+    ///         text: "Nice!".to_string(),
+    ///     })]
     /// );
     /// ```
     fn from(tokens: Vec<Token>) -> Self {
@@ -234,12 +244,12 @@ fn normalize_text_tokens(input: Vec<Token>) -> Vec<Token> {
 
     for token in input {
         match token {
-            Token::Text(Text(text)) => {
+            Token::Text(Text { text }) => {
                 replacement.push_str(&text);
             },
             _ => {
                 if replacement.len() > 0 {
-                    output.push(Token::Text(Text(replacement)));
+                    output.push(Token::Text(Text { text: replacement }));
                     replacement = String::new();
                 }
 
@@ -249,7 +259,7 @@ fn normalize_text_tokens(input: Vec<Token>) -> Vec<Token> {
     }
 
     if replacement.len() > 0 {
-        output.push(Token::Text(Text(replacement)));
+        output.push(Token::Text(Text { text: replacement }));
     }
 
     output
@@ -303,7 +313,9 @@ impl<'w> WriterBuilder<'w> {
     /// use posticle::tokens::*;
     /// use posticle::{Reader, Writer};
     ///
-    /// let tokens = vec![Token::Text(Text("Nice!".to_string()))];
+    /// let tokens = vec![Token::Text(Text {
+    ///     text: "Nice!".to_string(),
+    /// })];
     /// let writer = Writer::new().with_tokens(tokens).finish();
     ///
     /// assert_eq!(writer.to_string(), "Nice!".to_string());
@@ -322,11 +334,13 @@ impl<'w> WriterBuilder<'w> {
     /// use posticle::tokens::*;
     /// use posticle::{Reader, Writer};
     ///
-    /// let tokens = vec![Token::Element(Element(
-    ///     "x".to_string(),
-    ///     None,
-    ///     Some("Nice!".to_string()),
-    /// ))];
+    /// let tokens = vec![Token::Element(Element {
+    ///     name: "x".to_string(),
+    ///     attributes: Vec::new(),
+    ///     children: vec![Token::Text(Text {
+    ///         text: "Nice!".to_string(),
+    ///     })],
+    /// })];
     /// let writer = Writer::new()
     ///     .with_tokens(tokens)
     ///     .with_html_sanitizer(Builder::new())
@@ -347,7 +361,6 @@ impl<'w> WriterBuilder<'w> {
 pub struct Writer<'w> {
     output: String,
     html_sanitizer: Ammonia<'w>,
-    html_tags: Vec<String>,
     tokens: Vec<Token>,
 }
 
@@ -359,7 +372,6 @@ impl<'w> Default for Writer<'w> {
 
         Self {
             output: String::new(),
-            html_tags: vec!["br".to_string()],
             html_sanitizer,
             tokens: Vec::new(),
         }
@@ -371,7 +383,9 @@ impl<'w> From<Reader> for Writer<'w> {
     /// use posticle::tokens::*;
     /// use posticle::{Reader, Writer};
     ///
-    /// let reader = Reader::from(vec![Token::Text(Text("Nice!".to_string()))]);
+    /// let reader = Reader::from(vec![Token::Text(Text {
+    ///     text: "Nice!".to_string(),
+    /// })]);
     /// let writer = Writer::from(reader);
     ///
     /// assert_eq!(writer.to_string(), "Nice!".to_string());
@@ -386,7 +400,9 @@ impl<'w> From<Vec<Token>> for Writer<'w> {
     /// use posticle::tokens::*;
     /// use posticle::Writer;
     ///
-    /// let writer = Writer::from(vec![Token::Text(Text("Nice!".to_string()))]);
+    /// let writer = Writer::from(vec![Token::Text(Text {
+    ///     text: "Nice!".to_string(),
+    /// })]);
     ///
     /// assert_eq!(writer.to_string(), "Nice!".to_string());
     /// ```
@@ -418,34 +434,6 @@ impl<'w> Writer<'w> {
 
     /// Push a [`Token`] onto the [`Writer`].
     pub fn push(&mut self, token: Token) {
-        match token {
-            Token::Emoticon(token) => {
-                token.render(&mut self.output);
-            },
-            Token::Hashtag(token) => {
-                token.render(&mut self.output);
-            },
-            Token::LineBreak(token) => {
-                token.render(&mut self.output);
-            },
-            Token::Link(token) => {
-                token.render(&mut self.output);
-            },
-            Token::Mention(token) => {
-                token.render(&mut self.output);
-            },
-            Token::Text(token) => {
-                token.render(&mut self.output);
-            },
-            Token::Element(token) => {
-                let tag = token.0.clone();
-
-                if !self.html_tags.contains(&tag) {
-                    self.html_tags.push(tag);
-                }
-
-                token.render(&mut self.output);
-            },
-        }
+        token.render(&mut self.output);
     }
 }

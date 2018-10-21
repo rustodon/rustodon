@@ -9,7 +9,9 @@ use posticle::Reader;
 fn extracts_nothing() {
     assert_eq!(
         Reader::from("a string without at signs").to_vec(),
-        vec![Token::Text(Text("a string without at signs".to_string()))]
+        vec![Token::Text(Text {
+            text: "a string without at signs".to_string(),
+        })]
     );
 }
 
@@ -17,21 +19,24 @@ fn extracts_nothing() {
 fn extracts_mentions() {
     assert_eq!(
         Reader::from("@mention").to_vec(),
-        vec![Token::Mention(Mention("mention".to_string(), None))]
+        vec![Token::Mention(Mention {
+            username: "mention".to_string(),
+            domain:   None,
+        })]
     );
     assert_eq!(
         Reader::from("@mention@domain.place").to_vec(),
-        vec![Token::Mention(Mention(
-            "mention".to_string(),
-            Some("domain.place".to_string())
-        ))]
+        vec![Token::Mention(Mention {
+            username: "mention".to_string(),
+            domain:   Some("domain.place".to_string()),
+        })]
     );
     assert_eq!(
         Reader::from("@Mention@Domain.Place").to_vec(),
-        vec![Token::Mention(Mention(
-            "Mention".to_string(),
-            Some("Domain.Place".to_string())
-        ))]
+        vec![Token::Mention(Mention {
+            username: "Mention".to_string(),
+            domain:   Some("Domain.Place".to_string()),
+        })]
     );
 }
 
@@ -40,9 +45,16 @@ fn extracts_mentions_in_punctuation() {
     assert_eq!(
         Reader::from("(@mention)").to_vec(),
         vec![
-            Token::Text(Text("(".to_string())),
-            Token::Mention(Mention("mention".to_string(), None)),
-            Token::Text(Text(")".to_string()))
+            Token::Text(Text {
+                text: "(".to_string(),
+            }),
+            Token::Mention(Mention {
+                username: "mention".to_string(),
+                domain:   None,
+            }),
+            Token::Text(Text {
+                text: ")".to_string(),
+            })
         ]
     );
 }
@@ -62,7 +74,9 @@ fn ignores_invalid_mentions() {
     for mention in mentions {
         assert_eq!(
             Reader::from(mention).to_vec(),
-            vec![Token::Text(Text(mention.to_string()))],
+            vec![Token::Text(Text {
+                text: mention.to_string(),
+            })],
             "ignores_invalid_mentions failed on {}",
             mention
         );
@@ -76,7 +90,9 @@ fn extracts_hashtags() {
     for hashtag in hashtags {
         assert_eq!(
             Reader::from(hashtag).to_vec(),
-            vec![Token::Hashtag(Hashtag(hashtag[1..].to_string()))],
+            vec![Token::Hashtag(Hashtag {
+                name: hashtag[1..].to_string(),
+            })],
             "extracts_hashtags failed on {}",
             hashtag
         );
@@ -91,9 +107,15 @@ fn extracts_hashtags_in_punctuation() {
         assert_eq!(
             Reader::from(format!("({})", hashtag)).to_vec(),
             vec![
-                Token::Text(Text("(".to_string())),
-                Token::Hashtag(Hashtag(hashtag[1..].to_string())),
-                Token::Text(Text(")".to_string()))
+                Token::Text(Text {
+                    text: "(".to_string(),
+                }),
+                Token::Hashtag(Hashtag {
+                    name: hashtag[1..].to_string(),
+                }),
+                Token::Text(Text {
+                    text: ")".to_string(),
+                })
             ],
             "extracts_hashtags_in_punctuation failed on {}",
             hashtag
@@ -114,7 +136,9 @@ fn ignores_invalid_hashtags() {
     for hashtag in hashtags {
         assert_eq!(
             Reader::from(hashtag).to_vec(),
-            vec![Token::Text(Text(hashtag.to_string()))],
+            vec![Token::Text(Text {
+                text: hashtag.to_string(),
+            })],
             "ignores_invalid_hashtags failed on {}",
             hashtag
         );
@@ -142,7 +166,9 @@ fn extracts_links() {
     for link in links {
         assert_eq!(
             Reader::from(link).to_vec(),
-            vec![Token::Link(Link(link.to_string()))],
+            vec![Token::Link(Link {
+                url: link.to_string(),
+            })],
             "extracts_links failed on {}",
             link
         );
@@ -171,9 +197,15 @@ fn extracts_links_in_punctuation() {
         assert_eq!(
             Reader::from(format!("({})", link)).to_vec(),
             vec![
-                Token::Text(Text("(".to_string())),
-                Token::Link(Link(link.to_string())),
-                Token::Text(Text(")".to_string()))
+                Token::Text(Text {
+                    text: "(".to_string(),
+                }),
+                Token::Link(Link {
+                    url: link.to_string(),
+                }),
+                Token::Text(Text {
+                    text: ")".to_string(),
+                })
             ],
             "extracts_links_in_punctuation failed on {}",
             link
@@ -188,7 +220,9 @@ fn ignores_invalid_links() {
     for link in links {
         assert_eq!(
             Reader::from(link).to_vec(),
-            vec![Token::Text(Text(link.to_string()))],
+            vec![Token::Text(Text {
+                text: link.to_string(),
+            })],
             "ignores_invalid_links failed on {}",
             link
         );
@@ -200,13 +234,28 @@ fn extracts_all() {
     assert_eq!(
         Reader::from("text #hashtag https://example.com @mention text").to_vec(),
         vec![
-            Token::Text(Text("text ".to_string())),
-            Token::Hashtag(Hashtag("hashtag".to_string())),
-            Token::Text(Text(" ".to_string())),
-            Token::Link(Link("https://example.com".to_string())),
-            Token::Text(Text(" ".to_string())),
-            Token::Mention(Mention("mention".to_string(), None)),
-            Token::Text(Text(" text".to_string())),
+            Token::Text(Text {
+                text: "text ".to_string(),
+            }),
+            Token::Hashtag(Hashtag {
+                name: "hashtag".to_string(),
+            }),
+            Token::Text(Text {
+                text: " ".to_string(),
+            }),
+            Token::Link(Link {
+                url: "https://example.com".to_string(),
+            }),
+            Token::Text(Text {
+                text: " ".to_string(),
+            }),
+            Token::Mention(Mention {
+                username: "mention".to_string(),
+                domain:   None,
+            }),
+            Token::Text(Text {
+                text: " text".to_string(),
+            }),
         ]
     );
 }

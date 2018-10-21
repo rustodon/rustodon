@@ -10,21 +10,25 @@ fn html_escape(text: &String) -> String {
 
 #[derive(Clone, Debug, PartialEq)]
 /// A textual emoticon.
-pub struct Emoticon(pub String);
+pub struct Emoticon {
+    pub name: String,
+}
 
 impl Emoticon {
     pub fn render(&self, output: &mut String) {
-        output.push_str(&format!(":{}:", html_escape(&self.0)));
+        output.push_str(&format!(":{}:", html_escape(&self.name)));
     }
 }
 
 #[derive(Clone, Debug, PartialEq)]
 /// A hashtag.
-pub struct Hashtag(pub String);
+pub struct Hashtag {
+    pub name: String,
+}
 
 impl Hashtag {
     pub fn render(&self, output: &mut String) {
-        output.push_str(&format!("#{}", html_escape(&self.0)));
+        output.push_str(&format!("#{}", html_escape(&self.name)));
     }
 }
 
@@ -40,57 +44,60 @@ impl LineBreak {
 
 #[derive(Clone, Debug, PartialEq)]
 /// A link to a resource with text and href.
-pub struct Link(pub String);
+pub struct Link {
+    pub url: String,
+}
 
 impl Link {
     pub fn render(&self, output: &mut String) {
-        output.push_str(&html_escape(&self.0));
+        output.push_str(&html_escape(&self.url));
     }
 }
 
 #[derive(Clone, Debug, PartialEq)]
 /// A mention with an optional domain.
-pub struct Mention(pub String, pub Option<String>);
+pub struct Mention {
+    pub username: String,
+    pub domain:   Option<String>,
+}
 
 impl Mention {
     pub fn render(&self, output: &mut String) {
-        if let Some(domain) = &self.1 {
-            output.push_str(&format!(
-                "@{}@{}",
-                html_escape(&self.0),
-                html_escape(domain)
-            ));
-        } else {
-            output.push_str(&format!("@{}", html_escape(&self.0)));
+        output.push_str(&format!("@{}", html_escape(&self.username)));
+
+        if let Some(domain) = &self.domain {
+            output.push_str(&format!("@{}", html_escape(domain)));
         }
     }
 }
 
 #[derive(Clone, Debug, PartialEq)]
 /// Plain text that will have its entities encoded on render.
-pub struct Text(pub String);
+pub struct Text {
+    pub text: String,
+}
 
 impl Text {
     pub fn render(&self, output: &mut String) {
-        output.push_str(&html_escape(&self.0));
+        output.push_str(&html_escape(&self.text));
     }
 }
 
 #[derive(Clone, Debug, PartialEq)]
 /// Trusted HTML element with content that will have its entities encoded on render.
-pub struct Element(
-    pub String,
-    pub Option<Vec<(String, String)>>,
-    pub Option<String>,
-);
+pub struct Element {
+    pub name: String,
+    pub attributes: Vec<(String, String)>,
+    pub children: Vec<Token>,
+}
 
 impl Element {
     pub fn render(&self, output: &mut String) {
         output.push_str("<");
-        output.push_str(&self.0);
+        output.push_str(&self.name);
 
-        if let Some(attributes) = &self.1 {
-            for (name, value) in attributes {
+        if !self.attributes.is_empty() {
+            for (name, value) in &self.attributes {
                 output.push_str(" ");
                 output.push_str(name);
                 output.push_str("=\"");
@@ -101,12 +108,14 @@ impl Element {
 
         output.push_str(">");
 
-        if let Some(text) = &self.2 {
-            output.push_str(&html_escape(text));
+        if !self.children.is_empty() {
+            for child in &self.children {
+                child.render(output);
+            }
         }
 
         output.push_str("</");
-        output.push_str(&self.0);
+        output.push_str(&self.name);
         output.push_str(">");
     }
 }
@@ -131,7 +140,9 @@ impl Token {
             Rule::line_break => vec![transformer(Token::LineBreak(LineBreak))],
             Rule::link => Self::from_link_rule(pair, transformer),
             Rule::mention => Self::from_mention_rule(pair, transformer),
-            _ => vec![transformer(Token::Text(Text(pair.as_str().to_string())))],
+            _ => vec![transformer(Token::Text(Text {
+                text: pair.as_str().to_string(),
+            }))],
         }
     }
 
@@ -151,7 +162,7 @@ impl Token {
         }
 
         if let Some(name) = name {
-            tokens.push(transformer(Token::Emoticon(Emoticon(name))));
+            tokens.push(transformer(Token::Emoticon(Emoticon { name })));
         }
 
         tokens
@@ -173,7 +184,7 @@ impl Token {
         }
 
         if let Some(name) = name {
-            tokens.push(transformer(Token::Hashtag(Hashtag(name))));
+            tokens.push(transformer(Token::Hashtag(Hashtag { name })));
         }
 
         tokens
@@ -199,10 +210,9 @@ impl Token {
         }
 
         if let (Some(schema), Some(tail)) = (schema, tail) {
-            tokens.push(transformer(Token::Link(Link(format!(
-                "{}{}",
-                schema, tail
-            )))));
+            let url = format!("{}{}", schema, tail);
+
+            tokens.push(transformer(Token::Link(Link { url })));
         }
 
         tokens
@@ -228,7 +238,7 @@ impl Token {
         }
 
         if let Some(username) = username {
-            tokens.push(transformer(Token::Mention(Mention(username, domain))));
+            tokens.push(transformer(Token::Mention(Mention { username, domain })));
         }
 
         tokens
@@ -243,11 +253,39 @@ impl Token {
                     tokens.push(transformer(Token::LineBreak(LineBreak)));
                 },
                 _ => {
-                    tokens.push(transformer(Token::Text(Text(pair.as_str().to_string()))));
+                    let text = pair.as_str().to_string();
+
+                    tokens.push(transformer(Token::Text(Text { text })));
                 },
             }
         }
 
         tokens
+    }
+
+    pub fn render(&self, output: &mut String) {
+        match self {
+            Token::Emoticon(token) => {
+                token.render(output);
+            },
+            Token::Hashtag(token) => {
+                token.render(output);
+            },
+            Token::LineBreak(token) => {
+                token.render(output);
+            },
+            Token::Link(token) => {
+                token.render(output);
+            },
+            Token::Mention(token) => {
+                token.render(output);
+            },
+            Token::Text(token) => {
+                token.render(output);
+            },
+            Token::Element(token) => {
+                token.render(output);
+            },
+        }
     }
 }
