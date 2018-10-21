@@ -9,7 +9,6 @@ input[type="checkbox"].collapse--toggle {
 
 .collapse--content {
   display: none;
-  overflow-wrap: break-word;
 }
 
 .collapse--toggle:checked + .collapse--lbl-toggle + .collapse--content {
