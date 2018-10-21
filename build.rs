@@ -23,8 +23,12 @@ where
 fn main() {
     askama::rerun_if_templates_changed();
 
-    if let Err(_) = Command::new("bundle").args(&["exec", "sass"]).status() {
-        eprintln!("build error: sass compiler not installed. please run `bundle install` to install ruby dependencies.");
+    if let Err(_) = Command::new("sass").status() {
+        eprintln!(
+            "build error: sass compiler not installed.\n\
+             please follow the instructions at https://sass-lang.com/install, \
+             making sure the `sass` executable is in your $PATH."
+        );
         process::exit(1);
     }
 
@@ -35,8 +39,8 @@ fn main() {
         .write_all(commit_info().as_bytes())
         .unwrap();
 
-    Command::new("bundle")
-        .args(&["exec", "sass", "style/style.scss", "static/style.css"])
+    Command::new("sass")
+        .args(&["style/style.scss", "static/style.css"])
         .status()
         .unwrap();
 }

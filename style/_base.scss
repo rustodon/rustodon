@@ -107,10 +107,6 @@ a.button:visited {
   }
 }
 
-form {
-  margin-top: 1em;
-}
-
 form.inline {
   display: inline;
 }
@@ -175,9 +171,9 @@ button.link {
 }
 
 @keyframes disappear {
-	from { opacity: 1; margin-top: 0; }
-	95% { opacity: .9; margin-top: 0; }
-	to { opacity: 0; margin-top: -100%; display: none; }
+	from { opacity: 1; }
+	95% { opacity: .8; }
+	to { opacity: 0; display: none; }
 }
 
 .title {
