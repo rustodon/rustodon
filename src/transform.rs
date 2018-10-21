@@ -21,26 +21,28 @@ where
 {
     let transformer = |token| match token {
         Token::Hashtag(hashtag) => {
-            if VALID_HASHTAG_NAME_RE.is_match(&hashtag.0) {
-                Token::Element(Element(
-                    "a".to_string(),
-                    Some(vec![("href".to_string(), "#".to_string())]),
-                    Some(format!("#{}", hashtag.0)),
-                ))
+            if VALID_HASHTAG_NAME_RE.is_match(&hashtag.name) {
+                Token::Element(Element {
+                    name: "a".to_string(),
+                    attributes: vec![("href".to_string(), "#".to_string())],
+                    children: vec![Token::Text(Text {
+                        text: format!("#{}", hashtag.name),
+                    })],
+                })
             } else {
                 Token::Hashtag(hashtag)
             }
         },
         Token::Link(link) => {
-            let url = Url::parse(&link.0);
+            let url = Url::parse(&link.url);
 
             if let Ok(url) = url {
                 match url.scheme() {
-                    "http" | "https" => Token::Element(Element(
-                        "a".to_string(),
-                        Some(vec![("href".to_string(), link.0.clone())]),
-                        Some(link.0),
-                    )),
+                    "http" | "https" => Token::Element(Element {
+                        name: "a".to_string(),
+                        attributes: vec![("href".to_string(), link.url.clone())],
+                        children: vec![Token::Text(Text { text: link.url })],
+                    }),
                     _ => Token::Link(link),
                 }
             } else {
@@ -48,21 +50,24 @@ where
             }
         },
         Token::Mention(mention) => {
-            if VALID_MENTION_USERNAME_RE.is_match(&mention.0) {
-                let lookup = account_lookup(&mention.0, mention.1.as_ref().map(String::as_str));
+            if VALID_MENTION_USERNAME_RE.is_match(&mention.username) {
+                let lookup = account_lookup(
+                    &mention.username,
+                    mention.domain.as_ref().map(String::as_str),
+                );
 
                 if let Ok(Some(account)) = lookup {
-                    let mut name = format!("@{}", mention.0);
+                    let mut name = format!("@{}", mention.username);
 
-                    if let Some(domain) = &mention.1 {
+                    if let Some(domain) = &mention.domain {
                         name.push_str(&format!("@{}", domain));
                     }
 
-                    Token::Element(Element(
-                        "a".to_string(),
-                        Some(vec![("href".to_string(), account.get_uri().to_string())]),
-                        Some(name),
-                    ))
+                    Token::Element(Element {
+                        name: "a".to_string(),
+                        attributes: vec![("href".to_string(), account.get_uri().to_string())],
+                        children: vec![Token::Text(Text { text: name })],
+                    })
                 } else {
                     Token::Mention(mention)
                 }
@@ -79,10 +84,16 @@ where
         .tags(hashset!["br", "a"])
         .link_rel(Some("noopener nofollow"));
 
-    let tokens = Reader::from(text).map(transformer).collect::<Vec<Token>>();
-    let html = Writer::from(tokens).with_html_sanitizer(html_sanitizer);
+    let reader = Reader::new()
+        .with_transformer(Box::new(transformer))
+        .with_str(text)
+        .finish();
+    let html = Writer::new()
+        .with_html_sanitizer(html_sanitizer)
+        .with_reader(reader)
+        .finish();
 
-    Ok(html.to_string())
+    Ok(format!("<p>{}</p>", html.to_string()))
 }
 
 #[cfg(test)]
