@@ -34,7 +34,6 @@ validator = "0.8"
 validator_derive = "0.8"
 
 ammonia = "1.1.0"
-maud_htmlescape = "0.17.0"
 
 [dependencies.rustodon_database]
 path = "database/"

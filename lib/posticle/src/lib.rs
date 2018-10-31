@@ -1,393 +1,439 @@
+//! Posticle is a parser and renderer for Twitter and Mastodon like text.
+
 #![feature(nll)]
 
+extern crate ammonia;
 #[macro_use]
-extern crate lazy_static;
+extern crate maplit;
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
-#[cfg(test)]
-#[macro_use]
-extern crate pretty_assertions;
-extern crate regex;
-extern crate validator;
 
-mod grammar;
+pub mod grammar;
+pub mod tokens;
 
-use grammar::{Grammar, Rule};
-use pest::iterators::Pair;
-use pest::Parser;
-use regex::Regex;
+use ammonia::Builder as Ammonia;
+use grammar::document;
+use tokens::*;
 
-lazy_static! {
-    /// Matches all valid characters in a hashtag name (after the first #).
-    static ref VALID_HASHTAG_NAME_RE: Regex = Regex::new(r"^[\w_]*[\p{Alphabetic}_·][\w_]*$").unwrap();
+/// Build a new [`Reader`].
+pub struct ReaderBuilder<'t>(Reader<'t>);
 
-    /// Matches all valid characters in a mention username (after the first @).
-    static ref VALID_MENTION_USERNAME_RE: Regex = Regex::new(r"^(?i)[a-z0-9_]+([a-z0-9_\.]+[a-z0-9_]+)?$").unwrap();
+impl<'t> Default for ReaderBuilder<'t> {
+    fn default() -> Self {
+        ReaderBuilder(Reader::default())
+    }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
-/// Tags a given [Entity]'s semantic kind.
-pub enum EntityKind {
-    /// A URL.
-    Url,
-    /// A hashtag.
-    Hashtag,
-    /// A mention; the inner data is `(username, optional domain)`.
-    Mention(String, Option<String>),
-}
-
-#[derive(Debug, PartialEq, Eq, Hash)]
-/// Represents an entity extracted from a given string of text.
-///
-/// The entity is described by its `kind` and the `span` of indices it occupies within the string.
-pub struct Entity {
-    pub kind: EntityKind,
-    pub span: (usize, usize),
-}
-
-impl Entity {
-    /// Extracts the span described by this Entity from the passed `text`.
-    pub fn substr<'a>(&self, text: &'a str) -> &'a str {
-        &text[self.span.0..self.span.1]
+impl<'t> ReaderBuilder<'t> {
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    /// Returns `true` if this entity overlaps with some `other` entity.
-    pub fn overlaps_with(&self, other: &Entity) -> bool {
-        self.span.0 <= other.span.1 && other.span.0 <= self.span.1
+    /// Finish building a [`Reader`] and tokenize its input.
+    ///
+    /// ```
+    /// use posticle::Reader;
+    ///
+    /// let reader = Reader::new().with_str("Nice!").finish();
+    ///
+    /// assert_ne!(reader.to_vec(), Vec::new());
+    /// ```
+    pub fn finish(self) -> Reader<'t> {
+        self.0.finish()
     }
 
-    fn from_parse_pair(pair: Pair<Rule>) -> Option<Self> {
-        let span = (
-            pair.as_span().start_pos().pos(),
-            pair.as_span().end_pos().pos(),
-        );
+    /// Add a [`str`] as input to the [`Reader`] being built.
+    ///
+    /// ```
+    /// use posticle::Reader;
+    ///
+    /// let reader_a = Reader::new().with_str("Hello world!").finish();
+    /// let reader_b = Reader::from("Hello world!");
+    ///
+    /// assert_eq!(reader_a.to_vec(), reader_b.to_vec());
+    /// ```
+    pub fn with_str(self, input: &str) -> Self {
+        self.with_string(input.to_string())
+    }
 
-        match pair.as_rule() {
-            Rule::mention => {
-                let mut inner = pair.into_inner();
-                let username = inner.next().unwrap().as_str();
-                let domain = inner.next().as_ref().map(Pair::as_str);
+    /// Add a [`String`] as input to the [`Reader`] being built.
+    ///
+    /// ```
+    /// use posticle::Reader;
+    ///
+    /// let reader_a = Reader::new()
+    ///     .with_string(String::from("Hello world!"))
+    ///     .finish();
+    /// let reader_b = Reader::from("Hello world!");
+    ///
+    /// assert_eq!(reader_a.to_vec(), reader_b.to_vec());
+    /// ```
+    pub fn with_string(self, input: String) -> Self {
+        ReaderBuilder(Reader { input, ..self.0 })
+    }
 
-                if validate_mention_username(username)
-                    && (domain.map(validate_mention_domain).unwrap_or(true))
-                {
-                    Some(Entity {
-                        kind: EntityKind::Mention(username.to_string(), domain.map(str::to_string)),
-                        span,
-                    })
-                } else {
-                    None
-                }
-            },
-            Rule::url => {
-                if validator::validate_url(pair.as_str()) {
-                    Some(Entity {
-                        kind: EntityKind::Url,
-                        span,
-                    })
-                } else {
-                    None
-                }
-            },
-            Rule::hashtag => {
-                let name = pair.into_inner().next().unwrap().as_str();
-                if validate_hashtag_name(name) {
-                    Some(Entity {
-                        kind: EntityKind::Hashtag,
-                        span,
-                    })
-                } else {
-                    None
-                }
-            },
-            _ => None,
+    /// Add a transformer closure to the [`Reader`] being built.
+    ///
+    /// ```
+    /// use posticle::tokens::*;
+    /// use posticle::Reader;
+    ///
+    /// let reader = Reader::new()
+    ///     .with_transformer(Box::new(|token| token))
+    ///     .with_str("Hello world!")
+    ///     .finish();
+    ///
+    /// assert_eq!(
+    ///     reader.to_vec(),
+    ///     vec![Token::Text(Text {
+    ///         text: "Hello world!".to_string(),
+    ///     })]
+    /// );
+    /// ```
+    pub fn with_transformer(self, transformer: Box<'t + Fn(Token) -> Token>) -> Self {
+        ReaderBuilder(Reader {
+            transformer,
+            ..self.0
+        })
+    }
+}
+
+/// Read [`Token`]s from a string.
+pub struct Reader<'t> {
+    input: String,
+    tokens: Vec<Token>,
+    current_token: usize,
+    transformer: Box<'t + Fn(Token) -> Token>,
+}
+
+impl<'t> Default for Reader<'t> {
+    fn default() -> Self {
+        Reader {
+            input: String::new(),
+            tokens: Vec::new(),
+            current_token: 0,
+            transformer: Box::new(|token| token),
         }
     }
 }
 
-/// Given `text`, extract all [Entities](Entity)
-pub fn entities(text: &str) -> Vec<Entity> {
-    // If the parse succeeded, run Entity::from_parse_pair on each pair, dropping those which returned None;
-    // collect to a vec of entities. If the parse errored, just return an empty vec.
-    Grammar::parse(Rule::post, text)
-        .map(|pairs| pairs.filter_map(Entity::from_parse_pair).collect())
-        .unwrap_or_default()
-}
+impl<'t> Iterator for Reader<'t> {
+    type Item = Token;
 
-/// Check that a hashtag name (after the first #) is valid.
-fn validate_hashtag_name(name: &str) -> bool {
-    VALID_HASHTAG_NAME_RE.is_match(name)
-}
+    fn next(&mut self) -> Option<Self::Item> {
+        let current_token = self.current_token.to_owned();
 
-/// Check that a mentioned username is valid.
-fn validate_mention_username(username: &str) -> bool {
-    VALID_MENTION_USERNAME_RE.is_match(username)
-}
+        if current_token < self.tokens.len() {
+            self.current_token = self.current_token + 1;
 
-/// Check that a mentioned instance domain is valid.
-fn validate_mention_domain(domain: &str) -> bool {
-    validator::validate_url(format!("https://{}", domain))
-}
-
-#[cfg(test)]
-mod tests {
-    extern crate yaml_rust;
-    use super::*;
-
-    const TLDS_YAML: &'static str = include_str!("../vendor/test/tlds.yml");
-
-    #[test]
-    fn extracts_nothing() {
-        assert_eq!(entities("a string without at signs"), vec![]);
-    }
-
-    #[test]
-    fn extracts_mentions() {
-        assert_eq!(
-            entities("@mention"),
-            vec![Entity {
-                kind: EntityKind::Mention("mention".to_string(), None),
-                span: (0, 8),
-            }]
-        );
-        assert_eq!(
-            entities("@mention@domain.place"),
-            vec![Entity {
-                kind: EntityKind::Mention("mention".to_string(), Some("domain.place".to_string())),
-                span: (0, 21),
-            }]
-        );
-        assert_eq!(
-            entities("@Mention@Domain.Place"),
-            vec![Entity {
-                kind: EntityKind::Mention("Mention".to_string(), Some("Domain.Place".to_string())),
-                span: (0, 21),
-            }]
-        );
-    }
-
-    #[test]
-    fn extracts_mentions_in_punctuation() {
-        assert_eq!(
-            entities("(@mention)"),
-            vec![Entity {
-                kind: EntityKind::Mention("mention".to_string(), None),
-                span: (1, 9),
-            }]
-        );
-    }
-
-    #[test]
-    fn ignores_invalid_mentions() {
-        let mentions = vec![
-            "some text @ yo",
-            "@@yuser@domain",
-            "@xuser@@domain",
-            "@zuser@-domain-.com",
-            "@@not",
-            "@not@",
-            "@not@@not",
-            "@not@not@not",
-        ];
-
-        for mention in mentions {
-            assert_eq!(
-                entities(mention),
-                vec![],
-                "ignores_invalid_mentions failed on {}",
-                mention
-            );
-        }
-    }
-
-    #[test]
-    fn extracts_hashtags() {
-        let hashtags = vec!["#hashtag", "#HASHTAG", "#1000followers", "#文字化け"];
-
-        for hashtag in hashtags {
-            assert_eq!(
-                entities(hashtag),
-                vec![Entity {
-                    kind: EntityKind::Hashtag,
-                    span: (0, hashtag.len()),
-                }],
-                "extracts_hashtags failed on {}",
-                hashtag
-            );
-        }
-    }
-
-    #[test]
-    fn extracts_hashtags_in_punctuation() {
-        let hashtags = vec!["#hashtag", "#HASHTAG", "#1000followers", "#文字化け"];
-
-        for hashtag in hashtags {
-            let hashtag = format!("({})", hashtag);
-
-            assert_eq!(
-                entities(&hashtag),
-                vec![Entity {
-                    kind: EntityKind::Hashtag,
-                    span: (1, hashtag.len() - 1),
-                }],
-                "extracts_hashtags_in_punctuation failed on {}",
-                hashtag
-            );
-        }
-    }
-
-    #[test]
-    fn ignores_invalid_hashtags() {
-        let hashtags = vec![
-            "some text # yo",
-            "#---bite-my-entire---",
-            "#123",
-            "##not",
-            "#not#",
-            "#not##not",
-            "#not#not#not",
-        ];
-
-        for hashtag in hashtags {
-            assert_eq!(
-                entities(hashtag),
-                vec![],
-                "ignores_invalid_hashtags failed on {}",
-                hashtag
-            );
-        }
-    }
-
-    #[test]
-    fn extracts_urls() {
-        let urls = vec![
-            "http://example.com",
-            "https://example.com/path/to/resource?search=foo&lang=en",
-            "http://example.com/#!/heck",
-            "HTTPS://www.ExaMPLE.COM/index.html",
-            "https://example.com:8080/",
-            "http://test_underscore.example.com",
-            "http://☃.net/",
-            "http://example.com/Русские_слова",
-            "http://example.com/الكلمات_العربية",
-            "http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook",
-            "http://example.com?foo=$bar.;baz?BAZ&c=d-#top/?stories",
-            "https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-",
-            "ftp://www.example.com/",
-        ];
-
-        for url in urls {
-            assert_eq!(
-                entities(url),
-                vec![Entity {
-                    kind: EntityKind::Url,
-                    span: (0, url.len()),
-                }],
-                "extracts_urls failed on {}",
-                url
-            );
-        }
-    }
-
-    #[test]
-    fn extracts_urls_in_punctuation() {
-        let urls = vec![
-            "http://example.com",
-            "https://example.com/path/to/resource?search=foo&lang=en",
-            "http://example.com/#!/heck",
-            "HTTPS://www.ExaMPLE.COM/index.html",
-            "https://example.com:8080/",
-            "http://test_underscore.example.com",
-            "http://☃.net/",
-            "http://example.com/Русские_слова",
-            "http://example.com/الكلمات_العربية",
-            "http://sports.yahoo.com/nfl/news;_ylt=Aom0;ylu=XyZ?slug=ap-superbowlnotebook",
-            "http://example.com?foo=$bar.;baz?BAZ&c=d-#top/?stories",
-            "https://www.youtube.com/watch?v=g8X0nJHrJ9g&list=PLLLYkE3G1HEAUsnZ-vfTeQ_ZO37DhHhOY-",
-            "ftp://www.example.com/",
-        ];
-
-        for url in urls {
-            let url = format!("({})", url);
-
-            assert_eq!(
-                entities(&url),
-                vec![Entity {
-                    kind: EntityKind::Url,
-                    span: (1, url.len() - 1),
-                }],
-                "extracts_urls_in_punctuation failed on {}",
-                url
-            );
-        }
-    }
-
-    #[test]
-    fn ignores_invalid_urls() {
-        let urls = vec![
-            "some text http:// yo",
-            "some:thing",
-            "some://thing/else yo",
-            "http://www.-domain4352.com/",
-            "http://www.domain4352-.com/",
-            "http://☃-.net/",
-        ];
-
-        for url in urls {
-            assert_eq!(
-                entities(url),
-                vec![],
-                "ignores_invalid_urls failed on {}",
-                url
-            );
-        }
-    }
-
-    #[test]
-    fn extracts_all() {
-        assert_eq!(
-            entities("text #hashtag https://example.com @mention text"),
-            vec![
-                Entity {
-                    kind: EntityKind::Hashtag,
-                    span: (5, 13),
-                },
-                Entity {
-                    kind: EntityKind::Url,
-                    span: (14, 33),
-                },
-                Entity {
-                    kind: EntityKind::Mention("mention".to_string(), None),
-                    span: (34, 42),
-                },
-            ]
-        );
-    }
-
-    #[test]
-    fn all_tlds_validate() {
-        let tests = yaml_rust::YamlLoader::load_from_str(TLDS_YAML).unwrap();
-        let tests = tests.first().unwrap();
-        let ref tests = tests["tests"];
-
-        for (suite, test_cases) in tests.as_hash().expect("could not load tests document") {
-            let suite = suite.as_str().expect("suite could not be loaded");
-
-            for test in test_cases.as_vec().expect("suite could not be loaded") {
-                let description = test["description"]
-                    .as_str()
-                    .expect("test was missing 'description'");
-                let text = test["text"].as_str().expect("test was missing 'text'");
-
-                assert!(
-                    validate_mention_domain(text),
-                    "test {}/\"{}\" failed on text \"{}\"",
-                    suite,
-                    description,
-                    text
-                );
+            if let Some(token) = self.tokens.get(current_token) {
+                return Some(token.to_owned());
             }
         }
+
+        None
+    }
+}
+
+impl<'a, 't> From<&'a str> for Reader<'t> {
+    /// ```
+    /// use posticle::tokens::*;
+    /// use posticle::Reader;
+    ///
+    /// let reader = Reader::from("Nice!");
+    ///
+    /// assert_eq!(
+    ///     reader.to_vec(),
+    ///     vec![Token::Text(Text {
+    ///         text: "Nice!".to_string(),
+    ///     })]
+    /// );
+    /// ```
+    fn from(input: &str) -> Self {
+        ReaderBuilder::new().with_str(input).finish()
+    }
+}
+
+impl<'t> From<String> for Reader<'t> {
+    /// ```
+    /// use posticle::tokens::*;
+    /// use posticle::Reader;
+    ///
+    /// let reader = Reader::from("Nice!".to_string());
+    ///
+    /// assert_eq!(
+    ///     reader.to_vec(),
+    ///     vec![Token::Text(Text {
+    ///         text: "Nice!".to_string(),
+    ///     })]
+    /// );
+    /// ```
+    fn from(input: String) -> Self {
+        ReaderBuilder::new().with_string(input).finish()
+    }
+}
+
+impl<'t> From<Vec<Token>> for Reader<'t> {
+    /// ```
+    /// use posticle::tokens::*;
+    /// use posticle::Reader;
+    ///
+    /// let reader = Reader::from(vec![Token::Text(Text {
+    ///     text: "Nice!".to_string(),
+    /// })]);
+    ///
+    /// assert_eq!(
+    ///     reader.to_vec(),
+    ///     vec![Token::Text(Text {
+    ///         text: "Nice!".to_string(),
+    ///     })]
+    /// );
+    /// ```
+    fn from(tokens: Vec<Token>) -> Self {
+        Reader {
+            tokens: tokens,
+            ..Self::default()
+        }
+    }
+}
+
+impl<'ta, 'tb> PartialEq<Reader<'ta>> for Reader<'tb> {
+    fn eq(&self, other: &Reader) -> bool {
+        self.input == other.input && self.tokens == other.tokens
+    }
+
+    fn ne(&self, other: &Reader) -> bool {
+        self.input != other.input || self.tokens != other.tokens
+    }
+}
+
+impl<'t> Reader<'t> {
+    /// Build a new [`Reader`].
+    pub fn new() -> ReaderBuilder<'t> {
+        ReaderBuilder::new()
+    }
+
+    fn finish(self) -> Self {
+        let mut tokens: Vec<Token> = Vec::new();
+
+        if let Ok(pairs) = document(&self.input) {
+            let transformer = &self.transformer;
+
+            for pair in pairs {
+                tokens.append(&mut Token::from_parse_pair(pair, transformer));
+            }
+        }
+
+        let tokens = normalize_text_tokens(tokens);
+
+        Self { tokens, ..self }
+    }
+
+    /// Convert a [`Reader`] to a [`Vec`] of [`Token`].
+    pub fn to_vec(self) -> Vec<Token> {
+        self.tokens
+    }
+}
+
+/// The parser has a tendency to produce rows of text tokens, combine any
+/// text token that follows another text token into a new text token.
+fn normalize_text_tokens(input: Vec<Token>) -> Vec<Token> {
+    let mut output = Vec::new();
+    let mut replacement = String::new();
+
+    for token in input {
+        match token {
+            Token::Text(Text { text }) => {
+                replacement.push_str(&text);
+            },
+            _ => {
+                if replacement.len() > 0 {
+                    output.push(Token::Text(Text { text: replacement }));
+                    replacement = String::new();
+                }
+
+                output.push(token);
+            },
+        }
+    }
+
+    if replacement.len() > 0 {
+        output.push(Token::Text(Text { text: replacement }));
+    }
+
+    output
+}
+
+pub struct WriterBuilder<'w>(Writer<'w>);
+
+impl<'w> Default for WriterBuilder<'w> {
+    fn default() -> Self {
+        WriterBuilder(Writer::default())
+    }
+}
+
+impl<'w> WriterBuilder<'w> {
+    /// Finish building a [`Writer`].
+    ///
+    /// ```
+    /// extern crate ammonia;
+    /// extern crate posticle;
+    ///
+    /// use ammonia::Builder;
+    /// use posticle::Writer;
+    ///
+    /// let html_sanitizer = Builder::new();
+    ///
+    /// // html_sanitizer.tags(hashset!["a", "br"]);
+    ///
+    /// let writer = Writer::new().with_html_sanitizer(html_sanitizer);
+    /// ```
+    pub fn finish(self) -> Writer<'w> {
+        self.0.finish()
+    }
+
+    /// Add a [`Reader`] as input to the [`Writer`] being built.
+    ///
+    /// ```
+    /// use posticle::{Reader, Writer};
+    ///
+    /// let reader = Reader::from("Nice!");
+    /// let writer = Writer::new().with_reader(reader).finish();
+    ///
+    /// assert_eq!(writer.to_string(), "Nice!".to_string());
+    /// ```
+    pub fn with_reader(self, reader: Reader) -> Self {
+        self.with_tokens(reader.to_vec())
+    }
+
+    /// Add a [`Vec`] of [`Token`] as input to the [`Writer`] being built.
+    ///
+    /// ```
+    /// use posticle::tokens::*;
+    /// use posticle::{Reader, Writer};
+    ///
+    /// let tokens = vec![Token::Text(Text {
+    ///     text: "Nice!".to_string(),
+    /// })];
+    /// let writer = Writer::new().with_tokens(tokens).finish();
+    ///
+    /// assert_eq!(writer.to_string(), "Nice!".to_string());
+    /// ```
+    pub fn with_tokens(self, tokens: Vec<Token>) -> Self {
+        WriterBuilder(Writer { tokens, ..self.0 })
+    }
+
+    /// Add an [`ammonia::Builder`] to the [`Writer`] being built.
+    ///
+    /// ```
+    /// extern crate ammonia;
+    /// extern crate posticle;
+    ///
+    /// use ammonia::Builder;
+    /// use posticle::tokens::*;
+    /// use posticle::{Reader, Writer};
+    ///
+    /// let tokens = vec![Token::Element(Element {
+    ///     name: "x".to_string(),
+    ///     attributes: Vec::new(),
+    ///     children: vec![Token::Text(Text {
+    ///         text: "Nice!".to_string(),
+    ///     })],
+    /// })];
+    /// let writer = Writer::new()
+    ///     .with_tokens(tokens)
+    ///     .with_html_sanitizer(Builder::new())
+    ///     .finish();
+    ///
+    /// // The <x> and </x> tags will be stripped.
+    /// assert_eq!(writer.to_string(), "Nice!".to_string());
+    /// ```
+    pub fn with_html_sanitizer(self, html_sanitizer: Ammonia<'w>) -> Self {
+        WriterBuilder(Writer {
+            html_sanitizer,
+            ..self.0
+        })
+    }
+}
+
+/// Write [`Token`]s as HTML to a string.
+pub struct Writer<'w> {
+    output: String,
+    html_sanitizer: Ammonia<'w>,
+    tokens: Vec<Token>,
+}
+
+impl<'w> Default for Writer<'w> {
+    fn default() -> Self {
+        let mut html_sanitizer = Ammonia::default();
+
+        html_sanitizer.tags(hashset!["br"]);
+
+        Self {
+            output: String::new(),
+            html_sanitizer,
+            tokens: Vec::new(),
+        }
+    }
+}
+
+impl<'w, 't> From<Reader<'t>> for Writer<'w> {
+    /// ```
+    /// use posticle::tokens::*;
+    /// use posticle::{Reader, Writer};
+    ///
+    /// let reader = Reader::from(vec![Token::Text(Text {
+    ///     text: "Nice!".to_string(),
+    /// })]);
+    /// let writer = Writer::from(reader);
+    ///
+    /// assert_eq!(writer.to_string(), "Nice!".to_string());
+    /// ```
+    fn from(reader: Reader) -> Self {
+        Writer::new().with_reader(reader).finish()
+    }
+}
+
+impl<'w> From<Vec<Token>> for Writer<'w> {
+    /// ```
+    /// use posticle::tokens::*;
+    /// use posticle::Writer;
+    ///
+    /// let writer = Writer::from(vec![Token::Text(Text {
+    ///     text: "Nice!".to_string(),
+    /// })]);
+    ///
+    /// assert_eq!(writer.to_string(), "Nice!".to_string());
+    /// ```
+    fn from(tokens: Vec<Token>) -> Self {
+        Writer::new().with_tokens(tokens).finish()
+    }
+}
+
+impl<'w> Writer<'w> {
+    /// Build a new [`Writer`].
+    pub fn new() -> WriterBuilder<'w> {
+        WriterBuilder::default()
+    }
+
+    fn finish(mut self) -> Self {
+        let tokens = &self.tokens.to_owned();
+
+        for token in tokens {
+            self.push(token.to_owned());
+        }
+
+        self
+    }
+
+    /// Convert the [`Writer`] to a [`String`].
+    pub fn to_string(self) -> String {
+        self.html_sanitizer.clean(&self.output).to_string()
+    }
+
+    /// Push a [`Token`] onto the [`Writer`].
+    pub fn push(&mut self, token: Token) {
+        token.render(&mut self.output);
     }
 }
