@@ -133,7 +133,7 @@ pub enum Token {
 }
 
 impl Token {
-    pub fn from_parse_pair(pair: Pair<Rule>, transformer: &Box<Fn(Token) -> Token>) -> Vec<Self> {
+    pub fn from_parse_pair<'t>(pair: Pair<Rule>, transformer: &Box<'t + Fn(Token) -> Token>) -> Vec<Self> {
         match pair.as_rule() {
             Rule::emoticon => Self::from_emoticon_rule(pair, transformer),
             Rule::hashtag => Self::from_hashtag_rule(pair, transformer),
@@ -146,7 +146,7 @@ impl Token {
         }
     }
 
-    fn from_emoticon_rule(pair: Pair<Rule>, transformer: &Box<Fn(Token) -> Token>) -> Vec<Self> {
+    fn from_emoticon_rule<'t>(pair: Pair<Rule>, transformer: &Box<'t + Fn(Token) -> Token>) -> Vec<Self> {
         let mut tokens = Vec::new();
         let mut name: Option<String> = None;
 
@@ -168,7 +168,7 @@ impl Token {
         tokens
     }
 
-    fn from_hashtag_rule(pair: Pair<Rule>, transformer: &Box<Fn(Token) -> Token>) -> Vec<Self> {
+    fn from_hashtag_rule<'t>(pair: Pair<Rule>, transformer: &Box<'t + Fn(Token) -> Token>) -> Vec<Self> {
         let mut tokens = Vec::new();
         let mut name: Option<String> = None;
 
@@ -190,7 +190,7 @@ impl Token {
         tokens
     }
 
-    fn from_link_rule(pair: Pair<Rule>, transformer: &Box<Fn(Token) -> Token>) -> Vec<Self> {
+    fn from_link_rule<'t>(pair: Pair<Rule>, transformer: &Box<'t + Fn(Token) -> Token>) -> Vec<Self> {
         let mut tokens = Vec::new();
         let mut schema: Option<String> = None;
         let mut tail: Option<String> = None;
@@ -218,7 +218,7 @@ impl Token {
         tokens
     }
 
-    fn from_mention_rule(pair: Pair<Rule>, transformer: &Box<Fn(Token) -> Token>) -> Vec<Self> {
+    fn from_mention_rule<'t>(pair: Pair<Rule>, transformer: &Box<'t + Fn(Token) -> Token>) -> Vec<Self> {
         let mut tokens = Vec::new();
         let mut username: Option<String> = None;
         let mut domain: Option<String> = None;
@@ -244,7 +244,7 @@ impl Token {
         tokens
     }
 
-    fn from_symbol_prefix(pair: Pair<Rule>, transformer: &Box<Fn(Token) -> Token>) -> Vec<Self> {
+    fn from_symbol_prefix<'t>(pair: Pair<Rule>, transformer: &Box<'t + Fn(Token) -> Token>) -> Vec<Self> {
         let mut tokens = Vec::new();
 
         for pair in pair.into_inner() {

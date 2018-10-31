@@ -17,15 +17,15 @@ use grammar::document;
 use tokens::*;
 
 /// Build a new [`Reader`].
-pub struct ReaderBuilder(Reader);
+pub struct ReaderBuilder<'t>(Reader<'t>);
 
-impl Default for ReaderBuilder {
+impl<'t> Default for ReaderBuilder<'t> {
     fn default() -> Self {
         ReaderBuilder(Reader::default())
     }
 }
 
-impl ReaderBuilder {
+impl<'t> ReaderBuilder<'t> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -39,7 +39,7 @@ impl ReaderBuilder {
     ///
     /// assert_ne!(reader.to_vec(), Vec::new());
     /// ```
-    pub fn finish(self) -> Reader {
+    pub fn finish(self) -> Reader<'t> {
         self.0.finish()
     }
 
@@ -91,7 +91,7 @@ impl ReaderBuilder {
     ///     })]
     /// );
     /// ```
-    pub fn with_transformer(self, transformer: Box<Fn(Token) -> Token>) -> Self {
+    pub fn with_transformer(self, transformer: Box<'t + Fn(Token) -> Token>) -> Self {
         ReaderBuilder(Reader {
             transformer,
             ..self.0
@@ -100,14 +100,14 @@ impl ReaderBuilder {
 }
 
 /// Read [`Token`]s from a string.
-pub struct Reader {
+pub struct Reader<'t> {
     input: String,
     tokens: Vec<Token>,
     current_token: usize,
-    transformer: Box<Fn(Token) -> Token>,
+    transformer: Box<'t + Fn(Token) -> Token>,
 }
 
-impl Default for Reader {
+impl<'t> Default for Reader<'t> {
     fn default() -> Self {
         Reader {
             input: String::new(),
@@ -118,7 +118,7 @@ impl Default for Reader {
     }
 }
 
-impl Iterator for Reader {
+impl<'t> Iterator for Reader<'t> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -136,7 +136,7 @@ impl Iterator for Reader {
     }
 }
 
-impl<'a> From<&'a str> for Reader {
+impl<'a, 't> From<&'a str> for Reader<'t> {
     /// ```
     /// use posticle::tokens::*;
     /// use posticle::Reader;
@@ -155,7 +155,7 @@ impl<'a> From<&'a str> for Reader {
     }
 }
 
-impl From<String> for Reader {
+impl<'t> From<String> for Reader<'t> {
     /// ```
     /// use posticle::tokens::*;
     /// use posticle::Reader;
@@ -174,7 +174,7 @@ impl From<String> for Reader {
     }
 }
 
-impl From<Vec<Token>> for Reader {
+impl<'t> From<Vec<Token>> for Reader<'t> {
     /// ```
     /// use posticle::tokens::*;
     /// use posticle::Reader;
@@ -198,7 +198,7 @@ impl From<Vec<Token>> for Reader {
     }
 }
 
-impl PartialEq<Reader> for Reader {
+impl<'ta, 'tb> PartialEq<Reader<'ta>> for Reader<'tb> {
     fn eq(&self, other: &Reader) -> bool {
         self.input == other.input && self.tokens == other.tokens
     }
@@ -208,9 +208,9 @@ impl PartialEq<Reader> for Reader {
     }
 }
 
-impl Reader {
+impl<'t> Reader<'t> {
     /// Build a new [`Reader`].
-    pub fn new() -> ReaderBuilder {
+    pub fn new() -> ReaderBuilder<'t> {
         ReaderBuilder::new()
     }
 
@@ -378,7 +378,7 @@ impl<'w> Default for Writer<'w> {
     }
 }
 
-impl<'w> From<Reader> for Writer<'w> {
+impl<'w, 't> From<Reader<'t>> for Writer<'w> {
     /// ```
     /// use posticle::tokens::*;
     /// use posticle::{Reader, Writer};
