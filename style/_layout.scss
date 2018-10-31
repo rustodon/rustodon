@@ -50,6 +50,12 @@ main>section {
   white-space: pre-wrap;
 }
 
+.status {
+  .cw, .content {
+    overflow-wrap: break-word;
+  }
+}
+
 .view-status {
   flex: 1 1 auto;
   .status {

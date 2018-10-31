@@ -94,7 +94,8 @@ pub fn create_status(
             .map(|e| {
                 let msg = e.message.to_owned();
                 msg.unwrap_or(Cow::Borrowed("unknown error"))
-            }).join(", ");
+            })
+            .join(", ");
 
         return Ok(Either::Left(Flash::error(Redirect::to("/"), error_desc)));
     }
@@ -112,15 +113,13 @@ pub fn create_status(
         text: form_data.content.to_owned(),
         content_warning: content_warning,
         account_id: user.account_id,
-    }.insert(&db_conn)?;
+    }
+    .insert(&db_conn)?;
 
     Ok(Either::Right(Redirect::to("/")))
 }
 
-#[get(
-    "/users/<username>/statuses/<status_id>",
-    format = "text/html"
-)]
+#[get("/users/<username>/statuses/<status_id>", format = "text/html")]
 pub fn status_page(
     username: String,
     status_id: u64,

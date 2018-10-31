@@ -179,7 +179,8 @@ impl Status {
                 "{base}{path}",
                 base = BASE_URL.as_str(),
                 path = self.path_with_account(account)
-            ).into(),
+            )
+            .into(),
         }
     }
 
@@ -193,6 +194,7 @@ impl Status {
             "/users/{user}/statuses/{id}",
             user = account.username,
             id = self.id
-        ).into()
+        )
+        .into()
     }
 }

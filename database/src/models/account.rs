@@ -124,7 +124,8 @@ impl Account {
                     "{base}{path}",
                     base = BASE_URL.as_str(),
                     path = self.profile_path()
-                ).into()
+                )
+                .into()
             })
     }
 
@@ -143,7 +144,8 @@ impl Account {
                     "{base}{path}",
                     base = BASE_URL.as_str(),
                     path = self.inbox_path()
-                ).into()
+                )
+                .into()
             })
     }
 
@@ -162,7 +164,8 @@ impl Account {
                     "{base}{path}",
                     base = BASE_URL.as_str(),
                     path = self.outbox_path()
-                ).into()
+                )
+                .into()
             })
     }
 
@@ -181,7 +184,8 @@ impl Account {
                     "{base}{path}",
                     base = BASE_URL.as_str(),
                     path = self.following_path()
-                ).into()
+                )
+                .into()
             })
     }
 
@@ -200,7 +204,8 @@ impl Account {
                     "{base}{path}",
                     base = BASE_URL.as_str(),
                     path = self.followers_path()
-                ).into()
+                )
+                .into()
             })
     }
 

@@ -1,4 +1,4 @@
-#![feature(plugin, nll, custom_derive, proc_macro_non_items)]
+#![feature(plugin, nll, custom_derive, proc_macro_hygiene)]
 #![plugin(rocket_codegen)]
 #![recursion_limit = "128"]
 
@@ -27,7 +27,7 @@ extern crate validator_derive;
 extern crate maplit;
 extern crate posticle;
 extern crate regex;
-#[macro_use(slog_o, slog_info, slog_warn,)]
+#[macro_use(slog_o, slog_info, slog_warn)]
 extern crate slog;
 extern crate slog_async;
 extern crate slog_term;

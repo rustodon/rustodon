@@ -1,4 +1,6 @@
 #![recursion_limit = "128"]
+// silence warnings due to diesel-rs/diesel#1785
+#![allow(proc_macro_derive_resolution_fallback, unused_imports)]
 
 extern crate chrono;
 extern crate chrono_humanize;
