@@ -1,4 +1,4 @@
-#![feature(plugin, nll, custom_derive, proc_macro_non_items)]
+#![feature(plugin, nll, custom_derive, proc_macro_hygiene)]
 #![plugin(rocket_codegen)]
 #![recursion_limit = "128"]
 
