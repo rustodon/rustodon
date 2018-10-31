@@ -23,7 +23,8 @@ fn main() {
                 })
             },
             _ => token,
-        })).finish();
+        }))
+        .finish();
 
     let mut html_sanitizer = Builder::default();
 
