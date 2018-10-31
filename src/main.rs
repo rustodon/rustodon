@@ -28,7 +28,7 @@ extern crate validator_derive;
 extern crate maplit;
 extern crate posticle;
 extern crate regex;
-#[macro_use(slog_o, slog_info, slog_warn,)]
+#[macro_use(slog_o, slog_info, slog_warn)]
 extern crate slog;
 extern crate slog_async;
 extern crate slog_term;

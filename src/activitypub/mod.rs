@@ -23,7 +23,8 @@ where
                 let ap_json = ContentType::new("application", "activity+json");
 
                 Content(ap_json, string).respond_to(req).unwrap()
-            }).map_err(|e| {
+            })
+            .map_err(|e| {
                 // TODO: logging (what happens if the Value won't serialize?)
                 // the code i cribbed this from did some internal Rocket thing.
                 http::Status::InternalServerError
@@ -129,7 +130,8 @@ mod tests {
         let accept_json = Accept::from_str("application/activity+json").unwrap();
         let accept_json_ld = Accept::from_str(
             "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
-        ).unwrap();
+        )
+        .unwrap();
 
         assert!(is_as(&accept_json_ld));
         assert!(is_as(&accept_json));

@@ -12,7 +12,8 @@ impl HasBio for Account {
         if let Some(raw_bio) = self.summary.as_ref().map(String::as_str) {
             transform::bio(raw_bio, |username, domain| {
                 Account::fetch_by_username_domain(connection, username, domain).map_err(Error::from)
-            }).ok()
+            })
+            .ok()
         } else {
             None
         }
