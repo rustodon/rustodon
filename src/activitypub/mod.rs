@@ -91,7 +91,7 @@ impl AsActivityPub for Account {
 
             "preferredUsername": self.username,
             "name": self.display_name.as_ref().map(String::as_str).unwrap_or(""),
-            "summary": self.transformed_bio(&conn).unwrap_or("<p></p>".to_string()),
+            "summary": self.transformed_bio(&conn).as_ref().map(String::as_str).unwrap_or("<p></p>"),
         })))
     }
 }

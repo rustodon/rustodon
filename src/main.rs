@@ -1,6 +1,10 @@
 #![feature(plugin, nll, custom_derive, proc_macro_hygiene)]
 #![plugin(rocket_codegen)]
 #![recursion_limit = "128"]
+// Allow some clippy lints that would otherwise warn on various Rocket-generated code.
+// Unfortunately, this means we lose these lints on _our_ code, but it's a small price to pay
+// for less line noise running `cargo clippy`.
+#![allow(clippy::needless_pass_by_value, clippy::suspicious_else_formatting)]
 
 extern crate ammonia;
 extern crate chrono;
@@ -27,7 +31,7 @@ extern crate validator_derive;
 extern crate maplit;
 extern crate posticle;
 extern crate regex;
-#[macro_use(slog_o, slog_info, slog_warn)]
+#[macro_use(slog_o, slog_warn)]
 extern crate slog;
 extern crate slog_async;
 extern crate slog_term;
@@ -79,7 +83,7 @@ fn rocket_load_config() -> Config {
     use rocket::config::ConfigError::{self, *};
     use rocket::config::RocketConfig;
 
-    const CONFIG_FILENAME: &'static str = "Rocket.toml";
+    const CONFIG_FILENAME: &str = "Rocket.toml";
 
     let bail = |e: ConfigError| -> ! {
         use rocket::logger::{self, LoggingLevel};
