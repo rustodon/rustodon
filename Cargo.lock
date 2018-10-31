@@ -646,7 +646,7 @@ version = "0.3.0"
 dependencies = [
  "ammonia 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "maplit 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "pest 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pest 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "pest_derive 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pretty_assertions 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "yaml-rust 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",

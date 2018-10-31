@@ -102,38 +102,38 @@ mod tests {
 
     #[test]
     fn passes_through_text() {
-        assert_eq!(bio("foo", |_, _| Ok(None)).unwrap(), "foo");
-        assert_eq!(bio("foo:bar", |_, _| Ok(None)).unwrap(), "foo:bar");
+        assert_eq!(bio("foo", |_, _| Ok(None)).unwrap(), "<p>foo</p>");
+        assert_eq!(bio("foo:bar", |_, _| Ok(None)).unwrap(), "<p>foo:bar</p>");
     }
 
     #[test]
     fn escapes_html_characters() {
-        assert_eq!(bio("<>&", |_, _| Ok(None)).unwrap(), "&lt;&gt;&amp;");
+        assert_eq!(bio("<>&", |_, _| Ok(None)).unwrap(), "<p>&lt;&gt;&amp;</p>");
         assert_eq!(
             bio("<a></a>", |_, _| Ok(None)).unwrap(),
-            "&lt;a&gt;&lt;/a&gt;"
+            "<p>&lt;a&gt;&lt;/a&gt;</p>"
         );
     }
 
     #[test]
     fn converts_newlines_to_br() {
-        assert_eq!(bio("\n", |_, _| Ok(None)).unwrap(), "\n<br>");
-        assert_eq!(bio("\r\n", |_, _| Ok(None)).unwrap(), "\n<br>");
+        assert_eq!(bio("\n", |_, _| Ok(None)).unwrap(), "<p>\n<br></p>");
+        assert_eq!(bio("\r\n", |_, _| Ok(None)).unwrap(), "<p>\n<br></p>");
     }
 
     #[test]
     fn converts_links_to_a_tags() {
         assert_eq!(
             bio("https://example.com", |_, _| Ok(None)).unwrap(),
-            "<a href=\"https://example.com\" rel=\"noopener nofollow\">https://example.com</a>"
+            "<p><a href=\"https://example.com\" rel=\"noopener nofollow\">https://example.com</a></p>"
         );
         assert_eq!(
             bio("http://example.com", |_, _| Ok(None)).unwrap(),
-            "<a href=\"http://example.com\" rel=\"noopener nofollow\">http://example.com</a>"
+            "<p><a href=\"http://example.com\" rel=\"noopener nofollow\">http://example.com</a></p>"
         );
         assert_eq!(
             bio("http://‽.com/∰/", |_, _| Ok(None)).unwrap(),
-            "<a href=\"http://‽.com/∰/\" rel=\"noopener nofollow\">http://‽.com/∰/</a>"
+            "<p><a href=\"http://‽.com/∰/\" rel=\"noopener nofollow\">http://‽.com/∰/</a></p>"
         );
     }
 
@@ -142,7 +142,7 @@ mod tests {
         // TODO: we don't have hashtags atm, so we just fake-link them!
         assert_eq!(
             bio("#hashtag", |_, _| Ok(None)).unwrap(),
-            "<a href=\"#\" rel=\"noopener nofollow\">#hashtag</a>"
+            "<p><a href=\"#\" rel=\"noopener nofollow\">#hashtag</a></p>"
         );
     }
 
@@ -175,12 +175,12 @@ mod tests {
 
         assert_eq!(
             bio("@localfoo", acct_lookup).unwrap(),
-            "<a href=\"https://localhost/users/localfoo\" rel=\"noopener nofollow\">@localfoo</a>"
+            "<p><a href=\"https://localhost/users/localfoo\" rel=\"noopener nofollow\">@localfoo</a></p>"
         );
         assert_eq!(
             bio("@remotefoo@remote.example", acct_lookup).unwrap(),
-            "<a href=\"https://remote.example/remotefoo\" rel=\"noopener nofollow\">@remotefoo@remote.example</a>"
+            "<p><a href=\"https://remote.example/remotefoo\" rel=\"noopener nofollow\">@remotefoo@remote.example</a></p>"
         );
-        assert_eq!(bio("@invalid", acct_lookup).unwrap(), "@invalid");
+        assert_eq!(bio("@invalid", acct_lookup).unwrap(), "<p>@invalid</p>");
     }
 }
