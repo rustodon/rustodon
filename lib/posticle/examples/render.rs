@@ -5,10 +5,10 @@ extern crate posticle;
 
 use ammonia::{Builder, Url};
 use posticle::tokens::*;
-use posticle::{Reader, Writer};
+use posticle::{ReaderBuilder, WriterBuilder};
 
 fn main() {
-    let reader = Reader::new()
+    let reader = ReaderBuilder::new()
         .with_str("Mastodon is great! https://joinmastodon.org/")
         .with_transformer(Box::new(|token| match token {
             Token::Link(link) => {
@@ -30,7 +30,7 @@ fn main() {
 
     html_sanitizer.tags(hashset!["br", "a"]);
 
-    let html = Writer::new()
+    let html = WriterBuilder::new()
         .with_reader(reader)
         .with_html_sanitizer(html_sanitizer)
         .finish()

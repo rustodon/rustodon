@@ -8,7 +8,7 @@ use posticle::Reader;
 #[test]
 fn extracts_nothing() {
     assert_eq!(
-        Reader::from("a string without at signs").to_vec(),
+        Reader::from("a string without at signs").into_vec(),
         vec![Token::Text(Text {
             text: "a string without at signs".to_string(),
         })]
@@ -18,21 +18,21 @@ fn extracts_nothing() {
 #[test]
 fn extracts_mentions() {
     assert_eq!(
-        Reader::from("@mention").to_vec(),
+        Reader::from("@mention").into_vec(),
         vec![Token::Mention(Mention {
             username: "mention".to_string(),
             domain:   None,
         })]
     );
     assert_eq!(
-        Reader::from("@mention@domain.place").to_vec(),
+        Reader::from("@mention@domain.place").into_vec(),
         vec![Token::Mention(Mention {
             username: "mention".to_string(),
             domain:   Some("domain.place".to_string()),
         })]
     );
     assert_eq!(
-        Reader::from("@Mention@Domain.Place").to_vec(),
+        Reader::from("@Mention@Domain.Place").into_vec(),
         vec![Token::Mention(Mention {
             username: "Mention".to_string(),
             domain:   Some("Domain.Place".to_string()),
@@ -43,7 +43,7 @@ fn extracts_mentions() {
 #[test]
 fn extracts_mentions_in_punctuation() {
     assert_eq!(
-        Reader::from("(@mention)").to_vec(),
+        Reader::from("(@mention)").into_vec(),
         vec![
             Token::Text(Text {
                 text: "(".to_string(),
@@ -73,7 +73,7 @@ fn ignores_invalid_mentions() {
 
     for mention in mentions {
         assert_eq!(
-            Reader::from(mention).to_vec(),
+            Reader::from(mention).into_vec(),
             vec![Token::Text(Text {
                 text: mention.to_string(),
             })],
@@ -89,7 +89,7 @@ fn extracts_hashtags() {
 
     for hashtag in hashtags {
         assert_eq!(
-            Reader::from(hashtag).to_vec(),
+            Reader::from(hashtag).into_vec(),
             vec![Token::Hashtag(Hashtag {
                 name: hashtag[1..].to_string(),
             })],
@@ -105,7 +105,7 @@ fn extracts_hashtags_in_punctuation() {
 
     for hashtag in hashtags {
         assert_eq!(
-            Reader::from(format!("({})", hashtag)).to_vec(),
+            Reader::from(format!("({})", hashtag)).into_vec(),
             vec![
                 Token::Text(Text {
                     text: "(".to_string(),
@@ -135,7 +135,7 @@ fn ignores_invalid_hashtags() {
 
     for hashtag in hashtags {
         assert_eq!(
-            Reader::from(hashtag).to_vec(),
+            Reader::from(hashtag).into_vec(),
             vec![Token::Text(Text {
                 text: hashtag.to_string(),
             })],
@@ -165,7 +165,7 @@ fn extracts_links() {
 
     for link in links {
         assert_eq!(
-            Reader::from(link).to_vec(),
+            Reader::from(link).into_vec(),
             vec![Token::Link(Link {
                 url: link.to_string(),
             })],
@@ -195,7 +195,7 @@ fn extracts_links_in_punctuation() {
 
     for link in links {
         assert_eq!(
-            Reader::from(format!("({})", link)).to_vec(),
+            Reader::from(format!("({})", link)).into_vec(),
             vec![
                 Token::Text(Text {
                     text: "(".to_string(),
@@ -219,7 +219,7 @@ fn ignores_invalid_links() {
 
     for link in links {
         assert_eq!(
-            Reader::from(link).to_vec(),
+            Reader::from(link).into_vec(),
             vec![Token::Text(Text {
                 text: link.to_string(),
             })],
@@ -232,7 +232,7 @@ fn ignores_invalid_links() {
 #[test]
 fn extracts_all() {
     assert_eq!(
-        Reader::from("text #hashtag https://example.com @mention text").to_vec(),
+        Reader::from("text #hashtag https://example.com @mention text").into_vec(),
         vec![
             Token::Text(Text {
                 text: "text ".to_string(),

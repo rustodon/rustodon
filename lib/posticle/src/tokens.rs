@@ -1,7 +1,7 @@
 use grammar::Rule;
 use pest::iterators::Pair;
 
-fn html_escape(text: &String) -> String {
+fn html_escape(text: &str) -> String {
     text.replace('&', "&amp;")
         .replace('"', "&quot")
         .replace('<', "&lt;")

@@ -33,11 +33,11 @@ impl<'t> ReaderBuilder<'t> {
     /// Finish building a [`Reader`] and tokenize its input.
     ///
     /// ```
-    /// use posticle::Reader;
+    /// use posticle::ReaderBuilder;
     ///
-    /// let reader = Reader::new().with_str("Nice!").finish();
+    /// let reader = ReaderBuilder::new().with_str("Nice!").finish();
     ///
-    /// assert_ne!(reader.to_vec(), Vec::new());
+    /// assert_ne!(reader.into_vec(), Vec::new());
     /// ```
     pub fn finish(self) -> Reader<'t> {
         self.0.finish()
@@ -46,12 +46,12 @@ impl<'t> ReaderBuilder<'t> {
     /// Add a [`str`] as input to the [`Reader`] being built.
     ///
     /// ```
-    /// use posticle::Reader;
+    /// use posticle::{Reader, ReaderBuilder};
     ///
-    /// let reader_a = Reader::new().with_str("Hello world!").finish();
+    /// let reader_a = ReaderBuilder::new().with_str("Hello world!").finish();
     /// let reader_b = Reader::from("Hello world!");
     ///
-    /// assert_eq!(reader_a.to_vec(), reader_b.to_vec());
+    /// assert_eq!(reader_a.into_vec(), reader_b.into_vec());
     /// ```
     pub fn with_str(self, input: &str) -> Self {
         self.with_string(input.to_string())
@@ -60,14 +60,14 @@ impl<'t> ReaderBuilder<'t> {
     /// Add a [`String`] as input to the [`Reader`] being built.
     ///
     /// ```
-    /// use posticle::Reader;
+    /// use posticle::{Reader, ReaderBuilder};
     ///
-    /// let reader_a = Reader::new()
+    /// let reader_a = ReaderBuilder::new()
     ///     .with_string(String::from("Hello world!"))
     ///     .finish();
     /// let reader_b = Reader::from("Hello world!");
     ///
-    /// assert_eq!(reader_a.to_vec(), reader_b.to_vec());
+    /// assert_eq!(reader_a.into_vec(), reader_b.into_vec());
     /// ```
     pub fn with_string(self, input: String) -> Self {
         ReaderBuilder(Reader { input, ..self.0 })
@@ -77,15 +77,15 @@ impl<'t> ReaderBuilder<'t> {
     ///
     /// ```
     /// use posticle::tokens::*;
-    /// use posticle::Reader;
+    /// use posticle::ReaderBuilder;
     ///
-    /// let reader = Reader::new()
+    /// let reader = ReaderBuilder::new()
     ///     .with_transformer(Box::new(|token| token))
     ///     .with_str("Hello world!")
     ///     .finish();
     ///
     /// assert_eq!(
-    ///     reader.to_vec(),
+    ///     reader.into_vec(),
     ///     vec![Token::Text(Text {
     ///         text: "Hello world!".to_string(),
     ///     })]
@@ -125,7 +125,7 @@ impl<'t> Iterator for Reader<'t> {
         let current_token = self.current_token.to_owned();
 
         if current_token < self.tokens.len() {
-            self.current_token = self.current_token + 1;
+            self.current_token += 1;
 
             if let Some(token) = self.tokens.get(current_token) {
                 return Some(token.to_owned());
@@ -144,7 +144,7 @@ impl<'a, 't> From<&'a str> for Reader<'t> {
     /// let reader = Reader::from("Nice!");
     ///
     /// assert_eq!(
-    ///     reader.to_vec(),
+    ///     reader.into_vec(),
     ///     vec![Token::Text(Text {
     ///         text: "Nice!".to_string(),
     ///     })]
@@ -163,7 +163,7 @@ impl<'t> From<String> for Reader<'t> {
     /// let reader = Reader::from("Nice!".to_string());
     ///
     /// assert_eq!(
-    ///     reader.to_vec(),
+    ///     reader.into_vec(),
     ///     vec![Token::Text(Text {
     ///         text: "Nice!".to_string(),
     ///     })]
@@ -184,7 +184,7 @@ impl<'t> From<Vec<Token>> for Reader<'t> {
     /// })]);
     ///
     /// assert_eq!(
-    ///     reader.to_vec(),
+    ///     reader.into_vec(),
     ///     vec![Token::Text(Text {
     ///         text: "Nice!".to_string(),
     ///     })]
@@ -192,7 +192,7 @@ impl<'t> From<Vec<Token>> for Reader<'t> {
     /// ```
     fn from(tokens: Vec<Token>) -> Self {
         Reader {
-            tokens: tokens,
+            tokens,
             ..Self::default()
         }
     }
@@ -202,18 +202,9 @@ impl<'ta, 'tb> PartialEq<Reader<'ta>> for Reader<'tb> {
     fn eq(&self, other: &Reader) -> bool {
         self.input == other.input && self.tokens == other.tokens
     }
-
-    fn ne(&self, other: &Reader) -> bool {
-        self.input != other.input || self.tokens != other.tokens
-    }
 }
 
 impl<'t> Reader<'t> {
-    /// Build a new [`Reader`].
-    pub fn new() -> ReaderBuilder<'t> {
-        ReaderBuilder::new()
-    }
-
     fn finish(self) -> Self {
         let mut tokens: Vec<Token> = Vec::new();
 
@@ -231,7 +222,7 @@ impl<'t> Reader<'t> {
     }
 
     /// Convert a [`Reader`] to a [`Vec`] of [`Token`].
-    pub fn to_vec(self) -> Vec<Token> {
+    pub fn into_vec(self) -> Vec<Token> {
         self.tokens
     }
 }
@@ -248,7 +239,7 @@ fn normalize_text_tokens(input: Vec<Token>) -> Vec<Token> {
                 replacement.push_str(&text);
             },
             _ => {
-                if replacement.len() > 0 {
+                if !replacement.is_empty() {
                     output.push(Token::Text(Text { text: replacement }));
                     replacement = String::new();
                 }
@@ -258,7 +249,7 @@ fn normalize_text_tokens(input: Vec<Token>) -> Vec<Token> {
         }
     }
 
-    if replacement.len() > 0 {
+    if !replacement.is_empty() {
         output.push(Token::Text(Text { text: replacement }));
     }
 
@@ -274,6 +265,10 @@ impl<'w> Default for WriterBuilder<'w> {
 }
 
 impl<'w> WriterBuilder<'w> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// Finish building a [`Writer`].
     ///
     /// ```
@@ -281,13 +276,13 @@ impl<'w> WriterBuilder<'w> {
     /// extern crate posticle;
     ///
     /// use ammonia::Builder;
-    /// use posticle::Writer;
+    /// use posticle::WriterBuilder;
     ///
     /// let html_sanitizer = Builder::new();
     ///
     /// // html_sanitizer.tags(hashset!["a", "br"]);
     ///
-    /// let writer = Writer::new().with_html_sanitizer(html_sanitizer);
+    /// let writer = WriterBuilder::new().with_html_sanitizer(html_sanitizer);
     /// ```
     pub fn finish(self) -> Writer<'w> {
         self.0.finish()
@@ -296,27 +291,27 @@ impl<'w> WriterBuilder<'w> {
     /// Add a [`Reader`] as input to the [`Writer`] being built.
     ///
     /// ```
-    /// use posticle::{Reader, Writer};
+    /// use posticle::{Reader, WriterBuilder};
     ///
     /// let reader = Reader::from("Nice!");
-    /// let writer = Writer::new().with_reader(reader).finish();
+    /// let writer = WriterBuilder::new().with_reader(reader).finish();
     ///
     /// assert_eq!(writer.to_string(), "Nice!".to_string());
     /// ```
     pub fn with_reader(self, reader: Reader) -> Self {
-        self.with_tokens(reader.to_vec())
+        self.with_tokens(reader.into_vec())
     }
 
     /// Add a [`Vec`] of [`Token`] as input to the [`Writer`] being built.
     ///
     /// ```
     /// use posticle::tokens::*;
-    /// use posticle::{Reader, Writer};
+    /// use posticle::{Reader, WriterBuilder};
     ///
     /// let tokens = vec![Token::Text(Text {
     ///     text: "Nice!".to_string(),
     /// })];
-    /// let writer = Writer::new().with_tokens(tokens).finish();
+    /// let writer = WriterBuilder::new().with_tokens(tokens).finish();
     ///
     /// assert_eq!(writer.to_string(), "Nice!".to_string());
     /// ```
@@ -332,7 +327,7 @@ impl<'w> WriterBuilder<'w> {
     ///
     /// use ammonia::Builder;
     /// use posticle::tokens::*;
-    /// use posticle::{Reader, Writer};
+    /// use posticle::{Reader, WriterBuilder};
     ///
     /// let tokens = vec![Token::Element(Element {
     ///     name: "x".to_string(),
@@ -341,7 +336,7 @@ impl<'w> WriterBuilder<'w> {
     ///         text: "Nice!".to_string(),
     ///     })],
     /// })];
-    /// let writer = Writer::new()
+    /// let writer = WriterBuilder::new()
     ///     .with_tokens(tokens)
     ///     .with_html_sanitizer(Builder::new())
     ///     .finish();
@@ -391,7 +386,7 @@ impl<'w, 't> From<Reader<'t>> for Writer<'w> {
     /// assert_eq!(writer.to_string(), "Nice!".to_string());
     /// ```
     fn from(reader: Reader) -> Self {
-        Writer::new().with_reader(reader).finish()
+        WriterBuilder::new().with_reader(reader).finish()
     }
 }
 
@@ -407,33 +402,26 @@ impl<'w> From<Vec<Token>> for Writer<'w> {
     /// assert_eq!(writer.to_string(), "Nice!".to_string());
     /// ```
     fn from(tokens: Vec<Token>) -> Self {
-        Writer::new().with_tokens(tokens).finish()
+        WriterBuilder::new().with_tokens(tokens).finish()
     }
 }
 
 impl<'w> Writer<'w> {
-    /// Build a new [`Writer`].
-    pub fn new() -> WriterBuilder<'w> {
-        WriterBuilder::default()
-    }
-
     fn finish(mut self) -> Self {
-        let tokens = &self.tokens.to_owned();
-
-        for token in tokens {
-            self.push(token.to_owned());
+        for token in self.tokens.to_owned() {
+            self.push(&token);
         }
 
         self
     }
 
     /// Convert the [`Writer`] to a [`String`].
-    pub fn to_string(self) -> String {
+    pub fn to_string(&self) -> String {
         self.html_sanitizer.clean(&self.output).to_string()
     }
 
     /// Push a [`Token`] onto the [`Writer`].
-    pub fn push(&mut self, token: Token) {
+    pub fn push(&mut self, token: &Token) {
         token.render(&mut self.output);
     }
 }
