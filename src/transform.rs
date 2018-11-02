@@ -1,7 +1,7 @@
 use ammonia::{Builder, Url};
 use failure::Error;
 use posticle::tokens::*;
-use posticle::{Reader, Writer};
+use posticle::{ReaderBuilder, WriterBuilder};
 use regex::Regex;
 
 use db::models::Account;
@@ -84,11 +84,11 @@ where
         .tags(hashset!["br", "a"])
         .link_rel(Some("noopener nofollow"));
 
-    let reader = Reader::new()
+    let reader = ReaderBuilder::new()
         .with_transformer(Box::new(transformer))
         .with_str(text)
         .finish();
-    let html = Writer::new()
+    let html = WriterBuilder::new()
         .with_html_sanitizer(html_sanitizer)
         .with_reader(reader)
         .finish();

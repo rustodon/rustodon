@@ -101,7 +101,7 @@ pub fn create_status(
     }
 
     // convert CW to option if present, so we get proper nulls in DB
-    let content_warning: Option<String> = if form_data.content_warning.len() > 0 {
+    let content_warning: Option<String> = if !form_data.content_warning.is_empty() {
         Some(form_data.content_warning.to_owned())
     } else {
         None
@@ -111,7 +111,7 @@ pub fn create_status(
         id: id_generator().next(),
         created_at: Utc::now(),
         text: form_data.content.to_owned(),
-        content_warning: content_warning,
+        content_warning,
         account_id: user.account_id,
     }
     .insert(&db_conn)?;
