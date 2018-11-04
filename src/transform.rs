@@ -1,60 +1,99 @@
-use ammonia::Builder;
+use ammonia::{Builder, Url};
 use failure::Error;
-use maud_htmlescape::Escaper;
-use posticle::{self, EntityKind};
+use posticle::tokens::*;
+use posticle::{ReaderBuilder, WriterBuilder};
+use regex::Regex;
 
 use db::models::Account;
 use error::Perhaps;
 
-fn escape_html(text: impl AsRef<str>) -> Result<String, Error> {
-    use std::fmt::Write;
+lazy_static! {
+    /// Matches all valid characters in a hashtag name (after the first #).
+    static ref VALID_HASHTAG_NAME_RE: Regex = Regex::new(r"^[\w_]*[\p{Alphabetic}_·][\w_]*$").unwrap();
 
-    let mut out = String::new();
-    Escaper::new(&mut out).write_str(text.as_ref())?;
-    out = out.replace("\r", "").replace("\n", "<br>");
-
-    Ok(out)
+    /// Matches all valid characters in a mention username (after the first @).
+    static ref VALID_MENTION_USERNAME_RE: Regex = Regex::new(r"^(?i)[a-z0-9_]+([a-z0-9_\.]+[a-z0-9_]+)?$").unwrap();
 }
 
 pub fn bio<L>(text: &str, account_lookup: L) -> Result<String, Error>
 where
     L: Fn(&str, Option<&str>) -> Perhaps<Account>,
 {
-    let mut html = String::new();
-    let mut cursor = 0;
+    let transformer = |token| match token {
+        Token::Hashtag(hashtag) => {
+            if VALID_HASHTAG_NAME_RE.is_match(&hashtag.name) {
+                Token::Element(Element {
+                    name: "a".to_string(),
+                    attributes: vec![("href".to_string(), "#".to_string())],
+                    children: vec![Token::Text(Text {
+                        text: format!("#{}", hashtag.name),
+                    })],
+                })
+            } else {
+                Token::Hashtag(hashtag)
+            }
+        },
+        Token::Link(link) => {
+            let url = Url::parse(&link.url);
 
-    let entities = posticle::entities(&text);
-
-    for entity in entities {
-        html.push_str(&escape_html(&text[cursor..entity.span.0])?);
-        let entity_text = entity.substr(&text);
-        let replacement = match entity.kind {
-            EntityKind::Url => format!("<a href=\"{url}\">{url}</a>", url = entity_text),
-            EntityKind::Hashtag => format!("<a href=\"#\">{hashtag}</a>", hashtag = entity_text),
-            EntityKind::Mention(user, domain) => {
-                if let Some(account) = account_lookup(&user, domain.as_ref().map(String::as_str))? {
-                    format!(
-                        "<a href=\"{url}\">{mention}</a>",
-                        url = account.get_uri(),
-                        mention = entity_text
-                    )
-                } else {
-                    entity_text.into()
+            if let Ok(url) = url {
+                match url.scheme() {
+                    "http" | "https" => Token::Element(Element {
+                        name: "a".to_string(),
+                        attributes: vec![("href".to_string(), link.url.clone())],
+                        children: vec![Token::Text(Text { text: link.url })],
+                    }),
+                    _ => Token::Link(link),
                 }
-            },
-        };
-        html.push_str(&replacement);
-        cursor = entity.span.1;
-    }
-    html.push_str(&escape_html(&text[cursor..])?);
+            } else {
+                Token::Link(link)
+            }
+        },
+        Token::Mention(mention) => {
+            if VALID_MENTION_USERNAME_RE.is_match(&mention.username) {
+                let lookup = account_lookup(
+                    &mention.username,
+                    mention.domain.as_ref().map(String::as_str),
+                );
 
-    println!("{}", html);
+                if let Ok(Some(account)) = lookup {
+                    let mut name = format!("@{}", mention.username);
 
-    Ok(Builder::default()
-        .tags(hashset!["a", "p", "br"])
-        .link_rel(Some("noopener nofollow"))
-        .clean(&html)
-        .to_string())
+                    if let Some(domain) = &mention.domain {
+                        name.push_str(&format!("@{}", domain));
+                    }
+
+                    Token::Element(Element {
+                        name: "a".to_string(),
+                        attributes: vec![("href".to_string(), account.get_uri().to_string())],
+                        children: vec![Token::Text(Text { text: name })],
+                    })
+                } else {
+                    Token::Mention(mention)
+                }
+            } else {
+                Token::Mention(mention)
+            }
+        },
+        _ => token,
+    };
+
+    let mut html_sanitizer = Builder::default();
+
+    html_sanitizer
+        .tags(hashset!["br", "a"])
+        .link_rel(Some("noopener nofollow"));
+
+    let reader = ReaderBuilder::new()
+        .with_transformer(Box::new(transformer))
+        .with_str(text)
+        .finish();
+    let html = WriterBuilder::new()
+        .with_html_sanitizer(html_sanitizer)
+        .with_reader(reader)
+        .finish();
+
+    Ok(format!("<p>{}</p>", html.to_string()))
 }
 
 #[cfg(test)]
@@ -63,38 +102,38 @@ mod tests {
 
     #[test]
     fn passes_through_text() {
-        assert_eq!(bio("foo", |_, _| Ok(None)).unwrap(), "foo");
-        assert_eq!(bio("foo:bar", |_, _| Ok(None)).unwrap(), "foo:bar");
+        assert_eq!(bio("foo", |_, _| Ok(None)).unwrap(), "<p>foo</p>");
+        assert_eq!(bio("foo:bar", |_, _| Ok(None)).unwrap(), "<p>foo:bar</p>");
     }
 
     #[test]
     fn escapes_html_characters() {
-        assert_eq!(bio("<>&", |_, _| Ok(None)).unwrap(), "&lt;&gt;&amp;");
+        assert_eq!(bio("<>&", |_, _| Ok(None)).unwrap(), "<p>&lt;&gt;&amp;</p>");
         assert_eq!(
             bio("<a></a>", |_, _| Ok(None)).unwrap(),
-            "&lt;a&gt;&lt;/a&gt;"
+            "<p>&lt;a&gt;&lt;/a&gt;</p>"
         );
     }
 
     #[test]
     fn converts_newlines_to_br() {
-        assert_eq!(bio("\n", |_, _| Ok(None)).unwrap(), "<br>");
-        assert_eq!(bio("\r\n", |_, _| Ok(None)).unwrap(), "<br>");
+        assert_eq!(bio("\n", |_, _| Ok(None)).unwrap(), "<p>\n<br></p>");
+        assert_eq!(bio("\r\n", |_, _| Ok(None)).unwrap(), "<p>\n<br></p>");
     }
 
     #[test]
     fn converts_links_to_a_tags() {
         assert_eq!(
             bio("https://example.com", |_, _| Ok(None)).unwrap(),
-            "<a href=\"https://example.com\" rel=\"noopener nofollow\">https://example.com</a>"
+            "<p><a href=\"https://example.com\" rel=\"noopener nofollow\">https://example.com</a></p>"
         );
         assert_eq!(
             bio("http://example.com", |_, _| Ok(None)).unwrap(),
-            "<a href=\"http://example.com\" rel=\"noopener nofollow\">http://example.com</a>"
+            "<p><a href=\"http://example.com\" rel=\"noopener nofollow\">http://example.com</a></p>"
         );
         assert_eq!(
             bio("http://‽.com/∰/", |_, _| Ok(None)).unwrap(),
-            "<a href=\"http://‽.com/∰/\" rel=\"noopener nofollow\">http://‽.com/∰/</a>"
+            "<p><a href=\"http://‽.com/∰/\" rel=\"noopener nofollow\">http://‽.com/∰/</a></p>"
         );
     }
 
@@ -103,7 +142,7 @@ mod tests {
         // TODO: we don't have hashtags atm, so we just fake-link them!
         assert_eq!(
             bio("#hashtag", |_, _| Ok(None)).unwrap(),
-            "<a href=\"#\" rel=\"noopener nofollow\">#hashtag</a>"
+            "<p><a href=\"#\" rel=\"noopener nofollow\">#hashtag</a></p>"
         );
     }
 
@@ -136,12 +175,12 @@ mod tests {
 
         assert_eq!(
             bio("@localfoo", acct_lookup).unwrap(),
-            "<a href=\"https://localhost/users/localfoo\" rel=\"noopener nofollow\">@localfoo</a>"
+            "<p><a href=\"https://localhost/users/localfoo\" rel=\"noopener nofollow\">@localfoo</a></p>"
         );
         assert_eq!(
             bio("@remotefoo@remote.example", acct_lookup).unwrap(),
-            "<a href=\"https://remote.example/remotefoo\" rel=\"noopener nofollow\">@remotefoo@remote.example</a>"
+            "<p><a href=\"https://remote.example/remotefoo\" rel=\"noopener nofollow\">@remotefoo@remote.example</a></p>"
         );
-        assert_eq!(bio("@invalid", acct_lookup).unwrap(), "@invalid");
+        assert_eq!(bio("@invalid", acct_lookup).unwrap(), "<p>@invalid</p>");
     }
 }

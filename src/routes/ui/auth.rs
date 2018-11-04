@@ -99,7 +99,8 @@ pub fn signup_post(
             .map(|e| {
                 let msg = e.message.to_owned();
                 msg.unwrap_or(Cow::Borrowed("unknown error"))
-            }).join(", ");
+            })
+            .join(", ");
 
         return Ok(Flash::error(Redirect::to("/auth/sign_up"), error_desc));
     }
@@ -123,14 +124,16 @@ pub fn signup_post(
 
             display_name: None,
             summary: None,
-        }.insert(&db_conn)?;
+        }
+        .insert(&db_conn)?;
 
         NewUser {
             id: id_gen.next(),
             email: form_data.email.to_owned(),
             encrypted_password: User::encrypt_password(&form_data.password),
             account_id: account.id,
-        }.insert(&db_conn)
+        }
+        .insert(&db_conn)
     })?;
 
     Ok(Flash::success(Redirect::to("/"), "signed up!"))

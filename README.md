@@ -31,9 +31,7 @@ You will need to install several base dependencies:
    On some operating systems, you may need to separately install the Postgres client library:
    * Debian/Ubuntu/etc: `apt install libpq-dev`
    * Arch: `pacman -S postgresql-libs`
-1. [Ruby](https://www.ruby-lang.org/en/) + [Bundler](https://bundler.io/).
-   Install these using your favorite method (apt, [rbenv](https://github.com/rbenv/rbenv), etc).
-   We only use them for `sass`; since SASS is switching to a Dart-based compiler, we will likely end up dropping the dependency on Ruby entirely.
+1. [SASS](https://sass-lang.com/). To install, follow [the official directions](https://sass-lang.com/install), and make sure the `sass` binary is somewhere in your `PATH`.
 
 Once you have installed these base components, you should run `scripts/setup` to install the remainder of the application dependencies.
 
@@ -46,7 +44,7 @@ To run the application once you have installed all dependencies, you should run 
 
 Rustodon will launch on `http://localhost:8000` by default; this can be overriden by setting [certain environment variables](https://rocket.rs/guide/configuration/#environment-variables).
 
-Federation requires that the application know where it's hosted, and (thanks to Webfinger) also forces us to serve over HTTPS. To get around this in a development environment, you can use [ngrok](https://ngrok.com/) or a similar service. The app knows where it's serving from (used to compute, eg, AS2 UIDs), so make sure to set `DOMAIN` in `.env`.
+Federation requires that the application know where it's hosted, and (thanks to Webfinger) also forces us to serve over HTTPS. To get around this in a development environment, you can use [ngrok](https://ngrok.com/) or a similar service. To make sure the app knows where it's serving from (used to compute, eg, AS2 UIDs), set `DOMAIN` in `.env`.
 
 ### Running database migrations
 

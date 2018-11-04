@@ -1,16 +1,15 @@
 [package]
 name = "posticle"
-description = "tools for working with Twitter-post-like text"
-version = "0.2.0"
+description = "A parser and renderer for Twitter and Mastodon like text"
+version = "0.3.0"
 authors = ["Erin Moon <erin@hashbang.sh>", "Measly Twerp <measlytwerp@gmail.com>"]
 categories = ["text-processing"]
 
 [dependencies]
-lazy_static = "1.1.0"
-pest = "2.0.1"
-pest_derive = "2.0.1"
-regex = "1.0.5"
-validator = "0.8"
+ammonia = "1.2"
+maplit = "1.0"
+pest = "2.0"
+pest_derive = "2.0"
 
 [dev-dependencies]
 yaml-rust = "0.4.2"

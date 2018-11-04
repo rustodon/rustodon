@@ -32,7 +32,6 @@ main>section {
 
 .write-status {
   flex: 38%;
-  height: 6rem;
 }
 
 .write-status-form {
@@ -49,6 +48,12 @@ main>section {
 
 .status .content {
   white-space: pre-wrap;
+}
+
+.status {
+  .cw, .content {
+    overflow-wrap: break-word;
+  }
 }
 
 .view-status {
