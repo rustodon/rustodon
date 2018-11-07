@@ -16,7 +16,7 @@ lazy_static = "1.0"
 itertools = "0.7.4"
 resopt = { path = "lib/resopt/" }
 posticle = { path = "lib/posticle/" }
-regex = "1.0.5"
+regex = "1.0.6"
 
 slog = "2.4"
 slog-term = "2.4"
