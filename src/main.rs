@@ -33,7 +33,7 @@ extern crate maplit;
 extern crate posticle;
 extern crate regex;
 extern crate turnstile;
-#[macro_use(slog_o, slog_warn)]
+#[macro_use]
 extern crate slog;
 extern crate slog_async;
 extern crate slog_term;

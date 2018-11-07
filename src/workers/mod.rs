@@ -37,7 +37,7 @@ impl Job for TestJob {
 
 impl Perform for TestJob {
     fn perform(&self) -> Result<(), Box<Error>> {
-        println!("+++++++ {a} {a} {a} {a} +++++++", a = self.msg);
+        info!("+++++++ {a} {a} {a} {a} +++++++", a = &self.msg);
         Ok(())
     }
 }
@@ -50,7 +50,7 @@ pub fn init(pool: Pool) {
     thread::Builder::new()
         .name("job_collector".to_string())
         .spawn(move || loop {
-            println!("[job collector] doing a tick....");
+            trace!("job collection tick");
             let conn = pool.get().expect("couldn't connect to database");
             let top_of_queue = {
                 use db::schema::jobs::dsl::*;
