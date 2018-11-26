@@ -13,7 +13,7 @@ maplit = "1.0"
 failure = "0.1.3"
 failure_derive = "0.1.1"
 lazy_static = "1.0"
-itertools = "0.7.9"
+itertools = "0.7.11"
 resopt = { path = "lib/resopt/" }
 posticle = { path = "lib/posticle/" }
 regex = "1.0.6"
