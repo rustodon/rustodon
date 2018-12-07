@@ -25,7 +25,7 @@ slog-scope = "4.0"
 rocket-slog = "0.2"
 
 rocket = "0.3.17"
-rocket_codegen = "0.3.17"
+rocket_codegen = "0.4.0"
 
 serde = "1.0"
 serde_derive = "1.0"
