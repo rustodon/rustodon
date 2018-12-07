@@ -24,7 +24,7 @@ slog-async = "2.3"
 slog-scope = "4.0"
 rocket-slog = "0.2"
 
-rocket = "0.3.17"
+rocket = "0.4.0"
 rocket_codegen = "0.3.17"
 
 serde = "1.0"
