@@ -19,19 +19,12 @@ pub fn routes() -> Vec<Route> {
     ]
 }
 
-/// A type representing the parameters of a WebFinger query.
-#[derive(FromForm, Debug)]
-pub struct WFQuery {
-    resource: String,
-}
-
 /// Returns JRD replies to `acct:` webfinger queries; required for Mastodon to resolve our accounts.
-#[get("/.well-known/webfinger?<query>")]
-pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhaps<Content<JsonValue>> {
+#[get("/.well-known/webfinger?<resource>")]
+pub fn webfinger_get_resource(resource: String, db_conn: db::Connection) -> Perhaps<Content<JsonValue>> {
     // TODO: don't unwrap
-    let (_, addr) = query.resource.split_at(
-        query
-            .resource
+    let (_, addr) = resource.split_at(
+        resource
             .rfind("acct:")
             .map(|i| i + "acct:".len())
             .unwrap_or(0),
@@ -59,7 +52,7 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhap
                 "type": "application/activity+json",
             },
         ],
-        "subject": query.resource,
+        "subject": resource,
     });
 
     let wf_content = ContentType::new("application", "jrd+json");

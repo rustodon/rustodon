@@ -23,9 +23,7 @@ use self::templates::*;
 pub fn routes() -> Vec<Route> {
     routes![
         index,
-        index_paginated,
         user_page,
-        user_page_paginated,
         settings_profile,
         settings_profile_update,
         status_page,
@@ -37,11 +35,6 @@ pub fn routes() -> Vec<Route> {
         auth::signup_post,
         static_files
     ]
-}
-
-#[derive(FromForm, Debug)]
-pub struct UserPageParams {
-    max_id: Option<i64>,
 }
 
 #[derive(Debug)]
@@ -60,12 +53,6 @@ impl<'v> FromFormValue<'v> for Timeline {
             _ => Err(form_value),
         }
     }
-}
-
-#[derive(FromForm, Debug)]
-pub struct IndexPageParams {
-    max_id:   Option<i64>,
-    timeline: Option<Timeline>,
 }
 
 #[derive(Debug, FromForm, Validate)]
@@ -137,26 +124,16 @@ pub fn status_page(
     })
 }
 
-// This is due to [SergioBenitez/Rocket#376](https://github.com/SergioBenitez/Rocket/issues/376).
-// If you don't like this, please complain over there.
-#[get("/users/<username>", format = "text/html")]
+
+#[get("/users/<username>?<max_id>", format = "text/html")]
 pub fn user_page(
     username: String,
-    db_conn: db::Connection,
-    account: Option<Account>,
-) -> Perhaps<UserTemplate<'static>> {
-    user_page_paginated(username, UserPageParams { max_id: None }, db_conn, account)
-}
-
-#[get("/users/<username>?<params>", format = "text/html")]
-pub fn user_page_paginated(
-    username: String,
-    params: UserPageParams,
+    max_id: Option<i64>,
     db_conn: db::Connection,
     account: Option<Account>,
 ) -> Perhaps<UserTemplate<'static>> {
     let account_to_show = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
-    let statuses: Vec<Status> = account_to_show.statuses_before_id(&db_conn, params.max_id, 10)?;
+    let statuses: Vec<Status> = account_to_show.statuses_before_id(&db_conn, max_id, 10)?;
     let prev_page_id = if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
         let bounds = account_to_show.status_id_bounds(&db_conn)?;
         // unwrap is safe since we already know we have statuses
@@ -210,37 +187,21 @@ pub fn settings_profile_update(
     Ok(Redirect::to(&account.profile_path()))
 }
 
-#[get("/")]
+#[get("/?<max_id>&<timeline>")]
 pub fn index(
     flash: Option<FlashMessage>,
     account: Option<Account>,
+    max_id:   Option<i64>,
+    timeline: Option<Timeline>,
     db_conn: db::Connection,
 ) -> Result<IndexTemplate<'static>, Error> {
-    index_paginated(
-        flash,
-        account,
-        IndexPageParams {
-            max_id:   None,
-            timeline: None,
-        },
-        db_conn,
-    )
-}
-
-#[get("/?<params>")]
-pub fn index_paginated(
-    flash: Option<FlashMessage>,
-    account: Option<Account>,
-    params: IndexPageParams,
-    db_conn: db::Connection,
-) -> Result<IndexTemplate<'static>, Error> {
-    let statuses: Vec<Status> = match params.timeline {
-        Some(Timeline::Local) | None => Status::local_before_id(&db_conn, params.max_id, 10)?,
-        Some(Timeline::Federated) => Status::federated_before_id(&db_conn, params.max_id, 10)?,
+    let statuses: Vec<Status> = match timeline {
+        Some(Timeline::Local) | None => Status::local_before_id(&db_conn, max_id, 10)?,
+        Some(Timeline::Federated) => Status::federated_before_id(&db_conn, max_id, 10)?,
     };
 
     let prev_page_id = if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
-        let bounds = match params.timeline {
+        let bounds = match timeline {
             Some(Timeline::Local) | None => Status::local_status_id_bounds(&db_conn)?,
             Some(Timeline::Federated) => Status::federated_status_id_bounds(&db_conn)?,
         };
@@ -254,7 +215,8 @@ pub fn index_paginated(
         None
     };
 
-    let timeline_str = match params.timeline {
+    // todo: Into<String> and/or localization
+    let timeline_str = match timeline {
         Some(Timeline::Local) | None => "local",
         Some(Timeline::Federated) => "federated",
     };
