@@ -83,8 +83,6 @@ fn rocket_load_config() -> Config {
     use rocket::config::ConfigError::{self, *};
     use rocket::config::RocketConfig;
 
-    const CONFIG_FILENAME: &str = "Rocket.toml";
-
     let bail = |e: ConfigError| -> ! {
         use rocket::logger::{self, LoggingLevel};
         use std::process;
@@ -98,16 +96,11 @@ fn rocket_load_config() -> Config {
         match e {
             ParseError(..) | BadEntry(..) | BadEnv(..) | BadType(..) | Io(..) | BadFilePath(..)
             | BadEnvVal(..) | UnknownKey(..) => bail(e),
-            IoError | BadCWD => warn!("Failed reading Rocket.toml. Using defaults."),
+            IoError => warn!("Failed reading Rocket.toml. Using defaults."),
             NotFound => { /* try using the default below */ },
         }
 
-        let default_path = match env::current_dir() {
-            Ok(path) => path.join(&format!(".{}.{}", "default", CONFIG_FILENAME)),
-            Err(_) => bail(ConfigError::BadCWD),
-        };
-
-        RocketConfig::active_default(&default_path).unwrap_or_else(|e| bail(e))
+        RocketConfig::active_default().unwrap_or_else(|e| bail(e))
     });
 
     config.active().clone()
