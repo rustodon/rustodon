@@ -82,6 +82,7 @@ fn init_logger() -> slog::Logger {
 fn rocket_load_config() -> Config {
     use rocket::config::ConfigError::{self, *};
     use rocket::config::RocketConfig;
+    use rocket::config::LoggingLevel;
 
     let bail = |e: ConfigError| -> ! {
         use rocket::logger::{self, LoggingLevel};
@@ -103,7 +104,10 @@ fn rocket_load_config() -> Config {
         RocketConfig::active_default().unwrap_or_else(|e| bail(e))
     });
 
-    config.active().clone()
+    let mut config = config.active().clone();
+    config.set_log_level(LoggingLevel::Off); // disable Rocket's built-in logging
+
+    config
 }
 
 fn main() {
@@ -120,7 +124,7 @@ fn main() {
     let db_connection_pool =
         db::init_connection_pool(db_url).expect("Couldn't establish connection to database!");
 
-    rocket::custom(rocket_load_config(), false) // disable Rocket's built-in logging
+    rocket::custom(rocket_load_config()) // use our own config loading which turns off Rocket's built-in logging.
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
         .mount("/", routes::well_known::routes())
