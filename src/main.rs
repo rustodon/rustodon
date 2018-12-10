@@ -1,5 +1,4 @@
-#![feature(plugin, nll, custom_derive, proc_macro_hygiene)]
-#![plugin(rocket_codegen)]
+#![feature(nll, custom_derive, proc_macro_hygiene, decl_macro)]
 #![recursion_limit = "128"]
 // Allow some clippy lints that would otherwise warn on various Rocket-generated code.
 // Unfortunately, this means we lose these lints on _our_ code, but it's a small price to pay
@@ -17,6 +16,7 @@ extern crate itertools;
 extern crate lazy_static;
 #[macro_use]
 extern crate resopt;
+#[macro_use]
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
@@ -81,9 +81,8 @@ fn init_logger() -> slog::Logger {
 /// disable logging, but still load Rocket.toml like Rocket::ignite() does.
 fn rocket_load_config() -> Config {
     use rocket::config::ConfigError::{self, *};
+    use rocket::config::LoggingLevel;
     use rocket::config::RocketConfig;
-
-    const CONFIG_FILENAME: &str = "Rocket.toml";
 
     let bail = |e: ConfigError| -> ! {
         use rocket::logger::{self, LoggingLevel};
@@ -97,20 +96,18 @@ fn rocket_load_config() -> Config {
     let config = RocketConfig::read().unwrap_or_else(|e| {
         match e {
             ParseError(..) | BadEntry(..) | BadEnv(..) | BadType(..) | Io(..) | BadFilePath(..)
-            | BadEnvVal(..) | UnknownKey(..) => bail(e),
-            IoError | BadCWD => warn!("Failed reading Rocket.toml. Using defaults."),
+            | BadEnvVal(..) | UnknownKey(..) | Missing(..) => bail(e),
+            IoError => warn!("Failed reading Rocket.toml. Using defaults."),
             NotFound => { /* try using the default below */ },
         }
 
-        let default_path = match env::current_dir() {
-            Ok(path) => path.join(&format!(".{}.{}", "default", CONFIG_FILENAME)),
-            Err(_) => bail(ConfigError::BadCWD),
-        };
-
-        RocketConfig::active_default(&default_path).unwrap_or_else(|e| bail(e))
+        RocketConfig::active_default().unwrap_or_else(|e| bail(e))
     });
 
-    config.active().clone()
+    let mut config = config.active().clone();
+    config.set_log_level(LoggingLevel::Off); // disable Rocket's built-in logging
+
+    config
 }
 
 fn main() {
@@ -127,7 +124,7 @@ fn main() {
     let db_connection_pool =
         db::init_connection_pool(db_url).expect("Couldn't establish connection to database!");
 
-    rocket::custom(rocket_load_config(), false) // disable Rocket's built-in logging
+    rocket::custom(rocket_load_config()) // use our own config loading which turns off Rocket's built-in logging.
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
         .mount("/", routes::well_known::routes())
