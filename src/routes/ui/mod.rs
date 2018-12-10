@@ -81,9 +81,7 @@ pub fn create_status(
     db_conn: db::Connection,
     form: Form<CreateStatusForm>,
 ) -> Result<Either<Flash<Redirect>, Redirect>, Error> {
-    let form_data = form.get();
-
-    if let Err(errs) = form_data.validate() {
+    if let Err(errs) = form.validate() {
         let errs = errs.field_errors();
 
         // concatenate the error descriptions, with commas between them.
@@ -101,8 +99,8 @@ pub fn create_status(
     }
 
     // convert CW to option if present, so we get proper nulls in DB
-    let content_warning: Option<String> = if !form_data.content_warning.is_empty() {
-        Some(form_data.content_warning.to_owned())
+    let content_warning: Option<String> = if !form.content_warning.is_empty() {
+        Some(form.content_warning.to_owned())
     } else {
         None
     };
@@ -110,7 +108,7 @@ pub fn create_status(
     let _status = NewStatus {
         id: id_generator().next(),
         created_at: Utc::now(),
-        text: form_data.content.to_owned(),
+        text: form.content.to_owned(),
         content_warning,
         account_id: user.account_id,
     }
@@ -200,11 +198,10 @@ pub fn settings_profile_update(
     user: User,
     form: Form<UpdateProfileForm>,
 ) -> Result<Redirect, Error> {
-    let form_data = form.get();
     let account = user.get_account(&db_conn)?;
 
     // `as &str` defeat an incorrect deref coercion (due to the second match arm)
-    let new_summary = match &form_data.summary as &str {
+    let new_summary = match &form.summary as &str {
         "" => None,
         x => Some(x.to_string()),
     };
