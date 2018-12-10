@@ -95,8 +95,9 @@ fn rocket_load_config() -> Config {
 
     let config = RocketConfig::read().unwrap_or_else(|e| {
         match e {
-            ParseError(..) | BadEntry(..) | BadEnv(..) | BadType(..) | Io(..) | BadFilePath(..)
-            | BadEnvVal(..) | UnknownKey(..) => bail(e),
+            | ParseError(..) | BadEntry(..) | BadEnv(..) | BadType(..) | Io(..)
+            | BadFilePath(..) | BadEnvVal(..) | UnknownKey(..)
+            | Missing(..) => bail(e),
             IoError => warn!("Failed reading Rocket.toml. Using defaults."),
             NotFound => { /* try using the default below */ },
         }
