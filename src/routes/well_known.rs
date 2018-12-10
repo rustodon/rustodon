@@ -3,7 +3,7 @@ use itertools::Itertools;
 use rocket::http::ContentType;
 use rocket::response::Content;
 use rocket::Route;
-use rocket_contrib::json::Json;
+use rocket_contrib::json::JsonValue;
 
 use db;
 use db::models::{Account, Status, User};
@@ -27,7 +27,7 @@ pub struct WFQuery {
 
 /// Returns JRD replies to `acct:` webfinger queries; required for Mastodon to resolve our accounts.
 #[get("/.well-known/webfinger?<query>")]
-pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhaps<Content<Json>> {
+pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhaps<Content<JsonValue>> {
     // TODO: don't unwrap
     let (_, addr) = query.resource.split_at(
         query
@@ -64,7 +64,7 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhap
 
     let wf_content = ContentType::new("application", "jrd+json");
 
-    Ok(Some(Content(wf_content, Json(wf_doc))))
+    Ok(Some(Content(wf_content, JsonValue(wf_doc))))
 }
 
 /// Returns metadata about well-known routes as XRD; necessary to be Webfinger-compliant.
@@ -80,7 +80,7 @@ pub fn webfinger_host_meta() -> Content<String> {
 
 /// Returns a JRD document referencing (via `Link`s) the NodeInfo documents we support.
 #[get("/.well-known/nodeinfo")]
-pub fn webfinger_nodeinfo() -> Content<Json> {
+pub fn webfinger_nodeinfo() -> Content<JsonValue> {
     let jrd_ctype = ContentType::new("application", "jrd+json");
     let doc = json!({
         "links": [
@@ -90,11 +90,11 @@ pub fn webfinger_nodeinfo() -> Content<Json> {
             }
         ]
     });
-    Content(jrd_ctype, Json(doc))
+    Content(jrd_ctype, JsonValue(doc))
 }
 
 #[get("/nodeinfo/2.0", format = "application/json")]
-pub fn nodeinfo(db_conn: db::Connection) -> Result<Content<Json>, Error> {
+pub fn nodeinfo(db_conn: db::Connection) -> Result<Content<JsonValue>, Error> {
     let ctype = ContentType::with_params(
         "application",
         "json",
@@ -118,5 +118,5 @@ pub fn nodeinfo(db_conn: db::Connection) -> Result<Content<Json>, Error> {
         }
     });
 
-    Ok(Content(ctype, Json(doc)))
+    Ok(Content(ctype, JsonValue(doc)))
 }
