@@ -3,7 +3,7 @@ use itertools::Itertools;
 use rocket::http::ContentType;
 use rocket::response::Content;
 use rocket::Route;
-use rocket_contrib::Json;
+use rocket_contrib::json::Json;
 
 use db;
 use db::models::{Account, Status, User};
