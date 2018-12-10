@@ -11,7 +11,7 @@ use std::borrow::Cow;
 use validator::Validate;
 
 #[get("/auth/sign_in")]
-pub fn signin_get(flash: Option<FlashMessage>) -> SigninTemplate<'static> {
+pub fn signin_get<'b, 'c>(flash: Option<FlashMessage<'b, 'c>>) -> SigninTemplate<'static, 'b, 'c> {
     HtmlTemplate!(SigninTemplate, flash)
 }
 
@@ -77,7 +77,7 @@ pub struct SignupForm {
 }
 
 #[get("/auth/sign_up")]
-pub fn signup_get(flash: Option<FlashMessage>) -> SignupTemplate<'static> {
+pub fn signup_get<'b, 'c>(flash: Option<FlashMessage<'b, 'c>>) -> SignupTemplate<'static, 'b, 'c> {
     HtmlTemplate!(SignupTemplate, flash)
 }
 

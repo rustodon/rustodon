@@ -105,11 +105,11 @@ pub fn create_status(
 }
 
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
-pub fn status_page(
+pub fn status_page<'b, 'c>(
     username: String,
     status_id: u64,
     db_conn: db::Connection,
-) -> Perhaps<StatusTemplate<'static>> {
+) -> Perhaps<StatusTemplate<'static, 'b, 'c>> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
     let status = try_resopt!(Status::by_account_and_id(
         &db_conn,
@@ -126,12 +126,12 @@ pub fn status_page(
 
 
 #[get("/users/<username>?<max_id>", format = "text/html")]
-pub fn user_page(
+pub fn user_page<'b, 'c>(
     username: String,
     max_id: Option<i64>,
     db_conn: db::Connection,
     account: Option<Account>,
-) -> Perhaps<UserTemplate<'static>> {
+) -> Perhaps<UserTemplate<'static, 'b, 'c>> {
     let account_to_show = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
     let statuses: Vec<Status> = account_to_show.statuses_before_id(&db_conn, max_id, 10)?;
     let prev_page_id = if let Some(prev_page_max_id) = statuses.iter().map(|s| s.id).min() {
@@ -155,10 +155,10 @@ pub fn user_page(
 }
 
 #[get("/settings/profile")]
-pub fn settings_profile(
+pub fn settings_profile<'b, 'c>(
     db_conn: db::Connection,
     user: User,
-) -> Perhaps<EditProfileTemplate<'static>> {
+) -> Perhaps<EditProfileTemplate<'static, 'b, 'c>> {
     PerhapsHtmlTemplate!(EditProfileTemplate, {
         account: user.get_account(&db_conn)?
     })
@@ -184,17 +184,17 @@ pub fn settings_profile_update(
     };
     account.set_summary(&db_conn, new_summary)?;
 
-    Ok(Redirect::to(account.profile_path().as_ref()))
+    Ok(Redirect::to(account.profile_path().to_string()))
 }
 
 #[get("/?<max_id>&<timeline>")]
-pub fn index(
-    flash: Option<FlashMessage>,
+pub fn index<'b, 'c>(
+    flash: Option<FlashMessage<'b, 'c>>,
     account: Option<Account>,
     max_id:   Option<i64>,
     timeline: Option<Timeline>,
     db_conn: db::Connection,
-) -> Result<IndexTemplate<'static>, Error> {
+) -> Result<IndexTemplate<'static, 'b, 'c>, Error> {
     let statuses: Vec<Status> = match timeline {
         Some(Timeline::Local) | None => Status::local_before_id(&db_conn, max_id, 10)?,
         Some(Timeline::Federated) => Status::federated_before_id(&db_conn, max_id, 10)?,
