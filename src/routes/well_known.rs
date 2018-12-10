@@ -21,7 +21,10 @@ pub fn routes() -> Vec<Route> {
 
 /// Returns JRD replies to `acct:` webfinger queries; required for Mastodon to resolve our accounts.
 #[get("/.well-known/webfinger?<resource>")]
-pub fn webfinger_get_resource(resource: String, db_conn: db::Connection) -> Perhaps<Content<JsonValue>> {
+pub fn webfinger_get_resource(
+    resource: String,
+    db_conn: db::Connection,
+) -> Perhaps<Content<JsonValue>> {
     // TODO: don't unwrap
     let (_, addr) = resource.split_at(
         resource

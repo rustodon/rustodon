@@ -124,7 +124,6 @@ pub fn status_page<'b, 'c>(
     })
 }
 
-
 #[get("/users/<username>?<max_id>", format = "text/html")]
 pub fn user_page<'b, 'c>(
     username: String,
@@ -191,7 +190,7 @@ pub fn settings_profile_update(
 pub fn index<'b, 'c>(
     flash: Option<FlashMessage<'b, 'c>>,
     account: Option<Account>,
-    max_id:   Option<i64>,
+    max_id: Option<i64>,
     timeline: Option<Timeline>,
     db_conn: db::Connection,
 ) -> Result<IndexTemplate<'static, 'b, 'c>, Error> {
