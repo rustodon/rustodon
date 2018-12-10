@@ -47,7 +47,7 @@ pub struct StatusTemplate<'a> {
     pub status: Status,
     pub account: Account,
     pub revision: &'a str,
-    pub flash: Option<FlashMessage>,
+    pub flash: Option<FlashMessage<'a, 'static>>,
     pub connection: db::Connection,
 }
 
@@ -60,7 +60,7 @@ pub struct UserTemplate<'a> {
     pub prev_page_id: Option<i64>,
     pub connection: db::Connection,
     pub revision: &'a str,
-    pub flash: Option<FlashMessage>,
+    pub flash: Option<FlashMessage<'a, 'static>>,
 }
 
 #[derive(Template)]
@@ -68,21 +68,21 @@ pub struct UserTemplate<'a> {
 pub struct EditProfileTemplate<'a> {
     pub account:  Account,
     pub revision: &'a str,
-    pub flash:    Option<FlashMessage>,
+    pub flash:    Option<FlashMessage<'a, 'static>>,
 }
 
 #[derive(Template)]
 #[template(path = "signin.html")]
 pub struct SigninTemplate<'a> {
     pub revision: &'a str,
-    pub flash:    Option<FlashMessage>,
+    pub flash:    Option<FlashMessage<'a, 'static>>,
 }
 
 #[derive(Template)]
 #[template(path = "signup.html")]
 pub struct SignupTemplate<'a> {
     pub revision: &'a str,
-    pub flash:    Option<FlashMessage>,
+    pub flash:    Option<FlashMessage<'a, 'static>>,
 }
 
 #[derive(Template)]
@@ -94,5 +94,5 @@ pub struct IndexTemplate<'a> {
     pub prev_page_id: Option<i64>,
     pub connection: db::Connection,
     pub revision: &'a str,
-    pub flash: Option<FlashMessage>,
+    pub flash: Option<FlashMessage<'a, 'static>>,
 }
