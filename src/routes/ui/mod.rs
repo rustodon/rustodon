@@ -1,7 +1,7 @@
 use chrono::offset::Utc;
 use db::models::{Account, NewStatus, Status, User};
 use db::{self, id_generator};
-use error::Perhaps;
+use crate::error::Perhaps;
 use failure::Error;
 use itertools::Itertools;
 use rocket::http::RawStr;
@@ -10,7 +10,7 @@ use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::Route;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
-use util::Either;
+use crate::util::Either;
 use validator::Validate;
 
 #[macro_use]

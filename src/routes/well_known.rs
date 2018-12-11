@@ -7,8 +7,8 @@ use rocket_contrib::json::JsonValue;
 
 use db;
 use db::models::{Account, Status, User};
-use error::Perhaps;
-use {BASE_URL, DOMAIN, GIT_REV};
+use crate::error::Perhaps;
+use crate::{BASE_URL, DOMAIN, GIT_REV};
 
 pub fn routes() -> Vec<Route> {
     routes![

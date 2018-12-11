@@ -1,7 +1,7 @@
 use db;
 use db::models::Account;
 use failure::Error;
-use transform;
+use crate::transform;
 
 pub trait HasBio {
     fn transformed_bio(&self, connection: &db::Connection) -> Option<String>;

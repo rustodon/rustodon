@@ -1,4 +1,4 @@
-#![feature(nll, custom_derive, proc_macro_hygiene, decl_macro)]
+#![feature(nll, proc_macro_hygiene, decl_macro)]
 #![recursion_limit = "128"]
 // Allow some clippy lints that would otherwise warn on various Rocket-generated code.
 // Unfortunately, this means we lose these lints on _our_ code, but it's a small price to pay

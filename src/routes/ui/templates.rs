@@ -2,7 +2,7 @@ use askama::Template;
 use db;
 use db::models::{Account, Status};
 use rocket::request::FlashMessage;
-use routes::ui::view_helpers::*;
+use crate::routes::ui::view_helpers::*;
 
 macro_rules! HtmlTemplate {
     ($x:tt) => {{

@@ -6,7 +6,7 @@ use itertools::Itertools;
 use rocket::http::{Cookie, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, Redirect};
-use routes::ui::templates::{SigninTemplate, SignupTemplate};
+use crate::routes::ui::templates::{SigninTemplate, SignupTemplate};
 use std::borrow::Cow;
 use validator::Validate;
 

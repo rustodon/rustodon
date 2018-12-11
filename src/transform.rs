@@ -5,7 +5,7 @@ use posticle::{ReaderBuilder, WriterBuilder};
 use regex::Regex;
 
 use db::models::Account;
-use error::Perhaps;
+use crate::error::Perhaps;
 
 lazy_static! {
     /// Matches all valid characters in a hashtag name (after the first #).
