@@ -1,9 +1,9 @@
+use resopt::try_resopt;
 use rocket::Route;
 
 use crate::activitypub::{ActivityGuard, ActivityStreams, AsActivityPub};
-use db;
-use db::models::{Account, Status};
 use crate::error::Perhaps;
+use db::models::{Account, Status};
 
 pub fn routes() -> Vec<Route> {
     routes![ap_user_object, ap_status_object,]

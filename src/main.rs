@@ -1,61 +1,29 @@
-#![feature(nll, proc_macro_hygiene, decl_macro)]
+#![feature(proc_macro_hygiene, decl_macro)]
 #![recursion_limit = "128"]
 // Allow some clippy lints that would otherwise warn on various Rocket-generated code.
 // Unfortunately, this means we lose these lints on _our_ code, but it's a small price to pay
 // for less line noise running `cargo clippy`.
 #![allow(clippy::needless_pass_by_value, clippy::suspicious_else_formatting)]
 
-extern crate ammonia;
-extern crate chrono;
-extern crate dotenv;
-extern crate failure;
-#[macro_use]
-extern crate failure_derive;
-extern crate itertools;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate resopt;
 #[macro_use]
 extern crate rocket;
-extern crate rocket_contrib;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-#[macro_use]
-extern crate serde_json;
-extern crate validator;
 #[macro_use]
 extern crate validator_derive;
-#[macro_use]
-extern crate maplit;
-extern crate posticle;
-extern crate regex;
-#[macro_use(slog_o, slog_warn)]
-extern crate slog;
-extern crate slog_async;
-extern crate slog_term;
-#[macro_use]
-extern crate slog_scope;
-extern crate rocket_slog;
 
-extern crate rustodon_database as db;
-
-#[macro_use]
-mod error;
 mod activitypub;
+mod error;
 mod routes;
 mod transform;
 mod util;
 
 use dotenv::dotenv;
+use lazy_static::lazy_static;
 use rocket::config::Config;
 use rocket_slog::SlogFairing;
 use slog::Drain;
+use slog::{slog_o, slog_warn};
+use slog_scope::warn;
 use std::env;
-
-#[macro_use]
-extern crate askama;
 
 lazy_static! {
     pub static ref BASE_URL: String = format!(

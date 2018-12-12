@@ -1,12 +1,12 @@
+use crate::routes::ui::templates::{SigninTemplate, SignupTemplate};
 use db::models::{NewAccount, NewUser, User};
 use db::validators;
-use db::{self, id_generator, DieselConnection, LOCAL_ACCOUNT_DOMAIN};
+use db::{id_generator, DieselConnection, LOCAL_ACCOUNT_DOMAIN};
 use failure::Error;
 use itertools::Itertools;
 use rocket::http::{Cookie, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, Redirect};
-use crate::routes::ui::templates::{SigninTemplate, SignupTemplate};
 use std::borrow::Cow;
 use validator::Validate;
 

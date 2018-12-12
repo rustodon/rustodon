@@ -1,12 +1,11 @@
-use db;
+use crate::routes::ui::view_helpers::HasBio;
 use db::models::{Account, Status};
 use failure::Error;
 use rocket::http::{self, Accept, ContentType, MediaType};
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::{self, Content, Responder};
-use crate::routes::ui::view_helpers::HasBio;
 use serde::Serialize;
-use serde_json::{self, Value};
+use serde_json::{json, Value};
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
