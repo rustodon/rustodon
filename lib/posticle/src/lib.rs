@@ -1,25 +1,20 @@
 //! Posticle is a parser and renderer for Twitter and Mastodon like text.
 
-#![feature(nll)]
-
-extern crate ammonia;
-#[macro_use]
-extern crate maplit;
-extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
 pub mod grammar;
 pub mod tokens;
 
+use crate::grammar::document;
+use crate::tokens::*;
 use ammonia::Builder as Ammonia;
-use grammar::document;
-use tokens::*;
+use maplit::hashset;
 
 /// Build a new [`Reader`].
 pub struct ReaderBuilder<'t>(Reader<'t>);
 
-impl<'t> Default for ReaderBuilder<'t> {
+impl Default for ReaderBuilder<'_> {
     fn default() -> Self {
         ReaderBuilder(Reader::default())
     }
@@ -107,7 +102,7 @@ pub struct Reader<'t> {
     transformer: Box<'t + Fn(Token) -> Token>,
 }
 
-impl<'t> Default for Reader<'t> {
+impl Default for Reader<'_> {
     fn default() -> Self {
         Reader {
             input: String::new(),
@@ -118,7 +113,7 @@ impl<'t> Default for Reader<'t> {
     }
 }
 
-impl<'t> Iterator for Reader<'t> {
+impl Iterator for Reader<'_> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -155,7 +150,7 @@ impl<'a, 't> From<&'a str> for Reader<'t> {
     }
 }
 
-impl<'t> From<String> for Reader<'t> {
+impl From<String> for Reader<'_> {
     /// ```
     /// use posticle::tokens::*;
     /// use posticle::Reader;
@@ -174,7 +169,7 @@ impl<'t> From<String> for Reader<'t> {
     }
 }
 
-impl<'t> From<Vec<Token>> for Reader<'t> {
+impl From<Vec<Token>> for Reader<'_> {
     /// ```
     /// use posticle::tokens::*;
     /// use posticle::Reader;
@@ -204,7 +199,7 @@ impl<'ta, 'tb> PartialEq<Reader<'ta>> for Reader<'tb> {
     }
 }
 
-impl<'t> Reader<'t> {
+impl Reader<'_> {
     fn finish(self) -> Self {
         let mut tokens: Vec<Token> = Vec::new();
 
@@ -258,7 +253,7 @@ fn normalize_text_tokens(input: Vec<Token>) -> Vec<Token> {
 
 pub struct WriterBuilder<'w>(Writer<'w>);
 
-impl<'w> Default for WriterBuilder<'w> {
+impl Default for WriterBuilder<'_> {
     fn default() -> Self {
         WriterBuilder(Writer::default())
     }
@@ -359,7 +354,7 @@ pub struct Writer<'w> {
     tokens: Vec<Token>,
 }
 
-impl<'w> Default for Writer<'w> {
+impl Default for Writer<'_> {
     fn default() -> Self {
         let mut html_sanitizer = Ammonia::default();
 
@@ -390,7 +385,7 @@ impl<'w, 't> From<Reader<'t>> for Writer<'w> {
     }
 }
 
-impl<'w> From<Vec<Token>> for Writer<'w> {
+impl From<Vec<Token>> for Writer<'_> {
     /// ```
     /// use posticle::tokens::*;
     /// use posticle::Writer;
@@ -406,7 +401,7 @@ impl<'w> From<Vec<Token>> for Writer<'w> {
     }
 }
 
-impl<'w> Writer<'w> {
+impl Writer<'_> {
     fn finish(mut self) -> Self {
         for token in self.tokens.to_owned() {
             self.push(&token);

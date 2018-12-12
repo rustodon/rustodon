@@ -2,6 +2,7 @@
 name = "rustodon"
 version = "0.1.0"
 authors = ["The Rustodon team"]
+edition = "2018"
 
 [workspace]
 members = ['database/', 'lib/resopt/', 'lib/posticle/']
@@ -34,8 +35,9 @@ validator_derive = "0.8"
 
 ammonia = "1.1.0"
 
-[dependencies.rustodon_database]
+[dependencies.db]
 path = "database/"
+package = "rustodon_database"
 
 [dependencies.rocket_contrib]
 version = "0.4"

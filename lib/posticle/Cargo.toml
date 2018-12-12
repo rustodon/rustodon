@@ -4,6 +4,7 @@ description = "A parser and renderer for Twitter and Mastodon like text"
 version = "0.3.0"
 authors = ["Erin Moon <erin@hashbang.sh>", "Measly Twerp <measlytwerp@gmail.com>"]
 categories = ["text-processing"]
+edition = "2018"
 
 [dependencies]
 ammonia = "1.2"

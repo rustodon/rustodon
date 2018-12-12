@@ -1,16 +1,17 @@
+use crate::error::Perhaps;
+use crate::util::Either;
 use chrono::offset::Utc;
+use db::id_generator;
 use db::models::{Account, NewStatus, Status, User};
-use db::{self, id_generator};
-use error::Perhaps;
 use failure::Error;
 use itertools::Itertools;
+use resopt::try_resopt;
 use rocket::http::RawStr;
 use rocket::request::{FlashMessage, Form, FromFormValue};
 use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::Route;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
-use util::Either;
 use validator::Validate;
 
 #[macro_use]
@@ -176,8 +177,7 @@ pub fn settings_profile_update(
 ) -> Result<Redirect, Error> {
     let account = user.get_account(&db_conn)?;
 
-    // `as &str` defeat an incorrect deref coercion (due to the second match arm)
-    let new_summary = match &form.summary as &str {
+    let new_summary = match &form.summary[..] {
         "" => None,
         x => Some(x.to_string()),
     };

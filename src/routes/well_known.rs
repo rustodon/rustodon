@@ -1,14 +1,15 @@
 use failure::Error;
 use itertools::Itertools;
+use resopt::try_resopt;
 use rocket::http::ContentType;
 use rocket::response::Content;
 use rocket::Route;
 use rocket_contrib::json::JsonValue;
+use serde_json::json;
 
-use db;
+use crate::error::Perhaps;
+use crate::{BASE_URL, DOMAIN, GIT_REV};
 use db::models::{Account, Status, User};
-use error::Perhaps;
-use {BASE_URL, DOMAIN, GIT_REV};
 
 pub fn routes() -> Vec<Route> {
     routes![
