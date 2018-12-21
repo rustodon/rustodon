@@ -38,5 +38,16 @@
                 {% endmatch %}
             </section>
         </article>
+
+        {% match current_user %}
+        {% when Some with (user) %}
+            {% if user.account_id == account.id -%}
+                <form class="inline" method="post" action="{{status.path_with_account(account.as_ref())}}/delete">
+                    <input type="hidden" name="stub" />
+                    <button class="link" type="submit" name="submit">Delete status</button>
+                </form>
+            {%- endif %}
+        {% when None %}
+        {% endmatch %}
     </section>
 {%- endblock -%}
