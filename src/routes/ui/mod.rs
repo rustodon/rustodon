@@ -29,6 +29,7 @@ pub fn routes() -> Vec<Route> {
         settings_profile_update,
         status_page,
         create_status,
+        delete_status,
         auth::signin_get,
         auth::signin_post,
         auth::signout,
@@ -105,10 +106,39 @@ pub fn create_status(
     Ok(Either::Right(Redirect::to("/")))
 }
 
+#[post("/users/<username>/statuses/<status_id>/delete")]
+pub fn delete_status(
+    username: String,
+    status_id: u64,
+    user: User,
+    db_conn: db::Connection,
+) -> Perhaps<Flash<Redirect>> {
+    let status_user = try_resopt!(User::by_username(&db_conn, username));
+
+    if status_user.id != user.id {
+        return Ok(Some(Flash::error(
+            Redirect::to("/"),
+            "not authorized to delete this status!",
+        )));
+    }
+
+    let status = try_resopt!(Status::by_account_and_id(
+        &db_conn,
+        status_user.account_id,
+        status_id as i64
+    ));
+
+    use diesel::prelude::*;
+    diesel::delete(&status).execute(&*db_conn)?;
+
+    Ok(Some(Flash::success(Redirect::to("/"), "deleted status!")))
+}
+
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
 pub fn status_page<'b, 'c>(
     username: String,
     status_id: u64,
+    user: Option<User>,
     db_conn: db::Connection,
 ) -> Perhaps<StatusTemplate<'static, 'b, 'c>> {
     let account = try_resopt!(Account::fetch_local_by_username(&db_conn, username));
@@ -121,6 +151,7 @@ pub fn status_page<'b, 'c>(
     PerhapsHtmlTemplate!(StatusTemplate, {
         status:  status,
         account: account,
+        current_user: user,
         connection: db_conn
     })
 }

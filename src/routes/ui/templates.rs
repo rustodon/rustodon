@@ -1,6 +1,6 @@
 use crate::routes::ui::view_helpers::*;
 use askama::Template;
-use db::models::{Account, Status};
+use db::models::{Account, Status, User};
 use rocket::request::FlashMessage;
 
 macro_rules! HtmlTemplate {
@@ -45,6 +45,7 @@ macro_rules! PerhapsHtmlTemplate {
 pub struct StatusTemplate<'a, 'b, 'c> {
     pub status: Status,
     pub account: Account,
+    pub current_user: Option<User>,
     pub revision: &'a str,
     pub flash: Option<FlashMessage<'b, 'c>>,
     pub connection: db::Connection,
