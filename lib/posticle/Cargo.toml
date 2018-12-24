@@ -10,7 +10,7 @@ edition = "2018"
 ammonia = "1.2"
 maplit = "1.0"
 pest = "2.0"
-pest_derive = "2.0"
+pest_derive = "2.1"
 
 [dev-dependencies]
 yaml-rust = "0.4.2"
