@@ -12,7 +12,7 @@ chrono = "0.4"
 dotenv = "0.13"
 maplit = "1.0"
 failure = "0.1.4"
-failure_derive = "0.1.4"
+failure_derive = "0.1.5"
 lazy_static = "1.2"
 itertools = "0.8.0"
 resopt = { path = "lib/resopt/" }
