@@ -27,6 +27,15 @@ pub struct ExecutionContract {
     pub fail_behavior: FailBehavior,
 }
 
+impl ExecutionContract {
+    pub const fn immediate_fail() -> Self {
+        Self {
+            fail_behavior: FailBehavior::Destroy,
+            timeout: None,
+        }
+    }
+}
+
 pub trait Perform {
     /// Runs this job's action.
     fn perform(&self) -> Result<(), Box<Error>>;
