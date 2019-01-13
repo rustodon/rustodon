@@ -6,6 +6,8 @@ use rocket::request::{self, FromRequest, Request};
 use rocket::response::{self, Content, Responder};
 use serde::Serialize;
 use serde_json::{json, Value};
+use slog::{slog_error};
+use slog_scope::{error};
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
@@ -24,8 +26,8 @@ where
                 Content(ap_json, string).respond_to(req).unwrap()
             })
             .map_err(|e| {
-                // TODO: logging (what happens if the Value won't serialize?)
-                // the code i cribbed this from did some internal Rocket thing.
+                error!("Failed to serialize ActivityStreams2 content: {:?}", e);
+
                 http::Status::InternalServerError
             })
     }
