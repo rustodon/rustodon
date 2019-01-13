@@ -6,8 +6,8 @@ use rocket::request::{self, FromRequest, Request};
 use rocket::response::{self, Content, Responder};
 use serde::Serialize;
 use serde_json::{json, Value};
-use slog::{slog_error};
-use slog_scope::{error};
+use slog::slog_error;
+use slog_scope::error;
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///

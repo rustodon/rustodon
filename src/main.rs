@@ -10,7 +10,6 @@ extern crate rocket;
 #[macro_use]
 extern crate validator_derive;
 
-
 mod activitypub;
 mod error;
 mod routes;
@@ -23,8 +22,8 @@ use lazy_static::lazy_static;
 use rocket::config::Config;
 use rocket_slog::SlogFairing;
 use slog::Drain;
-use slog::{slog_o, slog_warn, slog_debug};
-use slog_scope::{warn, debug};
+use slog::{slog_debug, slog_o, slog_warn};
+use slog_scope::{debug, warn};
 use std::env;
 
 lazy_static! {
@@ -44,7 +43,6 @@ fn init_logger() -> slog::Logger {
 
     slog::Logger::root(drain, slog_o!())
 }
-
 
 /// Loads the Rocket.toml config.
 ///
