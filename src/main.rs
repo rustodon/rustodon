@@ -23,8 +23,8 @@ use lazy_static::lazy_static;
 use rocket::config::Config;
 use rocket_slog::SlogFairing;
 use slog::Drain;
-use slog::{slog_o, slog_warn};
-use slog_scope::{warn};
+use slog::{slog_o, slog_warn, slog_debug};
+use slog_scope::{warn, debug};
 use std::env;
 
 lazy_static! {
@@ -44,6 +44,7 @@ fn init_logger() -> slog::Logger {
 
     slog::Logger::root(drain, slog_o!())
 }
+
 
 /// Loads the Rocket.toml config.
 ///
@@ -95,6 +96,7 @@ fn main() {
         db::init_connection_pool(db_url).expect("Couldn't establish connection to database!");
 
     // initialize the worker queues
+    debug!("starting worker queues");
     workers::init(db_connection_pool.clone());
 
     {
@@ -104,15 +106,17 @@ fn main() {
         use db::models::NewJobRecord;
         let r = NewJobRecord::on_queue(
             workers::TestJob {
-                msg: "snug".to_string(),
+                msg: "bengis".to_string(),
             },
             "default_queue",
         )
         .unwrap();
+        debug!("injecting test job");
         diesel::insert_into(db::schema::jobs::table)
             .values(&r)
             .execute(&conn)
             .unwrap();
+        debug!("done injecting test job");
 
         // println!("{:?}", r);
     }
