@@ -1,64 +1,31 @@
-#![feature(plugin, nll, custom_derive, proc_macro_hygiene)]
-#![plugin(rocket_codegen)]
+#![feature(proc_macro_hygiene, decl_macro)]
 #![recursion_limit = "128"]
 // Allow some clippy lints that would otherwise warn on various Rocket-generated code.
 // Unfortunately, this means we lose these lints on _our_ code, but it's a small price to pay
 // for less line noise running `cargo clippy`.
 #![allow(clippy::needless_pass_by_value, clippy::suspicious_else_formatting)]
 
-extern crate ammonia;
-extern crate chrono;
-extern crate dotenv;
-extern crate failure;
 #[macro_use]
-extern crate failure_derive;
-extern crate itertools;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate resopt;
-extern crate diesel;
 extern crate rocket;
-extern crate rocket_contrib;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-#[macro_use]
-extern crate serde_json;
-extern crate validator;
 #[macro_use]
 extern crate validator_derive;
-#[macro_use]
-extern crate maplit;
-extern crate posticle;
-extern crate regex;
-extern crate turnstile;
-#[macro_use]
-extern crate slog;
-extern crate slog_async;
-extern crate slog_term;
-#[macro_use]
-extern crate slog_scope;
-extern crate rocket_slog;
 
-extern crate rustodon_database as db;
 
-#[macro_use]
-mod error;
 mod activitypub;
+mod error;
 mod routes;
 mod transform;
 mod util;
 mod workers;
 
 use dotenv::dotenv;
+use lazy_static::lazy_static;
 use rocket::config::Config;
 use rocket_slog::SlogFairing;
 use slog::Drain;
+use slog::{slog_o, slog_warn};
+use slog_scope::{warn};
 use std::env;
-
-#[macro_use]
-extern crate askama;
 
 lazy_static! {
     pub static ref BASE_URL: String = format!(
@@ -84,9 +51,8 @@ fn init_logger() -> slog::Logger {
 /// disable logging, but still load Rocket.toml like Rocket::ignite() does.
 fn rocket_load_config() -> Config {
     use rocket::config::ConfigError::{self, *};
+    use rocket::config::LoggingLevel;
     use rocket::config::RocketConfig;
-
-    const CONFIG_FILENAME: &str = "Rocket.toml";
 
     let bail = |e: ConfigError| -> ! {
         use rocket::logger::{self, LoggingLevel};
@@ -100,20 +66,18 @@ fn rocket_load_config() -> Config {
     let config = RocketConfig::read().unwrap_or_else(|e| {
         match e {
             ParseError(..) | BadEntry(..) | BadEnv(..) | BadType(..) | Io(..) | BadFilePath(..)
-            | BadEnvVal(..) | UnknownKey(..) => bail(e),
-            IoError | BadCWD => warn!("Failed reading Rocket.toml. Using defaults."),
+            | BadEnvVal(..) | UnknownKey(..) | Missing(..) => bail(e),
+            IoError => warn!("Failed reading Rocket.toml. Using defaults."),
             NotFound => { /* try using the default below */ },
         }
 
-        let default_path = match env::current_dir() {
-            Ok(path) => path.join(&format!(".{}.{}", "default", CONFIG_FILENAME)),
-            Err(_) => bail(ConfigError::BadCWD),
-        };
-
-        RocketConfig::active_default(&default_path).unwrap_or_else(|e| bail(e))
+        RocketConfig::active_default().unwrap_or_else(|e| bail(e))
     });
 
-    config.active().clone()
+    let mut config = config.active().clone();
+    config.set_log_level(LoggingLevel::Off); // disable Rocket's built-in logging
+
+    config
 }
 
 fn main() {
@@ -143,7 +107,8 @@ fn main() {
                 msg: "snug".to_string(),
             },
             "default_queue",
-        ).unwrap();
+        )
+        .unwrap();
         diesel::insert_into(db::schema::jobs::table)
             .values(&r)
             .execute(&conn)
@@ -152,7 +117,7 @@ fn main() {
         // println!("{:?}", r);
     }
 
-    rocket::custom(rocket_load_config(), false) // disable Rocket's built-in logging
+    rocket::custom(rocket_load_config()) // use our own config loading which turns off Rocket's built-in logging.
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
         .mount("/", routes::well_known::routes())

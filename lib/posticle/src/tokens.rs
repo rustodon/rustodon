@@ -1,4 +1,4 @@
-use grammar::Rule;
+use crate::grammar::Rule;
 use pest::iterators::Pair;
 
 fn html_escape(text: &str) -> String {

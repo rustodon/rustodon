@@ -1,14 +1,15 @@
 use failure::Error;
 use itertools::Itertools;
+use resopt::try_resopt;
 use rocket::http::ContentType;
 use rocket::response::Content;
 use rocket::Route;
-use rocket_contrib::Json;
+use rocket_contrib::json::JsonValue;
+use serde_json::json;
 
-use db;
+use crate::error::Perhaps;
+use crate::{BASE_URL, DOMAIN, GIT_REV};
 use db::models::{Account, Status, User};
-use error::Perhaps;
-use {BASE_URL, DOMAIN, GIT_REV};
 
 pub fn routes() -> Vec<Route> {
     routes![
@@ -19,19 +20,15 @@ pub fn routes() -> Vec<Route> {
     ]
 }
 
-/// A type representing the parameters of a WebFinger query.
-#[derive(FromForm, Debug)]
-pub struct WFQuery {
-    resource: String,
-}
-
 /// Returns JRD replies to `acct:` webfinger queries; required for Mastodon to resolve our accounts.
-#[get("/.well-known/webfinger?<query>")]
-pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhaps<Content<Json>> {
+#[get("/.well-known/webfinger?<resource>")]
+pub fn webfinger_get_resource(
+    resource: String,
+    db_conn: db::Connection,
+) -> Perhaps<Content<JsonValue>> {
     // TODO: don't unwrap
-    let (_, addr) = query.resource.split_at(
-        query
-            .resource
+    let (_, addr) = resource.split_at(
+        resource
             .rfind("acct:")
             .map(|i| i + "acct:".len())
             .unwrap_or(0),
@@ -59,12 +56,12 @@ pub fn webfinger_get_resource(query: WFQuery, db_conn: db::Connection) -> Perhap
                 "type": "application/activity+json",
             },
         ],
-        "subject": query.resource,
+        "subject": resource,
     });
 
     let wf_content = ContentType::new("application", "jrd+json");
 
-    Ok(Some(Content(wf_content, Json(wf_doc))))
+    Ok(Some(Content(wf_content, JsonValue(wf_doc))))
 }
 
 /// Returns metadata about well-known routes as XRD; necessary to be Webfinger-compliant.
@@ -80,7 +77,7 @@ pub fn webfinger_host_meta() -> Content<String> {
 
 /// Returns a JRD document referencing (via `Link`s) the NodeInfo documents we support.
 #[get("/.well-known/nodeinfo")]
-pub fn webfinger_nodeinfo() -> Content<Json> {
+pub fn webfinger_nodeinfo() -> Content<JsonValue> {
     let jrd_ctype = ContentType::new("application", "jrd+json");
     let doc = json!({
         "links": [
@@ -90,11 +87,11 @@ pub fn webfinger_nodeinfo() -> Content<Json> {
             }
         ]
     });
-    Content(jrd_ctype, Json(doc))
+    Content(jrd_ctype, JsonValue(doc))
 }
 
 #[get("/nodeinfo/2.0", format = "application/json")]
-pub fn nodeinfo(db_conn: db::Connection) -> Result<Content<Json>, Error> {
+pub fn nodeinfo(db_conn: db::Connection) -> Result<Content<JsonValue>, Error> {
     let ctype = ContentType::with_params(
         "application",
         "json",
@@ -118,5 +115,5 @@ pub fn nodeinfo(db_conn: db::Connection) -> Result<Content<Json>, Error> {
         }
     });
 
-    Ok(Content(ctype, Json(doc)))
+    Ok(Content(ctype, JsonValue(doc)))
 }

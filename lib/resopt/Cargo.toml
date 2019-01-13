@@ -3,5 +3,6 @@ name = "resopt"
 description = "Tools for working with Result<Option<T>>"
 version = "0.1.0"
 authors = ["Erin <erin@hashbang.sh>"]
+edition = "2018"
 
 [dependencies]

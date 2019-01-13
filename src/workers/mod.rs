@@ -8,6 +8,9 @@ use db::models::JobRecord;
 use db::types::JobStatus;
 use db::Pool;
 use diesel;
+use serde_derive::{Deserialize, Serialize};
+use slog::{slog_info, slog_trace};
+use slog_scope::{info, trace};
 use turnstile::{ExecutionContract, FailBehavior, Job, Perform, Worker};
 
 const BATCH_SIZE: i64 = 10;
@@ -84,7 +87,9 @@ pub fn init(pool: Pool) {
                         diesel::delete(jobs.filter(id.eq(job_id)))
                             .execute(&conn)
                             .unwrap();
-                    }).unwrap();
+                    })
+                    .unwrap();
             }
-        }).expect("failed to spawn job_collector thread");
+        })
+        .expect("failed to spawn job_collector thread");
 }

@@ -2,6 +2,7 @@
 name = "rustodon"
 version = "0.1.0"
 authors = ["The Rustodon team"]
+edition = "2018"
 
 [workspace]
 members = ['database/', 'lib/resopt/', 'lib/posticle/']
@@ -10,20 +11,21 @@ members = ['database/', 'lib/resopt/', 'lib/posticle/']
 chrono = "0.4"
 dotenv = "0.13"
 maplit = "1.0"
-failure = "0.1.3"
-failure_derive = "0.1.1"
-lazy_static = "1.0"
-itertools = "0.7.4"
-regex = "1.0"
+failure = "0.1.5"
+failure_derive = "0.1.5"
+lazy_static = "1.2"
+itertools = "0.8.0"
+resopt = { path = "lib/resopt/" }
+posticle = { path = "lib/posticle/" }
+regex = "1.1.0"
 
 slog = "2.4"
 slog-term = "2.4"
 slog-async = "2.3"
 slog-scope = "4.0"
-rocket-slog = "0.2"
+rocket-slog = "0.4"
 
-rocket = "0.3.17"
-rocket_codegen = "0.3.17"
+rocket = "0.4"
 
 serde = "1.0"
 serde_derive = "1.0"
@@ -31,26 +33,27 @@ serde_json = "1.0"
 validator = "0.8"
 validator_derive = "0.8"
 
-ammonia = "1.1.0"
+ammonia = "2.0.0"
 
-diesel = { version = "1.3.2", features = ["postgres", "chrono", "serde_json", "r2d2"] }
+diesel = { version = "1.3.3", features = ["postgres", "chrono", "serde_json", "r2d2"] }
 
-resopt = { path = "lib/resopt/" }
-posticle = { path = "lib/posticle/" }
 turnstile = { path = "lib/turnstile/" }
 
-[dependencies.rustodon_database]
+[dependencies.db]
 path = "database/"
+package = "rustodon_database"
 
 [dependencies.rocket_contrib]
-version = "0.3.17"
+version = "0.4"
 default-features = false
 features = ["json"]
 
 [dependencies.askama]
-version = "0.7.0"
+git = "https://github.com/djc/askama"
+rev = "5549f9a"
 features = ["with-rocket"]
 
 [build-dependencies.askama]
-version = "0.7.0"
+git = "https://github.com/djc/askama"
+rev = "5549f9a"
 features = ["with-rocket"]
