@@ -11,7 +11,7 @@ use diesel;
 use serde_derive::{Deserialize, Serialize};
 use slog::{slog_info, slog_trace};
 use slog_scope::{info, trace};
-use turnstile::{ExecutionContract, FailBehavior, Job, Perform, Worker};
+use turnstile::{ExecutionContract, Job, Perform, Worker};
 
 const BATCH_SIZE: i64 = 10;
 const CHECK_PERIOD: Duration = Duration::from_secs(1); // 1/(1 hz)
@@ -31,10 +31,7 @@ impl Job for TestJob {
     }
 
     fn execution_contract(&self) -> ExecutionContract {
-        ExecutionContract {
-            fail_behavior: FailBehavior::Destroy,
-            timeout: None,
-        }
+        ExecutionContract::immediate_fail()
     }
 }
 
@@ -53,7 +50,6 @@ pub fn init(pool: Pool) {
     thread::Builder::new()
         .name("job_collector".to_string())
         .spawn(move || loop {
-            trace!("job collection tick");
             let conn = pool.get().expect("couldn't connect to database");
             let top_of_queue = {
                 use db::schema::jobs::dsl::*;
@@ -64,7 +60,7 @@ pub fn init(pool: Pool) {
                     .expect("couldn't load from job queue")
             };
 
-            thread::sleep(CHECK_PERIOD);
+            trace!("job collection tick"; "top_of_queue" => ?top_of_queue);
 
             let should_run: Vec<&JobRecord> = top_of_queue.iter().filter(|_| true).collect();
             {
@@ -81,7 +77,7 @@ pub fn init(pool: Pool) {
                 let pool = pool.clone();
 
                 worker
-                    .job_tick(&job_record.kind, job_record.data, move |result_| {
+                    .job_tick(&job_record.kind, job_record.data, move |_result| {
                         use db::schema::jobs::dsl::*;
                         let conn = pool.get().unwrap();
                         diesel::delete(jobs.filter(id.eq(job_id)))
@@ -90,6 +86,8 @@ pub fn init(pool: Pool) {
                     })
                     .unwrap();
             }
+
+            thread::sleep(CHECK_PERIOD);
         })
         .expect("failed to spawn job_collector thread");
 }
