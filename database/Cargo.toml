@@ -12,7 +12,7 @@ flaken = "0.2.2"
 
 rocket = "0.4"
 
-pwhash = "0.2"
+pwhash = "0.3"
 chrono = "0.4"
 chrono-humanize = "0.0.11"
 
