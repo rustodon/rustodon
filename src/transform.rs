@@ -6,8 +6,8 @@ use posticle::tokens::*;
 use posticle::{ReaderBuilder, WriterBuilder};
 use regex::Regex;
 
+use crate::db::models::Account;
 use crate::error::Perhaps;
-use db::models::Account;
 
 lazy_static! {
     /// Matches all valid characters in a hashtag name (after the first #).

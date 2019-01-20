@@ -8,9 +8,12 @@
 #[macro_use]
 extern crate rocket;
 #[macro_use]
+extern crate diesel;
+#[macro_use]
 extern crate validator_derive;
 
 mod activitypub;
+mod db;
 mod error;
 mod routes;
 mod transform;

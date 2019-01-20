@@ -1,19 +1,5 @@
-#![recursion_limit = "128"]
 // silence warnings due to diesel-rs/diesel#1785
 #![allow(proc_macro_derive_resolution_fallback, unused_imports)]
-
-extern crate chrono;
-extern crate chrono_humanize;
-#[macro_use]
-extern crate diesel;
-extern crate flaken;
-#[macro_use]
-extern crate lazy_static;
-extern crate pwhash;
-extern crate regex;
-#[macro_use]
-extern crate resopt;
-extern crate rocket;
 
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
@@ -29,16 +15,7 @@ pub mod models;
 pub mod schema;
 pub mod validators;
 
-pub use idgen::id_generator;
-
-// TODO: gross hack. find a nicer way to pass these in?
-lazy_static! {
-    pub static ref BASE_URL: String = format!(
-        "https://{}",
-        env::var("DOMAIN").expect("DOMAIN must be set")
-    );
-    pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
-}
+pub use self::idgen::id_generator;
 
 pub static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
 
