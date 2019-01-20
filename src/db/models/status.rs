@@ -1,14 +1,14 @@
+use crate::db::Connection;
+use crate::BASE_URL;
 use chrono::offset::Utc;
 use chrono::DateTime;
 use chrono_humanize::Humanize;
 use diesel;
 use diesel::prelude::*;
 use std::borrow::Cow;
-use Connection;
-use BASE_URL;
 
-use models::Account;
-use schema::statuses;
+use super::Account;
+use crate::db::schema::statuses;
 
 /// Represents a post.
 ///
@@ -38,7 +38,7 @@ pub struct NewStatus {
 
 impl NewStatus {
     pub fn insert(self, conn: &Connection) -> QueryResult<Status> {
-        use schema::statuses::dsl::*;
+        use crate::db::schema::statuses::dsl::*;
 
         diesel::insert_into(statuses)
             .values(&self)
@@ -49,7 +49,7 @@ impl NewStatus {
 impl Status {
     /// Returns the `Account` which authored this status.
     pub fn account(&self, db_conn: &Connection) -> QueryResult<Account> {
-        use schema::accounts::dsl;
+        use crate::db::schema::accounts::dsl;
         dsl::accounts
             .find(self.account_id)
             .first::<Account>(&**db_conn)
@@ -61,7 +61,7 @@ impl Status {
         account_id: i64,
         id: i64,
     ) -> QueryResult<Option<Status>> {
-        use schema::statuses::dsl;
+        use crate::db::schema::statuses::dsl;
         dsl::statuses
             .find(id)
             .filter(dsl::account_id.eq(account_id))
@@ -71,7 +71,7 @@ impl Status {
 
     /// Returns the number of local statuses
     pub fn count_local(db_conn: &Connection) -> QueryResult<i64> {
-        use schema::statuses::dsl::{statuses, uri};
+        use crate::db::schema::statuses::dsl::{statuses, uri};
         statuses
             .filter(uri.is_null()) // is local status
             .count()
@@ -95,7 +95,7 @@ impl Status {
         max_id: Option<i64>,
         n: usize,
     ) -> QueryResult<Vec<Status>> {
-        use schema::statuses::dsl;
+        use crate::db::schema::statuses::dsl;
 
         let mut query = dsl::statuses.filter(dsl::uri.is_null()).into_boxed();
 
@@ -116,7 +116,7 @@ impl Status {
         max_id: Option<i64>,
         n: usize,
     ) -> QueryResult<Vec<Status>> {
-        use schema::statuses::{all_columns, dsl};
+        use crate::db::schema::statuses::{all_columns, dsl};
 
         let mut query = dsl::statuses.select(all_columns).into_boxed();
 
@@ -135,8 +135,8 @@ impl Status {
     ///
     /// If there are no local statuses in the database, return `None`.
     pub fn local_status_id_bounds(db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
+        use crate::db::schema::statuses::dsl::*;
         use diesel::dsl::sql;
-        use schema::statuses::dsl::*;
         // Yes, this is gross and we don't like having to use sql() either.
         // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
         statuses
@@ -154,8 +154,8 @@ impl Status {
     ///
     /// If there are no statuses in the database, return `None`.
     pub fn federated_status_id_bounds(db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
+        use crate::db::schema::statuses::dsl::*;
         use diesel::dsl::sql;
-        use schema::statuses::dsl::*;
         // Yes, this is gross and we don't like having to use sql() either.
         // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
         statuses
