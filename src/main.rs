@@ -11,6 +11,7 @@ extern crate rocket;
 extern crate validator_derive;
 
 mod activitypub;
+mod crypto;
 mod error;
 mod routes;
 mod transform;

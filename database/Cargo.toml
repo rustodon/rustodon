@@ -17,3 +17,4 @@ chrono = "0.4"
 chrono-humanize = "0.0.11"
 
 resopt = { path = "../lib/resopt/" }
+types = { path = "../lib/types" }

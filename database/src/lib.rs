@@ -14,10 +14,12 @@ extern crate regex;
 #[macro_use]
 extern crate resopt;
 extern crate rocket;
+extern crate types;
 
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{self, ConnectionManager};
+use diesel::result::ConnectionError;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
@@ -56,6 +58,11 @@ where
     let manager = ConnectionManager::<PgConnection>::new(url);
 
     r2d2::Pool::builder().build(manager)
+}
+
+/// Establishes a single database connection
+pub fn init_connection(url: impl AsRef<str>) -> Result<PgConnection, ConnectionError> {
+    PgConnection::establish(url.as_ref())
 }
 
 /// Request guard type for handing out db connections from the pool.

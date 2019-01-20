@@ -1,11 +1,14 @@
 use diesel;
 use diesel::prelude::*;
+use openssl::pkey::Private;
+use openssl::rsa::Rsa;
 use std::borrow::Cow;
 use Connection;
 use {BASE_URL, DOMAIN, LOCAL_ACCOUNT_DOMAIN};
 
 use models::{Status, User};
 use rocket::request::{self, FromRequest, Request};
+use types::crypto::DERKeypair;
 
 use schema::accounts;
 
@@ -272,6 +275,15 @@ impl Account {
 
     pub fn display_name_or_username(&self) -> &str {
         self.display_name.as_ref().unwrap_or(&self.username)
+    }
+
+    pub fn save_keypair(&self, db_conn: &Connection, keypair: DERKeypair) -> QueryResult<()> {
+        use schema::accounts::dsl::{privkey, pubkey};
+
+        diesel::update(self)
+            .set((pubkey.eq(keypair.public), privkey.eq(keypair.private)))
+            .execute(&**db_conn)
+            .and(Ok(()))
     }
 }
 
