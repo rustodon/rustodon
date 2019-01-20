@@ -25,6 +25,9 @@ pub struct Account {
 
     pub display_name: Option<String>,
     pub summary: Option<String>,
+
+    pub pubkey:  Vec<u8>,
+    pub privkey: Vec<u8>,
 }
 
 /// Represents a new account for insertion into the database.
