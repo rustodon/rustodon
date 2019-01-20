@@ -1,9 +1,13 @@
 use failure::Error;
 use openssl::pkey::Private;
 use openssl::rsa::Rsa;
-use types::crypto::DERKeypair;
 
 const KEYSIZE: u32 = 4096;
+
+pub struct DERKeypair {
+    pub public:  Vec<u8>,
+    pub private: Vec<u8>,
+}
 
 pub fn generate_keypair() -> Result<DERKeypair, Error> {
     let keypair = Rsa::generate(KEYSIZE)?;

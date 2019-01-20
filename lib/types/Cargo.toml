@@ -1,7 +1,0 @@
-[package]
-name = "types"
-version = "0.1.0"
-authors = ["Erin Moon <erin@hashbang.sh>"]
-edition = "2018"
-
-[dependencies]

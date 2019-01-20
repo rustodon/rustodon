@@ -7,9 +7,10 @@ use rocket::Route;
 use rocket_contrib::json::JsonValue;
 use serde_json::json;
 
+use crate::db;
+use crate::db::models::{Account, Status, User};
 use crate::error::Perhaps;
 use crate::{BASE_URL, DOMAIN, GIT_REV};
-use db::models::{Account, Status, User};
 
 pub fn routes() -> Vec<Route> {
     routes![

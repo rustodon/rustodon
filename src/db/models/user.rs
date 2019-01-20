@@ -1,13 +1,14 @@
+use crate::db::Connection;
+use crate::db::LOCAL_ACCOUNT_DOMAIN;
 use diesel;
 use diesel::prelude::*;
 use pwhash::bcrypt;
+use resopt::try_resopt;
 use rocket::outcome::IntoOutcome;
 use rocket::request::{self, FromRequest, Request};
-use Connection;
-use LOCAL_ACCOUNT_DOMAIN;
 
-use models::Account;
-use schema::users;
+use super::Account;
+use crate::db::schema::users;
 
 /// Represents a local user, and information required to authenticate that user.
 #[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
@@ -34,7 +35,7 @@ pub struct NewUser {
 
 impl NewUser {
     pub fn insert(self, conn: &Connection) -> QueryResult<User> {
-        use schema::users::dsl::*;
+        use crate::db::schema::users::dsl::*;
 
         diesel::insert_into(users).values(&self).get_result(&**conn)
     }
@@ -63,7 +64,7 @@ impl User {
         S: AsRef<str>,
     {
         let account = try_resopt!({
-            use schema::accounts::dsl;
+            use crate::db::schema::accounts::dsl;
             dsl::accounts
                 .filter(dsl::username.eq(username.as_ref()))
                 .filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN))
@@ -71,7 +72,7 @@ impl User {
                 .optional()
         });
 
-        use schema::users::dsl;
+        use crate::db::schema::users::dsl;
         dsl::users
             .filter(dsl::account_id.eq(account.id))
             .first::<User>(&**db_conn)
@@ -80,14 +81,14 @@ impl User {
 
     /// Finds a local user by their ID, returning an `Option<User>`.
     pub fn by_id(db_conn: &Connection, uid: i64) -> QueryResult<Option<User>> {
-        use schema::users::dsl::*;
+        use crate::db::schema::users::dsl::*;
 
         users.find(uid).first(&**db_conn).optional()
     }
 
     /// Returns the number of local users.
     pub fn count(db_conn: &Connection) -> QueryResult<i64> {
-        use schema::users::dsl::users;
+        use crate::db::schema::users::dsl::users;
 
         users.count().get_result(&**db_conn)
     }
@@ -98,7 +99,7 @@ impl User {
     /// Rocket, but this _should be_ an irrecoverable error - there's no concievable
     /// circumstance outside of horrible database meddling that would cause this.
     pub fn get_account(self, db_conn: &Connection) -> QueryResult<Account> {
-        use schema::accounts::dsl::*;
+        use crate::db::schema::accounts::dsl::*;
 
         accounts
             .find(self.account_id)

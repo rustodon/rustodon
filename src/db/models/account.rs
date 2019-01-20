@@ -3,14 +3,15 @@ use diesel::prelude::*;
 use openssl::pkey::Private;
 use openssl::rsa::Rsa;
 use std::borrow::Cow;
-use Connection;
-use {BASE_URL, DOMAIN, LOCAL_ACCOUNT_DOMAIN};
 
-use models::{Status, User};
+use crate::db::{Connection, LOCAL_ACCOUNT_DOMAIN};
+use crate::{BASE_URL, DOMAIN};
+
+use super::{Status, User};
+use crate::crypto::DERKeypair;
 use rocket::request::{self, FromRequest, Request};
-use types::crypto::DERKeypair;
 
-use schema::accounts;
+use crate::db::schema::accounts;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
@@ -49,7 +50,7 @@ pub struct NewAccount {
 
 impl NewAccount {
     pub fn insert(self, conn: &Connection) -> QueryResult<Account> {
-        use schema::accounts::dsl::*;
+        use crate::db::schema::accounts::dsl::*;
 
         diesel::insert_into(accounts)
             .values(&self)
@@ -66,7 +67,7 @@ impl Account {
     where
         S: Into<String>,
     {
-        use schema::accounts::dsl;
+        use crate::db::schema::accounts::dsl;
         dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN))
@@ -79,7 +80,7 @@ impl Account {
         username: impl Into<String>,
         domain: Option<impl Into<String>>,
     ) -> QueryResult<Option<Account>> {
-        use schema::accounts::dsl;
+        use crate::db::schema::accounts::dsl;
         let mut query = dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .into_boxed();
@@ -228,7 +229,7 @@ impl Account {
         max_id: Option<i64>,
         n: usize,
     ) -> QueryResult<Vec<Status>> {
-        use schema::statuses::dsl::*;
+        use crate::db::schema::statuses::dsl::*;
         let mut query = statuses.filter(account_id.eq(self.id)).into_boxed();
 
         if let Some(max_id) = max_id {
@@ -246,8 +247,8 @@ impl Account {
     ///
     /// If this account has no statuses attached to it in the database, return `None`.
     pub fn status_id_bounds(&self, db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
+        use crate::db::schema::statuses::dsl::*;
         use diesel::dsl::sql;
-        use schema::statuses::dsl::*;
         // Yes, this is gross and we don't like having to use sql() either.
         // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
         statuses
@@ -265,7 +266,7 @@ impl Account {
         db_conn: &Connection,
         new_summary: Option<String>,
     ) -> QueryResult<()> {
-        use schema::accounts::dsl::summary;
+        use crate::db::schema::accounts::dsl::summary;
 
         diesel::update(self)
             .set(summary.eq(new_summary))
@@ -278,7 +279,7 @@ impl Account {
     }
 
     pub fn save_keypair(&self, db_conn: &Connection, keypair: DERKeypair) -> QueryResult<()> {
-        use schema::accounts::dsl::{privkey, pubkey};
+        use crate::db::schema::accounts::dsl::{privkey, pubkey};
 
         diesel::update(self)
             .set((pubkey.eq(keypair.public), privkey.eq(keypair.private)))

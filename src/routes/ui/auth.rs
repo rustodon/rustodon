@@ -1,7 +1,8 @@
+use crate::db::models::{NewAccount, NewUser, User};
+use crate::db::validators;
+use crate::db::{self, id_generator, LOCAL_ACCOUNT_DOMAIN};
 use crate::routes::ui::templates::{SigninTemplate, SignupTemplate};
-use db::models::{NewAccount, NewUser, User};
-use db::validators;
-use db::{id_generator, DieselConnection, LOCAL_ACCOUNT_DOMAIN};
+use diesel::Connection;
 use failure::Error;
 use itertools::Itertools;
 use rocket::http::{Cookie, Cookies};

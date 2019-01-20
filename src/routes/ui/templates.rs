@@ -1,6 +1,7 @@
+use crate::db;
+use crate::db::models::{Account, Status, User};
 use crate::routes::ui::view_helpers::*;
 use askama::Template;
-use db::models::{Account, Status, User};
 use rocket::request::FlashMessage;
 
 macro_rules! HtmlTemplate {

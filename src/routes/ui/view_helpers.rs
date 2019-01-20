@@ -1,5 +1,6 @@
+use crate::db;
+use crate::db::models::Account;
 use crate::transform;
-use db::models::Account;
 use failure::Error;
 
 pub trait HasBio {

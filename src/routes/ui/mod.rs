@@ -1,8 +1,8 @@
+use crate::db::models::{Account, NewStatus, Status, User};
+use crate::db::{self, id_generator};
 use crate::error::Perhaps;
 use crate::util::Either;
 use chrono::offset::Utc;
-use db::id_generator;
-use db::models::{Account, NewStatus, Status, User};
 use failure::Error;
 use itertools::Itertools;
 use resopt::try_resopt;
