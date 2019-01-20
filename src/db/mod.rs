@@ -20,10 +20,10 @@ pub use self::idgen::id_generator;
 pub static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
 
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
-type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 /// Type alias for the pooled connection.
-type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
+pub type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 
 /// Initializes a new connection pool for the database at `url`.
 pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::PoolError>
