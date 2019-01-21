@@ -13,15 +13,15 @@ extern crate diesel;
 extern crate validator_derive;
 
 mod activitypub;
-mod db;
+pub mod db;
 mod error;
 mod routes;
 mod transform;
 mod util;
 
-use dotenv::dotenv;
 use lazy_static::lazy_static;
 use rocket::config::Config;
+use rocket::Rocket;
 use rocket_slog::SlogFairing;
 use slog::Drain;
 use slog::{slog_o, slog_warn};
@@ -38,7 +38,7 @@ lazy_static! {
 
 pub const GIT_REV: &str = include_str!(concat!(env!("OUT_DIR"), "/commit-info.txt"));
 
-fn init_logger() -> slog::Logger {
+pub fn init_logger() -> slog::Logger {
     let decorator = slog_term::TermDecorator::new().build();
     let drain = slog_term::CompactFormat::new(decorator).build().fuse();
     let drain = slog_async::Async::new(drain).build().fuse();
@@ -81,26 +81,12 @@ fn rocket_load_config() -> Config {
     config
 }
 
-fn main() {
-    // load environment variables fron .env
-    dotenv().ok();
-
-    // set up slog logger
-    let log = init_logger();
-    let rocket_logger = log.new(slog_o!());
-    let _guard = slog_scope::set_global_logger(log);
-
-    // extract the database url from the environment and create the db connection pool
-    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let db_connection_pool =
-        db::init_connection_pool(db_url).expect("Couldn't establish connection to database!");
-
+pub fn app(db: db::Pool, logger: slog::Logger) -> Rocket {
     rocket::custom(rocket_load_config()) // use our own config loading which turns off Rocket's built-in logging.
         .mount("/", routes::ui::routes())
         .mount("/", routes::ap::routes())
         .mount("/", routes::well_known::routes())
-        .manage(db_connection_pool) // store the db pool as Rocket managed state
-                                    // (this lets us use the db::Connection guard)
-        .attach(SlogFairing::new(rocket_logger))
-        .launch();
+        .manage(db) // store the db pool as Rocket managed state
+                    // (this lets us use the db::Connection guard)
+        .attach(SlogFairing::new(logger))
 }
