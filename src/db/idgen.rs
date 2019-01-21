@@ -13,7 +13,7 @@ pub struct IdGenerator {
 /// Example use:
 ///
 /// ```
-/// # use rustodon_database::idgen::id_generator;
+/// # use rustodon::db::idgen::id_generator;
 /// # struct ModelA { id: i64 }
 /// # struct ModelB { id: i64 }
 /// let mut id_gen = id_generator();
