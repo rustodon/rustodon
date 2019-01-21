@@ -2,7 +2,7 @@ use diesel;
 use diesel::prelude::*;
 use std::borrow::Cow;
 
-use crate::db::{Connection, LOCAL_ACCOUNT_DOMAIN};
+use crate::db::{self, DbConnection, LOCAL_ACCOUNT_DOMAIN};
 use crate::{BASE_URL, DOMAIN};
 
 use super::{Status, User};
@@ -43,19 +43,17 @@ pub struct NewAccount {
 }
 
 impl NewAccount {
-    pub fn insert(self, conn: &Connection) -> QueryResult<Account> {
+    pub fn insert(self, conn: &DbConnection) -> QueryResult<Account> {
         use crate::db::schema::accounts::dsl::*;
 
-        diesel::insert_into(accounts)
-            .values(&self)
-            .get_result(&**conn)
+        diesel::insert_into(accounts).values(&self).get_result(conn)
     }
 }
 
 impl Account {
     /// Finds a local account by username, returning an `Option<Account>`.
     pub fn fetch_local_by_username<S>(
-        db_conn: &Connection,
+        db_conn: &DbConnection,
         username: S,
     ) -> QueryResult<Option<Account>>
     where
@@ -65,12 +63,12 @@ impl Account {
         dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN))
-            .first::<Account>(&**db_conn)
+            .first::<Account>(db_conn)
             .optional()
     }
 
     pub fn fetch_by_username_domain(
-        db_conn: &Connection,
+        db_conn: &DbConnection,
         username: impl Into<String>,
         domain: Option<impl Into<String>>,
     ) -> QueryResult<Option<Account>> {
@@ -85,7 +83,7 @@ impl Account {
             query = query.filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN));
         };
 
-        query.first::<Account>(&**db_conn).optional()
+        query.first::<Account>(db_conn).optional()
     }
 
     /// Returns the fully-qualified (`@user@domain`) username of an account.
@@ -219,7 +217,7 @@ impl Account {
     // _strictly before_ the status `max_id`.
     pub fn statuses_before_id(
         &self,
-        db_conn: &Connection,
+        db_conn: &DbConnection,
         max_id: Option<i64>,
         n: usize,
     ) -> QueryResult<Vec<Status>> {
@@ -233,14 +231,14 @@ impl Account {
         query
             .order(id.desc())
             .limit(n as i64)
-            .get_results::<Status>(&**db_conn)
+            .get_results::<Status>(db_conn)
     }
 
     /// Returns a tuple of upper and lower bounds on the IDs of statuses authored by this account
     /// (i.e., `min(ids)` and `max(ids)` where `ids` is a list of status ids authored by this user).
     ///
     /// If this account has no statuses attached to it in the database, return `None`.
-    pub fn status_id_bounds(&self, db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
+    pub fn status_id_bounds(&self, db_conn: &DbConnection) -> QueryResult<Option<(i64, i64)>> {
         use crate::db::schema::statuses::dsl::*;
         use diesel::dsl::sql;
         // Yes, this is gross and we don't like having to use sql() either.
@@ -248,7 +246,7 @@ impl Account {
         statuses
             .select((sql("min(id)"), sql("max(id)")))
             .filter(account_id.eq(self.id))
-            .first::<(Option<i64>, Option<i64>)>(&**db_conn)
+            .first::<(Option<i64>, Option<i64>)>(db_conn)
             .map(|result| match result {
                 (Some(x), Some(y)) => Some((x, y)),
                 _ => None,
@@ -257,14 +255,14 @@ impl Account {
 
     pub fn set_summary(
         &self,
-        db_conn: &Connection,
+        db_conn: &DbConnection,
         new_summary: Option<String>,
     ) -> QueryResult<()> {
         use crate::db::schema::accounts::dsl::summary;
 
         diesel::update(self)
             .set(summary.eq(new_summary))
-            .execute(&**db_conn)
+            .execute(db_conn)
             .and(Ok(()))
     }
 
@@ -286,7 +284,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Account {
         use rocket::http::Status;
         use rocket::Outcome;
 
-        let db_conn = request.guard::<Connection>()?;
+        let db_conn = request.guard::<db::Connection>()?;
         if let Some(user) = request.guard::<User>().succeeded() {
             match user.get_account(&db_conn) {
                 Ok(account) => Outcome::Success(account),
