@@ -2,7 +2,7 @@ use dotenv::dotenv;
 use std::env;
 use structopt::StructOpt;
 
-use db;
+use rustodon::db;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "rustodonctl")]
@@ -31,12 +31,13 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
     match opt.cmd {
         Command::GenerateKeys => {
-            use db::models::Account;
-            use db::schema::{accounts, users};
+            use rustodon::db::models::Account;
+            use rustodon::db::schema::{accounts, users};
             use diesel::prelude::*;
 
             let needs_keys = accounts::table
                 .inner_join(users::table)
+                .filter(accounts::privkey.eq(Vec::new()))
                 .select(accounts::all_columns)
                 .load::<Account>(&db_conn)?;
 
@@ -44,8 +45,8 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
             for account in needs_keys {
                 let keypair =
-                    crate::crypto::generate_keypair().expect("couldn't generate a keypair!");
-                println!("{:?}", keypair.public);
+                    rustodon::crypto::generate_keypair().expect("couldn't generate a keypair!");
+                account.save_keypair(&db_conn, keypair);
             }
         },
     }
