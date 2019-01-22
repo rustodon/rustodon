@@ -19,18 +19,21 @@ pub use self::idgen::id_generator;
 
 pub static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
 
+/// The raw database connection type. Aliased so it's easy to switch when using, eg, an sqlite backend.
+pub type DbConnection = PgConnection;
+
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
-pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+pub type Pool = r2d2::Pool<ConnectionManager<DbConnection>>;
 
 /// Type alias for the pooled connection.
-pub type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
+pub type PooledConnection = r2d2::PooledConnection<ConnectionManager<DbConnection>>;
 
 /// Initializes a new connection pool for the database at `url`.
 pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::PoolError>
 where
     S: Into<String>,
 {
-    let manager = ConnectionManager::<PgConnection>::new(url);
+    let manager = ConnectionManager::<DbConnection>::new(url);
 
     r2d2::Pool::builder().build(manager)
 }
@@ -58,11 +61,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for Connection {
     }
 }
 
-/// A convenient way to use a `&db::Connection` as a `&PgConnection`.
+/// A convenient way to use a `&db::Connection` as a `&DbConnection`.
 ///
 /// Just allows deref-ing the inner `PooledConnection`.
 impl Deref for Connection {
-    type Target = PgConnection;
+    type Target = DbConnection;
 
     fn deref(&self) -> &Self::Target {
         &self.0
