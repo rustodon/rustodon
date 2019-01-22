@@ -116,7 +116,7 @@ impl Account {
     }
 
     /// Returns the URI of the account's ActivityPub object.
-    pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_uri(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -131,12 +131,12 @@ impl Account {
     }
 
     /// Returns the server local path to the Account profile page for this account.
-    pub fn profile_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn profile_path(&self) -> Cow<'_, str> {
         format!("/users/{user}", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `inbox` endpoint for this account.
-    pub fn get_inbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_inbox_endpoint(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -151,12 +151,12 @@ impl Account {
     }
 
     /// Returns the server local path to the `inbox` endpoint for this account.
-    pub fn inbox_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn inbox_path(&self) -> Cow<'_, str> {
         format!("/users/{user}/inbox", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `outbox` endpoint for this account.
-    pub fn get_outbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_outbox_endpoint(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -171,12 +171,12 @@ impl Account {
     }
 
     /// Returns the server local path to the `outbox` endpoint for this account.
-    pub fn outbox_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn outbox_path(&self) -> Cow<'_, str> {
         format!("/users/{user}/outbox", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `following` endpoint for this account.
-    pub fn get_following_endpoint<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_following_endpoint(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -191,12 +191,12 @@ impl Account {
     }
 
     /// Returns the server local path to the `following` endpoint for this account.
-    pub fn following_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn following_path(&self) -> Cow<'_, str> {
         format!("/users/{user}/following", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `followers` endpoint for this account.
-    pub fn get_followers_endpoint<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_followers_endpoint(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -211,7 +211,7 @@ impl Account {
     }
 
     /// Returns the server local path to the `followers` resource on this account.
-    pub fn followers_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn followers_path(&self) -> Cow<'_, str> {
         format!("/users/{user}/followers", user = self.username).into()
     }
 
