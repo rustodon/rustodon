@@ -79,7 +79,7 @@ impl Status {
     }
 
     /// Returns a URI to the ActivityPub object of this status.
-    pub fn get_uri<'a>(&'a self, db_conn: &'a Connection) -> QueryResult<Cow<'a, str>> {
+    pub fn get_uri(&self, db_conn: &Connection) -> QueryResult<Cow<'_, str>> {
         let account = self.account(db_conn)?;
         Ok(self.uri_with_account(&account))
     }
