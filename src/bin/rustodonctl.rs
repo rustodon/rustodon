@@ -31,9 +31,9 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
     match opt.cmd {
         Command::GenerateKeys => {
+            use diesel::prelude::*;
             use rustodon::db::models::Account;
             use rustodon::db::schema::{accounts, users};
-            use diesel::prelude::*;
 
             let needs_keys = accounts::table
                 .inner_join(users::table)
@@ -41,12 +41,17 @@ fn main() -> Result<(), Box<std::error::Error>> {
                 .select(accounts::all_columns)
                 .load::<Account>(&db_conn)?;
 
-            println!("needs_keys = {:#?}", needs_keys);
-
             for account in needs_keys {
+                print!("generating keypair for user {}... ", account.username);
                 let keypair =
                     rustodon::crypto::generate_keypair().expect("couldn't generate a keypair!");
-                account.save_keypair(&db_conn, keypair).expect("error saving keypair!");
+
+                print!("saving... ");
+                account
+                    .save_keypair(&db_conn, keypair)
+                    .expect("error saving keypair!");
+
+                println!("done!");
             }
         },
     }
