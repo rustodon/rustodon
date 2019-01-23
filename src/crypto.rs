@@ -1,5 +1,4 @@
 use failure::Error;
-use openssl::pkey::Private;
 use openssl::rsa::Rsa;
 
 const KEYSIZE: u32 = 4096;
