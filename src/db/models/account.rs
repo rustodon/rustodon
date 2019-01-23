@@ -31,7 +31,7 @@ pub struct Account {
     pub summary: Option<String>,
 
     pub pubkey:  Vec<u8>,
-    pub privkey: Vec<u8>,
+    pub privkey: Option<Vec<u8>>,
 }
 
 /// Represents a new account for insertion into the database.
@@ -328,6 +328,8 @@ mod tests {
             username: "account1".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         let account_with_local_domain: Account = Account {
             id: 2,
@@ -336,6 +338,8 @@ mod tests {
             username: "account2".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         let account_with_remote_domain: Account = Account {
             id: 3,
@@ -344,6 +348,8 @@ mod tests {
             username: "account3".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         assert_eq!(
             account_with_null_domain.get_domain(),

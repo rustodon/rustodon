@@ -162,6 +162,8 @@ mod tests {
                     username: "localfoo".to_string(),
                     display_name: None,
                     summary: None,
+                    pubkey: Vec::new(),
+                    privkey: None,
                 }),
                 ("remotefoo", Some("remote.example")) => Some(Account {
                     id: 1,
@@ -170,6 +172,8 @@ mod tests {
                     username: "remotefoo".to_string(),
                     display_name: None,
                     summary: None,
+                    pubkey: Vec::new(),
+                    privkey: None,
                 }),
                 _ => None,
             })
