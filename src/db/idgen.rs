@@ -47,6 +47,7 @@ fn node_id() -> u64 {
 }
 
 impl IdGenerator {
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> i64 {
         self.flaken.next() as i64
     }

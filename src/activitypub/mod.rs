@@ -7,6 +7,8 @@ use rocket::request::{self, FromRequest, Request};
 use rocket::response::{self, Content, Responder};
 use serde::Serialize;
 use serde_json::{json, Value};
+use slog::slog_error;
+use slog_scope::error;
 
 /// Newtype for JSON which represents JSON-LD ActivityStreams2 objects.
 ///
@@ -25,8 +27,8 @@ where
                 Content(ap_json, string).respond_to(req).unwrap()
             })
             .map_err(|e| {
-                // TODO: logging (what happens if the Value won't serialize?)
-                // the code i cribbed this from did some internal Rocket thing.
+                error!("Failed to serialize ActivityStreams2 content: {:?}", e);
+
                 http::Status::InternalServerError
             })
     }
@@ -70,13 +72,13 @@ fn is_as(accept: &Accept) -> bool {
 /// Trait implemented by structs which can serialize to
 /// ActivityPub-compliant ActivityStreams2 JSON-LD.
 pub trait AsActivityPub {
-    fn as_activitypub(&self, db: &db::Connection) -> Result<ActivityStreams, Error>;
+    fn as_activitypub(&self, db: &db::DbConnection) -> Result<ActivityStreams, Error>;
 }
 
 impl AsActivityPub for Account {
     fn as_activitypub(
         &self,
-        conn: &db::Connection,
+        conn: &db::DbConnection,
     ) -> Result<ActivityStreams<serde_json::Value>, Error> {
         Ok(ActivityStreams(json!({
             "@context": "https://www.w3.org/ns/activitystreams",
@@ -99,7 +101,7 @@ impl AsActivityPub for Account {
 impl AsActivityPub for Status {
     fn as_activitypub(
         &self,
-        conn: &db::Connection,
+        conn: &db::DbConnection,
     ) -> Result<ActivityStreams<serde_json::Value>, Error> {
         let account = self.account(conn)?;
         Ok(ActivityStreams(json!({
