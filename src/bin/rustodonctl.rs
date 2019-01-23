@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
             for account in needs_keys {
                 let keypair =
                     rustodon::crypto::generate_keypair().expect("couldn't generate a keypair!");
-                account.save_keypair(&db_conn, keypair);
+                account.save_keypair(&db_conn, keypair).expect("error saving keypair!");
             }
         },
     }
