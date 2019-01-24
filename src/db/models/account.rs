@@ -46,6 +46,9 @@ pub struct NewAccount {
 
     pub display_name: Option<String>,
     pub summary: Option<String>,
+
+    pub pubkey:  Vec<u8>,
+    pub privkey: Option<Vec<u8>>,
 }
 
 impl NewAccount {
