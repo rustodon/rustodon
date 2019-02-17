@@ -1,7 +1,7 @@
 use crate::db::models::{Account, NewStatus, Status, User};
 use crate::db::{self, id_generator};
 use crate::error::Perhaps;
-use crate::util::Either;
+use crate::util::{Either, StatusID};
 use chrono::offset::Utc;
 use failure::Error;
 use itertools::Itertools;
@@ -109,7 +109,7 @@ pub fn create_status(
 #[post("/users/<username>/statuses/<status_id>/delete")]
 pub fn delete_status(
     username: String,
-    status_id: u64,
+    status_id: StatusID,
     user: User,
     db_conn: db::Connection,
 ) -> Perhaps<Flash<Redirect>> {
@@ -125,7 +125,7 @@ pub fn delete_status(
     let status = try_resopt!(Status::by_account_and_id(
         &db_conn,
         status_user.account_id,
-        status_id as i64
+        status_id.0 as i64
     ));
 
     use diesel::prelude::*;
@@ -137,7 +137,7 @@ pub fn delete_status(
 #[get("/users/<username>/statuses/<status_id>", format = "text/html")]
 pub fn status_page<'b, 'c>(
     username: String,
-    status_id: u64,
+    status_id: StatusID,
     user: Option<User>,
     db_conn: db::Connection,
 ) -> Perhaps<StatusTemplate<'static, 'b, 'c>> {
@@ -145,7 +145,7 @@ pub fn status_page<'b, 'c>(
     let status = try_resopt!(Status::by_account_and_id(
         &db_conn,
         account.id,
-        status_id as i64
+        status_id.0 as i64
     ));
 
     PerhapsHtmlTemplate!(StatusTemplate, {
