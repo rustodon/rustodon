@@ -22,6 +22,27 @@ where
     }
 }
 
+pub struct Username<'r>(pub &'r str);
+
+impl<'r> FromParam<'r> for Username<'r> {
+    type Error = String;
+
+    fn from_param(param: &'r RawStr) -> Result<Self, Self::Error> {
+        // make sure there is at least room for the @ and one character
+        if param.len() < 2 {
+            return Err(format!("invalid username {}", param));
+        }
+        // unwrap is safe because there is at least two characters
+        if param.chars().next().unwrap() != '@' {
+            return Err("username must start with @".into());
+        }
+
+        let username = &param[1..];
+
+        Ok(Username(username))
+    }
+}
+
 pub fn base32_to_u64(input: String) -> Result<u64, String> {
     let vec_bytes = match decode(Alphabet::Crockford, &input[..]) {
         Some(bytes) => bytes,

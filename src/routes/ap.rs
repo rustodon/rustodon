@@ -12,7 +12,7 @@ pub fn routes() -> Vec<Route> {
 }
 
 /// Returns a user as an ActivityPub object.
-#[get("/users/<username>", rank = 2)]
+#[get("/users/<username>", rank = 3)]
 pub fn ap_user_object(
     username: String,
     _ag: ActivityGuard,
