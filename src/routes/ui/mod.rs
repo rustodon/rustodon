@@ -1,7 +1,7 @@
 use crate::db::models::{Account, NewStatus, Status, User};
 use crate::db::{self, id_generator};
 use crate::error::Perhaps;
-use crate::util::{Either, StatusID};
+use crate::util::{Either, StatusID, Username};
 use chrono::offset::Utc;
 use failure::Error;
 use itertools::Itertools;
@@ -25,9 +25,11 @@ pub fn routes() -> Vec<Route> {
     routes![
         index,
         user_page,
+        user_page_simple,
         settings_profile,
         settings_profile_update,
         status_page,
+        status_page_simple,
         create_status,
         delete_status,
         auth::signin_get,
@@ -156,6 +158,16 @@ pub fn status_page<'b, 'c>(
     })
 }
 
+#[get("/<username>/<status_id>", format = "text/html", rank = 2)]
+pub fn status_page_simple<'b, 'c>(
+    username: Username,
+    status_id: StatusID,
+    _user: Option<User>,
+    _db_conn: db::Connection,
+) -> Redirect {
+    Redirect::found(format!("/users/{}/statuses/{}", username.0, status_id.0))
+}
+
 #[get("/users/<username>?<max_id>", format = "text/html")]
 pub fn user_page<'b, 'c>(
     username: String,
@@ -183,6 +195,20 @@ pub fn user_page<'b, 'c>(
         prev_page_id: prev_page_id,
         connection: db_conn
     })
+}
+
+#[get("/<username>?<max_id>", format = "text/html", rank = 2)]
+pub fn user_page_simple<'b, 'c>(
+    username: Username,
+    max_id: Option<i64>,
+    _db_conn: db::Connection,
+    _account: Option<Account>,
+) -> Redirect {
+    if let Some(max_id) = max_id {
+        Redirect::found(format!("/users/{}?max_id={}", username.0, max_id))
+    } else {
+        Redirect::found(format!("/users/{}", username.0))
+    }
 }
 
 #[get("/settings/profile")]
