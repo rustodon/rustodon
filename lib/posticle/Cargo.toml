@@ -14,4 +14,4 @@ pest_derive = "2.1"
 
 [dev-dependencies]
 yaml-rust = "0.4.2"
-pretty_assertions = "0.5.1"
+pretty_assertions = "0.6.0"
