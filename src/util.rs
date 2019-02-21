@@ -87,7 +87,6 @@ impl<'r> FromParam<'r> for StatusID {
                 Err(_) => return Err(param),
             },
         };
-        println!("status id: {}", status_id);
         Ok(StatusID(status_id))
     }
 }
