@@ -1,7 +1,5 @@
 //! lovingly stolen from https://github.com/rust-lang-nursery/rustup.rs/blob/master/build.rs
 
-extern crate askama;
-
 use std::env;
 use std::error::Error;
 use std::fs::File;
@@ -21,8 +19,6 @@ where
 }
 
 fn main() {
-    askama::rerun_if_templates_changed();
-
     if let Err(_) = Command::new("sass").status() {
         eprintln!(
             "build error: sass compiler not installed.\n\
