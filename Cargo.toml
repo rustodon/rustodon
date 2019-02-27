@@ -32,6 +32,7 @@ serde_json = "1.0"
 validator = "0.8"
 validator_derive = "0.8"
 
+askama = { version = "0.8.0", features = ["with-rocket"] }
 ammonia = "2.0.0"
 
 diesel = { version = "1.4.1", features = ["postgres", "chrono", "r2d2"] }
@@ -47,13 +48,3 @@ base32 = "0.4"
 version = "0.4"
 default-features = false
 features = ["json"]
-
-[dependencies.askama]
-git = "https://github.com/djc/askama"
-rev = "5549f9a"
-features = ["with-rocket"]
-
-[build-dependencies.askama]
-git = "https://github.com/djc/askama"
-rev = "5549f9a"
-features = ["with-rocket"]
