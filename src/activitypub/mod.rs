@@ -1,6 +1,7 @@
 use crate::db;
 use crate::db::models::{Account, Status};
 use crate::routes::ui::view_helpers::HasBio;
+use crate::crypto::HasPublicKey;
 use failure::Error;
 use rocket::http::{self, Accept, ContentType, MediaType};
 use rocket::request::{self, FromRequest, Request};
@@ -94,6 +95,12 @@ impl AsActivityPub for Account {
             "preferredUsername": self.username,
             "name": self.display_name.as_ref().map(String::as_str).unwrap_or(""),
             "summary": self.transformed_bio(&conn).as_ref().map(String::as_str).unwrap_or("<p></p>"),
+
+            "publicKey": {
+                "id": format!("{}#main-key", self.get_uri()),
+                "owner": self.get_uri(),
+                "publicKeyPem": self.public_key_pem()?,
+            }
         })))
     }
 }
