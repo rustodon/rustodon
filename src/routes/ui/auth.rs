@@ -1,8 +1,8 @@
+use crate::crypto;
 use crate::db::models::{NewAccount, NewUser, User};
 use crate::db::validators;
 use crate::db::{self, id_generator, LOCAL_ACCOUNT_DOMAIN};
 use crate::routes::ui::templates::{SigninTemplate, SignupTemplate};
-use crate::crypto;
 use diesel::Connection;
 use failure::Error;
 use itertools::Itertools;
@@ -129,7 +129,7 @@ pub fn signup_post(
             summary: None,
 
             privkey: Some(keypair.private),
-            pubkey: keypair.public,
+            pubkey:  keypair.public,
         }
         .insert(&db_conn)?;
 

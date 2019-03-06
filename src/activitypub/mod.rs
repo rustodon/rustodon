@@ -1,7 +1,7 @@
+use crate::crypto::HasPublicKey;
 use crate::db;
 use crate::db::models::{Account, Status};
 use crate::routes::ui::view_helpers::HasBio;
-use crate::crypto::HasPublicKey;
 use failure::Error;
 use rocket::http::{self, Accept, ContentType, MediaType};
 use rocket::request::{self, FromRequest, Request};
