@@ -13,6 +13,7 @@ extern crate diesel;
 extern crate validator_derive;
 
 mod activitypub;
+pub mod crypto;
 pub mod db;
 mod error;
 mod routes;

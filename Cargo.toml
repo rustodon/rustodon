@@ -1,8 +1,11 @@
+cargo-features = ["default-run"]
+
 [package]
 name = "rustodon"
 version = "0.1.0"
 authors = ["The Rustodon team"]
 edition = "2018"
+default-run = "rustodon"
 
 [workspace]
 members = ['lib/resopt/', 'lib/posticle/']
@@ -15,8 +18,10 @@ failure_derive = "0.1.5"
 lazy_static = "1.3"
 itertools = "0.8.0"
 resopt = { path = "lib/resopt/" }
+structopt = "0.2.14"
+
+regex = "1.1.0"
 posticle = { path = "lib/posticle/" }
-regex = "1.1.2"
 
 slog = "2.4"
 slog-term = "2.4"
@@ -37,9 +42,11 @@ ammonia = "2.0.0"
 
 diesel = { version = "1.4.1", features = ["postgres", "chrono", "r2d2"] }
 flaken = "0.2.2"
+
 chrono = "0.4"
 chrono-humanize = "0.0.11"
 
+openssl = "0.10.16"
 pwhash = "0.3"
 
 base32 = "0.4"

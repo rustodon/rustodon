@@ -1,11 +1,14 @@
 use diesel;
 use diesel::prelude::*;
+use openssl::pkey::Private;
+use openssl::rsa::Rsa;
 use std::borrow::Cow;
 
 use crate::db::{self, DbConnection, LOCAL_ACCOUNT_DOMAIN};
 use crate::{BASE_URL, DOMAIN};
 
 use super::{Status, User};
+use crate::crypto::DERKeypair;
 use rocket::request::{self, FromRequest, Request};
 
 use crate::db::schema::accounts;
@@ -26,6 +29,9 @@ pub struct Account {
 
     pub display_name: Option<String>,
     pub summary: Option<String>,
+
+    pub pubkey:  Vec<u8>,
+    pub privkey: Option<Vec<u8>>,
 }
 
 /// Represents a new account for insertion into the database.
@@ -40,6 +46,9 @@ pub struct NewAccount {
 
     pub display_name: Option<String>,
     pub summary: Option<String>,
+
+    pub pubkey:  Vec<u8>,
+    pub privkey: Option<Vec<u8>>,
 }
 
 impl NewAccount {
@@ -269,6 +278,15 @@ impl Account {
     pub fn display_name_or_username(&self) -> &str {
         self.display_name.as_ref().unwrap_or(&self.username)
     }
+
+    pub fn save_keypair(&self, db_conn: &DbConnection, keypair: DERKeypair) -> QueryResult<()> {
+        use crate::db::schema::accounts::dsl::{privkey, pubkey};
+
+        diesel::update(self)
+            .set((pubkey.eq(keypair.public), privkey.eq(keypair.private)))
+            .execute(db_conn)
+            .and(Ok(()))
+    }
 }
 
 impl AsRef<Account> for Account {
@@ -313,6 +331,8 @@ mod tests {
             username: "account1".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         let account_with_local_domain: Account = Account {
             id: 2,
@@ -321,6 +341,8 @@ mod tests {
             username: "account2".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         let account_with_remote_domain: Account = Account {
             id: 3,
@@ -329,6 +351,8 @@ mod tests {
             username: "account3".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         assert_eq!(
             account_with_null_domain.get_domain(),

@@ -1,3 +1,4 @@
+use crate::crypto;
 use crate::db::models::{NewAccount, NewUser, User};
 use crate::db::validators;
 use crate::db::{self, id_generator, LOCAL_ACCOUNT_DOMAIN};
@@ -112,8 +113,11 @@ pub fn signup_post(
         ));
     }
 
+    let keypair = crypto::generate_keypair()?;
+
     (*db_conn).transaction::<_, _, _>(|| {
         let mut id_gen = id_generator();
+
         let account = NewAccount {
             id: id_gen.next(),
             domain: Some(LOCAL_ACCOUNT_DOMAIN.to_string()),
@@ -123,6 +127,9 @@ pub fn signup_post(
 
             display_name: None,
             summary: None,
+
+            privkey: Some(keypair.private),
+            pubkey:  keypair.public,
         }
         .insert(&db_conn)?;
 
