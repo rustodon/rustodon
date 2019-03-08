@@ -20,7 +20,7 @@ alertMsg() {
 
 # Ensure rustup and rust are installed
 if which rustup 2>/dev/null 1>&2 ; then
-  NIGHTLY_VERSION="$(cat REQUIRED_RUST_NIGHTLY)"
+  NIGHTLY_VERSION="$(cat rust-toolchain)"
   infoMsg "Setting Rust version to ${NIGHTLY_VERSION}..."
   # Ensure that rust is using nightly for library features
   rustup override set "${NIGHTLY_VERSION}" 2>/dev/null 1>&2
