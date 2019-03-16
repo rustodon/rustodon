@@ -37,7 +37,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
             let needs_keys = accounts::table
                 .inner_join(users::table)
-                .filter(accounts::privkey.eq(Vec::new()))
+                .filter(accounts::privkey.is_null())
                 .select(accounts::all_columns)
                 .load::<Account>(&db_conn)?;
 
