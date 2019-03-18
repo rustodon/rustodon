@@ -4,9 +4,9 @@ use std::error::Error;
 use std::thread;
 use std::time::Duration;
 
-use db::models::JobRecord;
-use db::types::JobStatus;
-use db::Pool;
+use crate::db::models::JobRecord;
+use crate::db::types::JobStatus;
+use crate::db::Pool;
 use diesel;
 use serde_derive::{Deserialize, Serialize};
 use slog::{slog_info, slog_trace};
@@ -52,7 +52,7 @@ pub fn init(pool: Pool) {
         .spawn(move || loop {
             let conn = pool.get().expect("couldn't connect to database");
             let top_of_queue = {
-                use db::schema::jobs::dsl::*;
+                use crate::db::schema::jobs::dsl::*;
                 jobs.filter(status.eq(JobStatus::Waiting))
                     .limit(BATCH_SIZE)
                     .order(id.asc())
@@ -64,7 +64,7 @@ pub fn init(pool: Pool) {
 
             let should_run: Vec<&JobRecord> = top_of_queue.iter().filter(|_| true).collect();
             {
-                use db::schema::jobs::dsl::*;
+                use crate::db::schema::jobs::dsl::*;
                 diesel::update(jobs)
                     .filter(id.eq_any(should_run.iter().map(|j| j.id).collect::<Vec<i64>>()))
                     .set(status.eq(JobStatus::Running))
@@ -78,7 +78,7 @@ pub fn init(pool: Pool) {
 
                 worker
                     .job_tick(&job_record.kind, job_record.data, move |_result| {
-                        use db::schema::jobs::dsl::*;
+                        use crate::db::schema::jobs::dsl::*;
                         let conn = pool.get().unwrap();
                         diesel::delete(jobs.filter(id.eq(job_id)))
                             .execute(&conn)

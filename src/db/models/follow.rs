@@ -1,4 +1,4 @@
-use schema::follows;
+use crate::db::schema::follows;
 
 /// Represents a following relationship `[source user] -> [target user]`.
 #[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]

@@ -1,4 +1,5 @@
 use flaken::Flaken;
+use lazy_static::lazy_static;
 use std::cell::Cell;
 use std::sync::Mutex;
 
@@ -12,7 +13,7 @@ pub struct IdGenerator {
 /// Example use:
 ///
 /// ```
-/// # use rustodon_database::idgen::id_generator;
+/// # use rustodon::db::idgen::id_generator;
 /// # struct ModelA { id: i64 }
 /// # struct ModelB { id: i64 }
 /// let mut id_gen = id_generator();
@@ -46,6 +47,7 @@ fn node_id() -> u64 {
 }
 
 impl IdGenerator {
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> i64 {
         self.flaken.next() as i64
     }

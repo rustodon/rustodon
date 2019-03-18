@@ -1,5 +1,7 @@
+use crate::crypto::HasPublicKey;
+use crate::db;
+use crate::db::models::{Account, Status};
 use crate::routes::ui::view_helpers::HasBio;
-use db::models::{Account, Status};
 use failure::Error;
 use rocket::http::{self, Accept, ContentType, MediaType};
 use rocket::request::{self, FromRequest, Request};
@@ -71,13 +73,13 @@ fn is_as(accept: &Accept) -> bool {
 /// Trait implemented by structs which can serialize to
 /// ActivityPub-compliant ActivityStreams2 JSON-LD.
 pub trait AsActivityPub {
-    fn as_activitypub(&self, db: &db::Connection) -> Result<ActivityStreams, Error>;
+    fn as_activitypub(&self, db: &db::DbConnection) -> Result<ActivityStreams, Error>;
 }
 
 impl AsActivityPub for Account {
     fn as_activitypub(
         &self,
-        conn: &db::Connection,
+        conn: &db::DbConnection,
     ) -> Result<ActivityStreams<serde_json::Value>, Error> {
         Ok(ActivityStreams(json!({
             "@context": "https://www.w3.org/ns/activitystreams",
@@ -93,6 +95,12 @@ impl AsActivityPub for Account {
             "preferredUsername": self.username,
             "name": self.display_name.as_ref().map(String::as_str).unwrap_or(""),
             "summary": self.transformed_bio(&conn).as_ref().map(String::as_str).unwrap_or("<p></p>"),
+
+            "publicKey": {
+                "id": format!("{}#main-key", self.get_uri()),
+                "owner": self.get_uri(),
+                "publicKeyPem": self.public_key_pem()?,
+            }
         })))
     }
 }
@@ -100,7 +108,7 @@ impl AsActivityPub for Account {
 impl AsActivityPub for Status {
     fn as_activitypub(
         &self,
-        conn: &db::Connection,
+        conn: &db::DbConnection,
     ) -> Result<ActivityStreams<serde_json::Value>, Error> {
         let account = self.account(conn)?;
         Ok(ActivityStreams(json!({

@@ -6,8 +6,8 @@ use posticle::tokens::*;
 use posticle::{ReaderBuilder, WriterBuilder};
 use regex::Regex;
 
+use crate::db::models::Account;
 use crate::error::Perhaps;
-use db::models::Account;
 
 lazy_static! {
     /// Matches all valid characters in a hashtag name (after the first #).
@@ -162,6 +162,8 @@ mod tests {
                     username: "localfoo".to_string(),
                     display_name: None,
                     summary: None,
+                    pubkey: Vec::new(),
+                    privkey: None,
                 }),
                 ("remotefoo", Some("remote.example")) => Some(Account {
                     id: 1,
@@ -170,6 +172,8 @@ mod tests {
                     username: "remotefoo".to_string(),
                     display_name: None,
                     summary: None,
+                    pubkey: Vec::new(),
+                    privkey: None,
                 }),
                 _ => None,
             })

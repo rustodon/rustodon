@@ -2,15 +2,17 @@ use resopt::try_resopt;
 use rocket::Route;
 
 use crate::activitypub::{ActivityGuard, ActivityStreams, AsActivityPub};
+use crate::db;
+use crate::db::models::{Account, Status};
 use crate::error::Perhaps;
-use db::models::{Account, Status};
+use crate::util::StatusID;
 
 pub fn routes() -> Vec<Route> {
     routes![ap_user_object, ap_status_object,]
 }
 
 /// Returns a user as an ActivityPub object.
-#[get("/users/<username>", rank = 2)]
+#[get("/users/<username>", rank = 3)]
 pub fn ap_user_object(
     username: String,
     _ag: ActivityGuard,
@@ -25,7 +27,7 @@ pub fn ap_user_object(
 #[get("/users/<username>/statuses/<status_id>", rank = 2)]
 pub fn ap_status_object(
     username: String,
-    status_id: u64,
+    status_id: StatusID,
     _ag: ActivityGuard,
     db_conn: db::Connection,
 ) -> Perhaps<ActivityStreams> {
@@ -33,7 +35,7 @@ pub fn ap_status_object(
     let status = try_resopt!(Status::by_account_and_id(
         &db_conn,
         account.id,
-        status_id as i64
+        status_id.0 as i64
     ));
 
     Ok(Some(status.as_activitypub(&db_conn)?))

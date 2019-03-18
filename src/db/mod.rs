@@ -1,28 +1,10 @@
-#![recursion_limit = "128"]
 // silence warnings due to diesel-rs/diesel#1785
 #![allow(proc_macro_derive_resolution_fallback, unused_imports)]
-
-extern crate chrono;
-extern crate chrono_humanize;
-#[macro_use]
-extern crate diesel;
-#[macro_use]
-extern crate diesel_derive_enum;
-extern crate flaken;
-#[macro_use]
-extern crate lazy_static;
-extern crate pwhash;
-extern crate regex;
-#[macro_use]
-extern crate resopt;
-extern crate rocket;
-extern crate serde;
-extern crate serde_json;
-extern crate turnstile;
 
 pub use diesel::connection::Connection as DieselConnection;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{self, ConnectionManager};
+use diesel::result::ConnectionError;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Outcome, Request, State};
@@ -35,33 +17,32 @@ pub mod schema;
 pub mod types;
 pub mod validators;
 
-pub use idgen::id_generator;
-
-// TODO: gross hack. find a nicer way to pass these in?
-lazy_static! {
-    pub static ref BASE_URL: String = format!(
-        "https://{}",
-        env::var("DOMAIN").expect("DOMAIN must be set")
-    );
-    pub static ref DOMAIN: String = env::var("DOMAIN").expect("DOMAIN must be set");
-}
+pub use self::idgen::id_generator;
 
 pub static LOCAL_ACCOUNT_DOMAIN: &'static str = "";
 
+/// The raw database connection type. Aliased so it's easy to switch when using, eg, an sqlite backend.
+pub type DbConnection = PgConnection;
+
 /// Convenient type alias for the postgres database pool so we don't have to type this out.
-pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+pub type Pool = r2d2::Pool<ConnectionManager<DbConnection>>;
 
 /// Type alias for the pooled connection.
-type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
+pub type PooledConnection = r2d2::PooledConnection<ConnectionManager<DbConnection>>;
 
 /// Initializes a new connection pool for the database at `url`.
 pub fn init_connection_pool<S>(url: S) -> Result<Pool, r2d2::PoolError>
 where
     S: Into<String>,
 {
-    let manager = ConnectionManager::<PgConnection>::new(url);
+    let manager = ConnectionManager::<DbConnection>::new(url);
 
     r2d2::Pool::builder().build(manager)
+}
+
+/// Establishes a single database connection
+pub fn init_connection(url: impl AsRef<str>) -> Result<PgConnection, ConnectionError> {
+    PgConnection::establish(url.as_ref())
 }
 
 /// Request guard type for handing out db connections from the pool.
@@ -87,11 +68,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for Connection {
     }
 }
 
-/// A convenient way to use a `&db::Connection` as a `&PgConnection`.
+/// A convenient way to use a `&db::Connection` as a `&DbConnection`.
 ///
 /// Just allows deref-ing the inner `PooledConnection`.
 impl Deref for Connection {
-    type Target = PgConnection;
+    type Target = DbConnection;
 
     fn deref(&self) -> &Self::Target {
         &self.0

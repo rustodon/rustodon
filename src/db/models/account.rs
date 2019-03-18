@@ -1,13 +1,17 @@
 use diesel;
 use diesel::prelude::*;
+use openssl::pkey::Private;
+use openssl::rsa::Rsa;
 use std::borrow::Cow;
-use Connection;
-use {BASE_URL, DOMAIN, LOCAL_ACCOUNT_DOMAIN};
 
-use models::{Status, User};
+use crate::db::{self, DbConnection, LOCAL_ACCOUNT_DOMAIN};
+use crate::{BASE_URL, DOMAIN};
+
+use super::{Status, User};
+use crate::crypto::DERKeypair;
 use rocket::request::{self, FromRequest, Request};
 
-use schema::accounts;
+use crate::db::schema::accounts;
 
 /// Represents an account (local _or_ remote) on the network, storing federation-relevant information.
 ///
@@ -25,6 +29,9 @@ pub struct Account {
 
     pub display_name: Option<String>,
     pub summary: Option<String>,
+
+    pub pubkey:  Vec<u8>,
+    pub privkey: Option<Vec<u8>>,
 }
 
 /// Represents a new account for insertion into the database.
@@ -39,41 +46,42 @@ pub struct NewAccount {
 
     pub display_name: Option<String>,
     pub summary: Option<String>,
+
+    pub pubkey:  Vec<u8>,
+    pub privkey: Option<Vec<u8>>,
 }
 
 impl NewAccount {
-    pub fn insert(self, conn: &Connection) -> QueryResult<Account> {
-        use schema::accounts::dsl::*;
+    pub fn insert(self, conn: &DbConnection) -> QueryResult<Account> {
+        use crate::db::schema::accounts::dsl::*;
 
-        diesel::insert_into(accounts)
-            .values(&self)
-            .get_result(&**conn)
+        diesel::insert_into(accounts).values(&self).get_result(conn)
     }
 }
 
 impl Account {
     /// Finds a local account by username, returning an `Option<Account>`.
     pub fn fetch_local_by_username<S>(
-        db_conn: &Connection,
+        db_conn: &DbConnection,
         username: S,
     ) -> QueryResult<Option<Account>>
     where
         S: Into<String>,
     {
-        use schema::accounts::dsl;
+        use crate::db::schema::accounts::dsl;
         dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN))
-            .first::<Account>(&**db_conn)
+            .first::<Account>(db_conn)
             .optional()
     }
 
     pub fn fetch_by_username_domain(
-        db_conn: &Connection,
+        db_conn: &DbConnection,
         username: impl Into<String>,
         domain: Option<impl Into<String>>,
     ) -> QueryResult<Option<Account>> {
-        use schema::accounts::dsl;
+        use crate::db::schema::accounts::dsl;
         let mut query = dsl::accounts
             .filter(dsl::username.eq(username.into()))
             .into_boxed();
@@ -84,7 +92,7 @@ impl Account {
             query = query.filter(dsl::domain.eq(LOCAL_ACCOUNT_DOMAIN));
         };
 
-        query.first::<Account>(&**db_conn).optional()
+        query.first::<Account>(db_conn).optional()
     }
 
     /// Returns the fully-qualified (`@user@domain`) username of an account.
@@ -115,7 +123,7 @@ impl Account {
     }
 
     /// Returns the URI of the account's ActivityPub object.
-    pub fn get_uri<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_uri(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -130,12 +138,12 @@ impl Account {
     }
 
     /// Returns the server local path to the Account profile page for this account.
-    pub fn profile_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn profile_path(&self) -> Cow<'_, str> {
         format!("/users/{user}", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `inbox` endpoint for this account.
-    pub fn get_inbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_inbox_endpoint(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -150,12 +158,12 @@ impl Account {
     }
 
     /// Returns the server local path to the `inbox` endpoint for this account.
-    pub fn inbox_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn inbox_path(&self) -> Cow<'_, str> {
         format!("/users/{user}/inbox", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `outbox` endpoint for this account.
-    pub fn get_outbox_endpoint<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_outbox_endpoint(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -170,12 +178,12 @@ impl Account {
     }
 
     /// Returns the server local path to the `outbox` endpoint for this account.
-    pub fn outbox_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn outbox_path(&self) -> Cow<'_, str> {
         format!("/users/{user}/outbox", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `following` endpoint for this account.
-    pub fn get_following_endpoint<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_following_endpoint(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -190,12 +198,12 @@ impl Account {
     }
 
     /// Returns the server local path to the `following` endpoint for this account.
-    pub fn following_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn following_path(&self) -> Cow<'_, str> {
         format!("/users/{user}/following", user = self.username).into()
     }
 
     /// Returns the URI of the ActivityPub `followers` endpoint for this account.
-    pub fn get_followers_endpoint<'a>(&'a self) -> Cow<'a, str> {
+    pub fn get_followers_endpoint(&self) -> Cow<'_, str> {
         self.uri
             .as_ref()
             .map(|x| String::as_str(x).into())
@@ -210,7 +218,7 @@ impl Account {
     }
 
     /// Returns the server local path to the `followers` resource on this account.
-    pub fn followers_path<'a>(&'a self) -> Cow<'a, str> {
+    pub fn followers_path(&self) -> Cow<'_, str> {
         format!("/users/{user}/followers", user = self.username).into()
     }
 
@@ -218,11 +226,11 @@ impl Account {
     // _strictly before_ the status `max_id`.
     pub fn statuses_before_id(
         &self,
-        db_conn: &Connection,
+        db_conn: &DbConnection,
         max_id: Option<i64>,
         n: usize,
     ) -> QueryResult<Vec<Status>> {
-        use schema::statuses::dsl::*;
+        use crate::db::schema::statuses::dsl::*;
         let mut query = statuses.filter(account_id.eq(self.id)).into_boxed();
 
         if let Some(max_id) = max_id {
@@ -232,22 +240,22 @@ impl Account {
         query
             .order(id.desc())
             .limit(n as i64)
-            .get_results::<Status>(&**db_conn)
+            .get_results::<Status>(db_conn)
     }
 
     /// Returns a tuple of upper and lower bounds on the IDs of statuses authored by this account
     /// (i.e., `min(ids)` and `max(ids)` where `ids` is a list of status ids authored by this user).
     ///
     /// If this account has no statuses attached to it in the database, return `None`.
-    pub fn status_id_bounds(&self, db_conn: &Connection) -> QueryResult<Option<(i64, i64)>> {
+    pub fn status_id_bounds(&self, db_conn: &DbConnection) -> QueryResult<Option<(i64, i64)>> {
+        use crate::db::schema::statuses::dsl::*;
         use diesel::dsl::sql;
-        use schema::statuses::dsl::*;
         // Yes, this is gross and we don't like having to use sql() either.
         // See [diesel-rs/diesel#3](https://github.com/diesel-rs/diesel/issues/3) for why this is necessary.
         statuses
             .select((sql("min(id)"), sql("max(id)")))
             .filter(account_id.eq(self.id))
-            .first::<(Option<i64>, Option<i64>)>(&**db_conn)
+            .first::<(Option<i64>, Option<i64>)>(db_conn)
             .map(|result| match result {
                 (Some(x), Some(y)) => Some((x, y)),
                 _ => None,
@@ -256,19 +264,28 @@ impl Account {
 
     pub fn set_summary(
         &self,
-        db_conn: &Connection,
+        db_conn: &DbConnection,
         new_summary: Option<String>,
     ) -> QueryResult<()> {
-        use schema::accounts::dsl::summary;
+        use crate::db::schema::accounts::dsl::summary;
 
         diesel::update(self)
             .set(summary.eq(new_summary))
-            .execute(&**db_conn)
+            .execute(db_conn)
             .and(Ok(()))
     }
 
     pub fn display_name_or_username(&self) -> &str {
         self.display_name.as_ref().unwrap_or(&self.username)
+    }
+
+    pub fn save_keypair(&self, db_conn: &DbConnection, keypair: DERKeypair) -> QueryResult<()> {
+        use crate::db::schema::accounts::dsl::{privkey, pubkey};
+
+        diesel::update(self)
+            .set((pubkey.eq(keypair.public), privkey.eq(keypair.private)))
+            .execute(db_conn)
+            .and(Ok(()))
     }
 }
 
@@ -285,7 +302,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Account {
         use rocket::http::Status;
         use rocket::Outcome;
 
-        let db_conn = request.guard::<Connection>()?;
+        let db_conn = request.guard::<db::Connection>()?;
         if let Some(user) = request.guard::<User>().succeeded() {
             match user.get_account(&db_conn) {
                 Ok(account) => Outcome::Success(account),
@@ -314,6 +331,8 @@ mod tests {
             username: "account1".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         let account_with_local_domain: Account = Account {
             id: 2,
@@ -322,6 +341,8 @@ mod tests {
             username: "account2".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         let account_with_remote_domain: Account = Account {
             id: 3,
@@ -330,6 +351,8 @@ mod tests {
             username: "account3".to_string(),
             display_name: None,
             summary: None,
+            pubkey: Vec::new(),
+            privkey: None,
         };
         assert_eq!(
             account_with_null_domain.get_domain(),

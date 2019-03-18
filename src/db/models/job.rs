@@ -6,9 +6,9 @@ use std::error::Error;
 
 use turnstile::Job;
 
-use idgen::id_generator;
-use schema::jobs;
-use types::JobStatus;
+use crate::db::idgen::id_generator;
+use crate::db::schema::jobs;
+use crate::db::types::JobStatus;
 
 #[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
 #[table_name = "jobs"]
