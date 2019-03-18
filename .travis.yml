@@ -6,14 +6,13 @@ rust:
 addons:
   config:
     retries: true
+  postgresql: 9.6
 
 cache:
   cargo: true
   directories:
     - /home/travis/.rvm
 
-services:
-  - postgresql
 
 before_install:
   - sudo apt-get update -yqq

@@ -6,10 +6,12 @@
 
 pub use self::account::{Account, NewAccount};
 pub use self::follow::Follow;
+pub use self::job::{JobRecord, NewJobRecord};
 pub use self::status::{NewStatus, Status};
 pub use self::user::{NewUser, User};
 
 mod account;
 mod follow;
+mod job;
 mod status;
 mod user;

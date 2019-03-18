@@ -14,6 +14,7 @@ use std::ops::Deref;
 pub mod idgen;
 pub mod models;
 pub mod schema;
+pub mod types;
 pub mod validators;
 
 pub use self::idgen::id_generator;
