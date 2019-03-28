@@ -6,3 +6,13 @@ pub enum JobStatus {
     Running,
     Dead,
 }
+
+impl ToString for JobStatus {
+    fn to_string(&self) -> String {
+        (match self {
+            JobStatus::Waiting => "waiting",
+            JobStatus::Running => "running",
+            JobStatus::Dead => "dead",
+        }).to_string()
+    }
+}

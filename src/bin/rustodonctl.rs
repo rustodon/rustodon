@@ -1,6 +1,7 @@
 use dotenv::dotenv;
 use std::env;
 use structopt::StructOpt;
+use prettytable::{self, Table, Row, Cell, row, cell};
 
 use rustodon::db;
 
@@ -17,6 +18,11 @@ enum Command {
     /// Should be run after db migrations complete when upgrading from pre-HTTP-signatures Rustodon versions.
     #[structopt(name = "generate-keys")]
     GenerateKeys,
+
+    /// Dumps the current jobs table.
+    /// Can be used to inspect job statuses, similar to looking at Sidekiq when running Mastodon.
+    #[structopt(name = "list-jobs")]
+    ListJobs,
 }
 
 fn main() -> Result<(), Box<std::error::Error>> {
@@ -53,6 +59,28 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
                 println!("done!");
             }
+        },
+        Command::ListJobs => {
+            let job_list = {
+                use diesel::prelude::*;
+                use rustodon::db::models::JobRecord;
+                use rustodon::db::schema::jobs::dsl::*;
+
+                jobs
+                    .order(id.asc())
+                    .load::<JobRecord>(&db_conn)
+                    .expect("couldn't load from job queue")
+            };
+
+            let mut table = Table::new();
+            table.set_format(*prettytable::format::consts::FORMAT_BOX_CHARS);
+            table.set_titles(row!["ID", "CREATION TIME", "STATUS", "QUEUE", "KIND", "PARAMS"]);
+
+            for job in job_list {
+                table.add_row(row![job.id, job.created_at, job.status, job.queue, job.kind, job.data]);
+            }
+
+            table.printstd();
         },
     }
 
