@@ -9,8 +9,8 @@ use crate::db::types::JobStatus;
 use crate::db::Pool;
 use diesel;
 use serde_derive::{Deserialize, Serialize};
-use slog::{slog_info, slog_trace};
-use slog_scope::{info, trace};
+use slog::{slog_error, slog_info, slog_trace};
+use slog_scope::{error, info, trace};
 use turnstile::{ExecutionContract, Job, Perform, Worker};
 
 const BATCH_SIZE: i64 = 10;
@@ -44,18 +44,33 @@ pub fn init(pool: Pool) {
                     .unwrap();
             }
 
+            let mut failed_jobs = Vec::new();
             for job_record in top_of_queue {
-                let job_id = job_record.id;
                 let pool = pool.clone();
 
-                worker
-                    .job_tick(&job_record.kind, job_record.data, move |_result| {
+                if let Err(e) = worker.job_tick(
+                    &job_record.kind.clone(),
+                    job_record.data.clone(),
+                    move |_result| {
                         use crate::db::schema::jobs::dsl::*;
                         let conn = pool.get().unwrap();
-                        diesel::delete(jobs.filter(id.eq(job_id)))
+                        diesel::delete(jobs.filter(id.eq(id)))
                             .execute(&conn)
                             .unwrap();
-                    })
+                    },
+                ) {
+                    // TODO: retries!
+                    error!("running job failed"; "error" => %e, "job" => ?job_record);
+                    failed_jobs.push(job_record.id);
+                }
+            }
+
+            {
+                use crate::db::schema::jobs::dsl::*;
+                diesel::update(jobs)
+                    .filter(id.eq_any(failed_jobs))
+                    .set(status.eq(JobStatus::Dead))
+                    .execute(&conn)
                     .unwrap();
             }
 
