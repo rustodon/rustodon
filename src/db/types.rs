@@ -13,6 +13,7 @@ impl ToString for JobStatus {
             JobStatus::Waiting => "waiting",
             JobStatus::Running => "running",
             JobStatus::Dead => "dead",
-        }).to_string()
+        })
+        .to_string()
     }
 }

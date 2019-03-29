@@ -1,7 +1,7 @@
 use dotenv::dotenv;
+use prettytable::{self, cell, row, Cell, Row, Table};
 use std::env;
 use structopt::StructOpt;
-use prettytable::{self, Table, Row, Cell, row, cell};
 
 use rustodon::db;
 
@@ -66,18 +66,31 @@ fn main() -> Result<(), Box<std::error::Error>> {
                 use rustodon::db::models::JobRecord;
                 use rustodon::db::schema::jobs::dsl::*;
 
-                jobs
-                    .order(id.asc())
+                jobs.order(id.asc())
                     .load::<JobRecord>(&db_conn)
                     .expect("couldn't load from job queue")
             };
 
             let mut table = Table::new();
             table.set_format(*prettytable::format::consts::FORMAT_BOX_CHARS);
-            table.set_titles(row!["ID", "CREATION TIME", "STATUS", "QUEUE", "KIND", "PARAMS"]);
+            table.set_titles(row![
+                "ID",
+                "CREATION TIME",
+                "STATUS",
+                "QUEUE",
+                "KIND",
+                "PARAMS"
+            ]);
 
             for job in job_list {
-                table.add_row(row![job.id, job.created_at, job.status, job.queue, job.kind, job.data]);
+                table.add_row(row![
+                    job.id,
+                    job.created_at,
+                    job.status,
+                    job.queue,
+                    job.kind,
+                    job.data
+                ]);
             }
 
             table.printstd();

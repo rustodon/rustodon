@@ -1,8 +1,8 @@
+use failure::Fail;
 use serde_json;
 use std::any::Any;
-use failure::Fail;
-use std::sync::Mutex;
 use std::fmt::{self, Debug, Display};
+use std::sync::Mutex;
 
 #[derive(Fail, Debug)]
 pub enum Error {
@@ -20,13 +20,13 @@ pub enum Error {
 }
 
 pub struct SyncPanicError {
-    inner: Mutex<Box<dyn Any + Send + 'static>>
+    inner: Mutex<Box<dyn Any + Send + 'static>>,
 }
 
 impl SyncPanicError {
     pub(crate) fn new(inner: Box<dyn Any + Send + 'static>) -> Self {
         Self {
-            inner: Mutex::new(inner)
+            inner: Mutex::new(inner),
         }
     }
 }

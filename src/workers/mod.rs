@@ -9,8 +9,8 @@ use crate::db::Pool;
 use diesel;
 use failure::{format_err, Error};
 use serde_derive::{Deserialize, Serialize};
-use slog::{slog_error, slog_info, slog_trace, slog_debug};
-use slog_scope::{error, info, trace, debug};
+use slog::{slog_debug, slog_error, slog_info, slog_trace};
+use slog_scope::{debug, error, info, trace};
 use turnstile::{ExecutionContract, Job, Perform, Worker};
 
 const BATCH_SIZE: i64 = 10;

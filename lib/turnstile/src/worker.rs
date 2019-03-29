@@ -1,10 +1,10 @@
+use failure::{self, Fallible};
 use serde::de::Deserialize;
 use serde_json::{self, Value};
 use std::collections::HashMap;
 use std::panic::{self, RefUnwindSafe};
 use std::sync::Arc;
 use threadpool::{Builder as ThreadPoolBuilder, ThreadPool};
-use failure::{self, Fallible};
 
 use crate::error::{Error, SyncPanicError};
 use crate::job::Job;
@@ -34,7 +34,8 @@ impl Worker {
         self.handlers.insert(
             J::kind(),
             Arc::new(Box::new(|value| {
-                let job: J = serde_json::from_value(value).map_err(|e| Error::DeserializeError(e.into()))?;
+                let job: J =
+                    serde_json::from_value(value).map_err(|e| Error::DeserializeError(e.into()))?;
 
                 panic::catch_unwind(|| Perform::perform(&job))
                     .map_err(|panic| Error::JobPanicked(SyncPanicError::new(panic)))?
