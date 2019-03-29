@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq, DbEnum)]
+#[derive(Debug, PartialEq, Eq, DbEnum, Clone, Copy)]
 #[PgType = "job_status"]
 #[DieselType = "Job_status"]
 pub enum JobStatus {

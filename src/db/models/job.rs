@@ -10,7 +10,7 @@ use crate::db::idgen::id_generator;
 use crate::db::schema::jobs;
 use crate::db::types::JobStatus;
 
-#[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
+#[derive(Identifiable, Queryable, Associations, PartialEq, Clone, Debug)]
 #[table_name = "jobs"]
 pub struct JobRecord {
     pub id: i64,
