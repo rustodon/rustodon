@@ -51,6 +51,7 @@ pub fn init(pool: Pool) {
         .name("job_collector".to_string())
         .spawn(move || loop {
             let conn = pool.get().expect("couldn't connect to database");
+            // -- pull the top BATCH_SIZE jobs from the queue that are in wait state
             let top_of_queue = {
                 use crate::db::schema::jobs::dsl::*;
                 jobs.filter(status.eq(JobStatus::Waiting))
@@ -62,6 +63,7 @@ pub fn init(pool: Pool) {
 
             trace!("job collection tick"; "top_of_queue" => ?top_of_queue);
 
+            // -- compute which jobs should run, and set those to running state
             let should_run: Vec<&JobRecord> = top_of_queue.iter().filter(|_| true).collect();
             {
                 use crate::db::schema::jobs::dsl::*;
@@ -72,7 +74,8 @@ pub fn init(pool: Pool) {
                     .unwrap();
             }
 
-            let mut failed_jobs = Vec::new();
+            // -- submit jobs which should be run to the thread pool
+            let mut failed_to_submit = Vec::new();
             for job_record in top_of_queue {
                 let pool = pool.clone();
 
@@ -87,16 +90,16 @@ pub fn init(pool: Pool) {
                             .unwrap();
                     },
                 ) {
-                    // TODO: retries!
-                    error!("running job failed"; "error" => %e, "job" => ?job_record);
-                    failed_jobs.push(job_record.id);
+                    error!("submitting job to thread pool failed"; "error" => %e, "job" => ?job_record);
+                    failed_to_submit.push(job_record.id);
                 }
             }
 
+            // -- kill jobs that weren't successfully submitted to the thread pool
             {
                 use crate::db::schema::jobs::dsl::*;
                 diesel::update(jobs)
-                    .filter(id.eq_any(failed_jobs))
+                    .filter(id.eq_any(failed_to_submit))
                     .set(status.eq(JobStatus::Dead))
                     .execute(&conn)
                     .unwrap();
