@@ -16,36 +16,8 @@ use turnstile::{ExecutionContract, Job, Perform, Worker};
 const BATCH_SIZE: i64 = 10;
 const CHECK_PERIOD: Duration = Duration::from_secs(1); // 1/(1 hz)
 
-#[derive(Serialize, Deserialize)]
-pub struct TestJob {
-    pub msg: String,
-}
-
-impl Job for TestJob {
-    fn kind() -> &'static str {
-        "test_job"
-    }
-
-    fn should_run(&self) -> bool {
-        true
-    }
-
-    fn execution_contract(&self) -> ExecutionContract {
-        ExecutionContract::immediate_fail()
-    }
-}
-
-impl Perform for TestJob {
-    fn perform(&self) -> Result<(), Box<Error>> {
-        info!("+++++++ {a} {a} {a} {a} +++++++", a = &self.msg);
-        Ok(())
-    }
-}
-
 pub fn init(pool: Pool) {
     let mut worker = Worker::new();
-
-    worker.register_job::<TestJob>();
 
     thread::Builder::new()
         .name("job_collector".to_string())
