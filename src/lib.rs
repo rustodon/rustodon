@@ -28,8 +28,8 @@ use rocket::config::Config;
 use rocket::Rocket;
 use rocket_slog::SlogFairing;
 use slog::Drain;
-use slog::{slog_debug, slog_o, slog_warn, slog_info};
-use slog_scope::{debug, warn, info};
+use slog::{slog_debug, slog_o, slog_warn};
+use slog_scope::{debug, warn};
 use std::env;
 
 lazy_static! {
@@ -87,8 +87,30 @@ fn rocket_load_config() -> Config {
 
 pub fn app(db: db::Pool, logger: slog::Logger) -> Rocket {
     // initialize the worker queues
-    info!("starting worker queues");
+    debug!("starting worker queues");
     workers::init(db.clone());
+
+    {
+        use diesel::prelude::*;
+        let conn = db.get().unwrap();
+
+        use crate::db::models::NewJobRecord;
+        let r = NewJobRecord::on_queue(
+            workers::TestJob {
+                msg: "bengis".to_string(),
+            },
+            "default_queue",
+        )
+        .unwrap();
+        debug!("injecting test job");
+        diesel::insert_into(db::schema::jobs::table)
+            .values(&r)
+            .execute(&conn)
+            .unwrap();
+        debug!("done injecting test job");
+
+        // println!("{:?}", r);
+    }
 
     rocket::custom(rocket_load_config()) // use our own config loading which turns off Rocket's built-in logging.
         .mount("/", routes::ui::routes())
