@@ -78,6 +78,7 @@ pub fn init(pool: Pool) {
             let mut failed_to_submit = Vec::new();
             for job_record in top_of_queue {
                 let pool = pool.clone();
+                let job_id = job_record.id;
 
                 if let Err(e) = worker.job_tick(
                     &job_record.kind.clone(),
@@ -85,7 +86,7 @@ pub fn init(pool: Pool) {
                     move |_result| {
                         use crate::db::schema::jobs::dsl::*;
                         let conn = pool.get().unwrap();
-                        diesel::delete(jobs.filter(id.eq(id)))
+                        diesel::delete(jobs.filter(id.eq(job_id)))
                             .execute(&conn)
                             .unwrap();
                     },
