@@ -1,10 +1,11 @@
 [package]
 name = "turnstile"
 version = "0.1.0"
+edition = "2018"
 authors = ["Erin Moon <erin@hashbang.sh>"]
 
 [dependencies]
 threadpool = "1.7"
-quick-error = "1.2"
 serde = "1.0"
 serde_json = "1.0"
+failure = "0.1.5"

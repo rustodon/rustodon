@@ -1,16 +1,16 @@
 use serde::de::Deserialize;
 use serde_json::{self, Value};
 use std::collections::HashMap;
-use std::error::Error as StdError;
 use std::panic::{self, RefUnwindSafe};
 use std::sync::Arc;
 use threadpool::{Builder as ThreadPoolBuilder, ThreadPool};
+use failure::{self, Fallible};
 
-use error::Error;
-use job::Job;
-use job::Perform;
+use crate::error::{Error, SyncPanicError};
+use crate::job::Job;
+use crate::job::Perform;
 
-type HandlerFn = Box<(Fn(Value) -> Result<(), Box<StdError>> + Send + Sync + 'static)>;
+type HandlerFn = Box<(Fn(Value) -> Fallible<()> + Send + Sync + 'static)>;
 
 pub struct Worker {
     handlers:    HashMap<&'static str, Arc<HandlerFn>>,
@@ -34,10 +34,11 @@ impl Worker {
         self.handlers.insert(
             J::kind(),
             Arc::new(Box::new(|value| {
-                let job: J = serde_json::from_value(value).map_err(Error::DeserializeError)?;
+                let job: J = serde_json::from_value(value).map_err(|e| Error::DeserializeError(e.into()))?;
 
-                panic::catch_unwind(|| Perform::perform(&job).map_err(Error::JobInnerError))
-                    .map_err(Error::JobPanicked)??;
+                panic::catch_unwind(|| Perform::perform(&job))
+                    .map_err(|panic| Error::JobPanicked(SyncPanicError::new(panic)))?
+                    .map_err(Error::JobInnerError)?;
 
                 Ok(())
             })),
@@ -48,7 +49,7 @@ impl Worker {
         &mut self,
         kind: &str,
         data: Value,
-        on_final: impl Fn(Result<(), Box<StdError>>) + Send + 'static,
+        on_final: impl Fn(Fallible<()>) + Send + 'static,
     ) -> Result<(), Error> {
         let handler = self.handlers.get(kind).ok_or(Error::InvalidKind)?.clone();
         self.thread_pool.execute(move || {

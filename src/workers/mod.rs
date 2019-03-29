@@ -1,6 +1,5 @@
 use diesel::prelude::*;
 use serde_json;
-use std::error::Error;
 use std::thread;
 use std::time::Duration;
 
@@ -8,9 +7,10 @@ use crate::db::models::JobRecord;
 use crate::db::types::JobStatus;
 use crate::db::Pool;
 use diesel;
+use failure::{format_err, Error};
 use serde_derive::{Deserialize, Serialize};
-use slog::{slog_error, slog_info, slog_trace};
-use slog_scope::{error, info, trace};
+use slog::{slog_error, slog_info, slog_trace, slog_debug};
+use slog_scope::{error, info, trace, debug};
 use turnstile::{ExecutionContract, Job, Perform, Worker};
 
 const BATCH_SIZE: i64 = 10;
@@ -36,7 +36,7 @@ impl Job for TestJob {
 }
 
 impl Perform for TestJob {
-    fn perform(&self) -> Result<(), Box<Error>> {
+    fn perform(&self) -> Result<(), Error> {
         info!("+++++++ {a} {a} {a} {a} +++++++", a = &self.msg);
         Ok(())
     }

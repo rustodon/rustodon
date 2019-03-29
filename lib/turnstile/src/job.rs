@@ -1,4 +1,4 @@
-use std::error::Error;
+use failure::Fallible;
 use std::time::Duration;
 
 pub trait Job {
@@ -38,5 +38,5 @@ impl ExecutionContract {
 
 pub trait Perform {
     /// Runs this job's action.
-    fn perform(&self) -> Result<(), Box<Error>>;
+    fn perform(&self) -> Fallible<()>;
 }
