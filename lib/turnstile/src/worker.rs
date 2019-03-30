@@ -1,4 +1,3 @@
-use failure::{self, Fallible};
 use serde::de::Deserialize;
 use serde_json::{self, Value};
 use std::collections::HashMap;
@@ -10,7 +9,7 @@ use crate::error::{Error, SyncPanicError};
 use crate::job::Job;
 use crate::job::Perform;
 
-type HandlerFn = Box<(Fn(Value) -> Fallible<()> + Send + Sync + 'static)>;
+type HandlerFn = Box<(Fn(Value) -> Result<(), Error> + Send + Sync + 'static)>;
 
 pub struct Worker {
     handlers:    HashMap<&'static str, Arc<HandlerFn>>,
@@ -50,7 +49,7 @@ impl Worker {
         &mut self,
         kind: &str,
         data: Value,
-        on_final: impl Fn(Fallible<()>) + Send + 'static,
+        on_final: impl Fn(Result<(), Error>) + Send + 'static,
     ) -> Result<(), Error> {
         let handler = self.handlers.get(kind).ok_or(Error::InvalidKind)?.clone();
         self.thread_pool.execute(move || {
