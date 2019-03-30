@@ -1,5 +1,5 @@
 use dotenv::dotenv;
-use prettytable::{self, cell, row, Cell, Row, Table};
+use prettytable::{self, cell, row, Cell, Row, Attr, Table, color};
 use std::env;
 use structopt::StructOpt;
 
@@ -61,6 +61,8 @@ fn main() -> Result<(), Box<std::error::Error>> {
             }
         },
         Command::ListJobs => {
+            use crate::db::types::JobStatus;
+
             let job_list = {
                 use diesel::prelude::*;
                 use rustodon::db::models::JobRecord;
@@ -83,14 +85,19 @@ fn main() -> Result<(), Box<std::error::Error>> {
             ]);
 
             for job in job_list {
-                table.add_row(row![
-                    job.id,
-                    job.created_at,
-                    job.status,
-                    job.queue,
-                    job.kind,
-                    job.data
-                ]);
+                table.add_row(Row::new(vec![
+                    Cell::new(&job.id.to_string()),
+                    Cell::new(&job.created_at.to_string()),
+                    Cell::new(&job.status.to_string())
+                        .with_style(Attr::ForegroundColor(match job.status {
+                            JobStatus::Waiting => color::BLUE,
+                            JobStatus::Running => color::GREEN,
+                            JobStatus::Dead    => color::RED,
+                        })),
+                    Cell::new(&job.queue.to_string()),
+                    Cell::new(&job.kind.to_string()),
+                    Cell::new(&job.data.to_string())
+                ]));
             }
 
             table.printstd();
