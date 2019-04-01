@@ -20,7 +20,7 @@ itertools = "0.8.0"
 resopt = { path = "lib/resopt/" }
 structopt = "0.2.15"
 
-regex = "1.1.0"
+regex = "1.1.4"
 posticle = { path = "lib/posticle/" }
 
 slog = "2.4"
