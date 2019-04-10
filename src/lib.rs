@@ -94,21 +94,22 @@ pub fn app(db: db::Pool, logger: slog::Logger) -> Rocket {
         use diesel::prelude::*;
         let conn = db.get().unwrap();
 
-        use crate::db::models::NewJobRecord;
-        let r = NewJobRecord::on_queue(
-            workers::TestJob {
-                msg: "bengis".to_string(),
-            },
-            "default_queue",
-        )
-        .unwrap();
-        debug!("injecting test job");
-        diesel::insert_into(db::schema::jobs::table)
-            .values(&r)
-            .execute(&conn)
+        for i in 0..1 {
+            use crate::db::models::NewJobRecord;
+            let r = NewJobRecord::on_queue(
+                workers::TestJob {
+                    msg: format!("bengis:{}", i),
+                },
+                "default_queue",
+            )
             .unwrap();
-        debug!("done injecting test job");
-
+            debug!("injecting test job");
+            diesel::insert_into(db::schema::jobs::table)
+                .values(&r)
+                .execute(&conn)
+                .unwrap();
+            debug!("done injecting test job");
+        }
         // println!("{:?}", r);
     }
 

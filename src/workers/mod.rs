@@ -1,17 +1,17 @@
+use diesel;
 use diesel::prelude::*;
+use failure::{format_err, Error, Fail};
+use serde_derive::{Deserialize, Serialize};
 use serde_json;
+use slog::{slog_debug, slog_error, slog_info, slog_trace};
+use slog_scope::{debug, error, info, trace};
 use std::thread;
 use std::time::Duration;
+use turnstile::{self, ExecutionContract, Job, Perform, Worker};
 
 use crate::db::models::JobRecord;
 use crate::db::types::JobStatus;
 use crate::db::Pool;
-use diesel;
-use failure::{format_err, Error};
-use serde_derive::{Deserialize, Serialize};
-use slog::{slog_debug, slog_error, slog_info, slog_trace};
-use slog_scope::{debug, error, info, trace};
-use turnstile::{ExecutionContract, Job, Perform, Worker};
 
 const BATCH_SIZE: i64 = 10;
 const CHECK_PERIOD: Duration = Duration::from_secs(1); // 1/(1 hz)
@@ -38,7 +38,12 @@ impl Job for TestJob {
 impl Perform for TestJob {
     fn perform(&self) -> Result<(), Error> {
         info!("+++++++ {a} {a} {a} {a} +++++++", a = &self.msg);
-        Ok(())
+
+        // panic!("🅱️anic");
+
+        Err(format_err!("a constructed error"))
+
+        // Ok(())
     }
 }
 
@@ -83,12 +88,43 @@ pub fn init(pool: Pool) {
                 if let Err(e) = worker.job_tick(
                     &job_record.kind.clone(),
                     job_record.data.clone(),
-                    move |_result| {
-                        use crate::db::schema::jobs::dsl::*;
-                        let conn = pool.get().unwrap();
-                        diesel::delete(jobs.filter(id.eq(job_id)))
-                            .execute(&conn)
-                            .unwrap();
+                    move |result| {
+                        match result {
+                            // If the job encountered an inner error, fail/reschedule it, following the job type's execution policy.
+                            Err(turnstile::Error::JobInnerError(inner_error)) => {
+                                error!("Job encountered inner error"; "error" => %inner_error);
+                            },
+                            // If the job panicked, fail/reschedule it, following the job type's execution policy.
+                            Err(turnstile::Error::JobPanicked(panic_msg)) => {
+                                error!("Job panicked!"; "panic_message" => %panic_msg);
+                            },
+                            
+                            // Immediately terminate the job if we failed to deserialize, since serde is generally deterministic,
+                            // and won't succeed if we try again.
+                            Err(turnstile::Error::DeserializeError(serde_error)) => {
+                                error!("Job failed to deserialize"; "error" => %serde_error);
+                                use crate::db::schema::jobs::dsl::*;
+                                let conn = pool.get().unwrap();
+                                diesel::update(jobs)
+                                    .filter(id.eq(job_id))
+                                    .set(status.eq(JobStatus::Dead))
+                                    .execute(&conn)
+                                    .unwrap();
+                            },
+
+                            Err(turnstile::Error::InvalidKind) => unreachable!(), // wouldn't be accepted in the first place
+
+                            // The job completed successfully! We can just delete it from the database.
+                            Ok(_) => {
+                                debug!("Job execution succeeded!"; "id" => job_id);
+
+                                use crate::db::schema::jobs::dsl::*;
+                                let conn = pool.get().unwrap();
+                                diesel::delete(jobs.filter(id.eq(job_id)))
+                                    .execute(&conn)
+                                    .unwrap();
+                            },
+                        }
                     },
                 ) {
                     error!("submitting job to thread pool failed"; "error" => %e, "job" => ?job_record);
