@@ -38,7 +38,7 @@ validator = "0.8"
 validator_derive = "0.8"
 
 askama = { version = "0.8.0", features = ["with-rocket"] }
-ammonia = "2.0.0"
+ammonia = "2.1.0"
 
 diesel = { version = "1.4.2", features = ["postgres", "chrono", "r2d2"] }
 flaken = "0.2.2"
