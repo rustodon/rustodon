@@ -11,7 +11,7 @@ default-run = "rustodon"
 members = ['lib/resopt/', 'lib/posticle/']
 
 [dependencies]
-dotenv = "0.13"
+dotenv = "0.14"
 maplit = "1.0"
 failure = "0.1.5"
 failure_derive = "0.1.5"
