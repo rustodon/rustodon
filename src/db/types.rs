@@ -5,6 +5,7 @@ pub enum JobStatus {
     Waiting,
     Running,
     Dead,
+    RetryQueued,
 }
 
 impl ToString for JobStatus {
@@ -13,6 +14,7 @@ impl ToString for JobStatus {
             JobStatus::Waiting => "waiting",
             JobStatus::Running => "running",
             JobStatus::Dead => "dead",
+            JobStatus::RetryQueued => "retry-queued",
         })
         .to_string()
     }

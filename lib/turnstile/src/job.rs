@@ -9,28 +9,41 @@ pub trait Job {
     fn should_run(&self) -> bool;
 
     /// Returns the execution contract of this job.
-    fn execution_contract(&self) -> ExecutionContract;
+    fn execution_contract() -> ExecutionContract;
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum Backoff {
     ConstantWait(Duration),
     Exponential { base: Duration },
 }
 
-pub enum FailBehavior {
-    Retry(Backoff),
-    Destroy,
+#[derive(Debug, Clone, Copy)]
+pub enum RetryBehavior {
+    Backoff(Backoff),
+    Immediate,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum PanicBehavior {
+    Fail,
+    Retry(RetryBehavior),
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct ExecutionContract {
     pub timeout: Option<Duration>,
-    pub fail_behavior: FailBehavior,
+    pub retry_behavior: RetryBehavior,
+    pub autoretry: Option<RetryBehavior>,
+    pub panic: PanicBehavior,
 }
 
 impl ExecutionContract {
-    pub const fn immediate_fail() -> Self {
+    pub const fn new() -> Self {
         Self {
-            fail_behavior: FailBehavior::Destroy,
+            panic: PanicBehavior::Fail,
+            retry_behavior: RetryBehavior::Immediate,
+            autoretry: None,
             timeout: None,
         }
     }

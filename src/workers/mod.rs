@@ -1,13 +1,13 @@
 use diesel;
 use diesel::prelude::*;
-use failure::{format_err, Error, Fail};
+use failure::{format_err, Error};
 use serde_derive::{Deserialize, Serialize};
 use serde_json;
 use slog::{slog_debug, slog_error, slog_info, slog_trace};
 use slog_scope::{debug, error, info, trace};
 use std::thread;
 use std::time::Duration;
-use turnstile::{self, ExecutionContract, Job, Perform, Worker};
+use turnstile::{self, ExecutionContract, Job, PanicBehavior, Perform, Worker};
 
 use crate::db::models::JobRecord;
 use crate::db::types::JobStatus;

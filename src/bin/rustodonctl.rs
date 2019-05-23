@@ -1,5 +1,5 @@
 use dotenv::dotenv;
-use prettytable::{self, cell, row, Cell, Row, Attr, Table, color};
+use prettytable::{self, cell, color, row, Attr, Cell, Row, Table};
 use std::env;
 use structopt::StructOpt;
 
@@ -88,15 +88,17 @@ fn main() -> Result<(), Box<std::error::Error>> {
                 table.add_row(Row::new(vec![
                     Cell::new(&job.id.to_string()),
                     Cell::new(&job.created_at.to_string()),
-                    Cell::new(&job.status.to_string())
-                        .with_style(Attr::ForegroundColor(match job.status {
-                            JobStatus::Waiting => color::BLUE,
-                            JobStatus::Running => color::GREEN,
-                            JobStatus::Dead    => color::RED,
-                        })),
+                    Cell::new(&job.status.to_string()).with_style(Attr::ForegroundColor(match job
+                        .status
+                    {
+                        JobStatus::Waiting => color::BLUE,
+                        JobStatus::Running => color::GREEN,
+                        JobStatus::RetryQueued => color::YELLOW,
+                        JobStatus::Dead => color::RED,
+                    })),
                     Cell::new(&job.queue.to_string()),
                     Cell::new(&job.kind.to_string()),
-                    Cell::new(&job.data.to_string())
+                    Cell::new(&job.data.to_string()),
                 ]));
             }
 

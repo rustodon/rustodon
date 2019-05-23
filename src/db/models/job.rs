@@ -1,5 +1,6 @@
 use chrono::offset::Utc;
-use chrono::DateTime;
+use chrono::prelude::*;
+use diesel::prelude::*;
 use serde::Serialize;
 use serde_json::{self, Value};
 use std::error::Error;
@@ -9,6 +10,7 @@ use turnstile::Job;
 use crate::db::idgen::id_generator;
 use crate::db::schema::jobs;
 use crate::db::types::JobStatus;
+use crate::db::DbConnection;
 
 #[derive(Identifiable, Queryable, Associations, PartialEq, Clone, Debug)]
 #[table_name = "jobs"]
@@ -21,6 +23,8 @@ pub struct JobRecord {
     pub queue: String,
     pub kind:  String,
     pub data:  Value,
+
+    pub last_attempt: Option<DateTime<Utc>>,
 }
 
 #[derive(Insertable, Debug)]
