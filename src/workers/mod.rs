@@ -69,7 +69,9 @@ pub fn init(pool: Pool) {
             trace!("job collection tick"; "top_of_queue" => ?top_of_queue);
 
             // -- compute which jobs should run, and set those to running state
-            let should_run: Vec<&JobRecord> = top_of_queue.iter().filter(|_| true).collect();
+            let should_run: Vec<&JobRecord> = top_of_queue.iter()
+                .filter(|jobr| worker.should_run(&jobr.kind, jobr.data.clone())
+                    .expect("Error filtering job queue for jobs which should run")).collect();
             {
                 use crate::db::schema::jobs::dsl::*;
                 diesel::update(jobs)
