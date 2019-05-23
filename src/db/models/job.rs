@@ -55,3 +55,20 @@ impl<'a> NewJobRecord<'a> {
         })
     }
 }
+
+impl JobRecord {
+    pub fn kill(&self, conn: &DbConnection) -> QueryResult<usize> {
+        use crate::db::schema::jobs::dsl::*;
+
+        diesel::update(jobs)
+            .filter(id.eq(self.id))
+            .set(status.eq(JobStatus::Dead))
+            .execute(conn)
+    }
+
+    pub fn drop(&self, conn: &DbConnection) -> QueryResult<usize> {
+        use crate::db::schema::jobs::dsl::*;
+
+        diesel::delete(jobs.filter(id.eq(self.id))).execute(conn)
+    }
+}

@@ -27,11 +27,12 @@ impl Job for TestJob {
     }
 
     fn should_run(&self) -> bool {
+        debug!("computing should-run-ness");
         true
     }
 
-    fn execution_contract(&self) -> ExecutionContract {
-        ExecutionContract::immediate_fail()
+    fn execution_contract() -> ExecutionContract {
+        ExecutionContract::new()
     }
 }
 
@@ -41,9 +42,9 @@ impl Perform for TestJob {
 
         // panic!("🅱️anic");
 
-        Err(format_err!("a constructed error"))
+        // Err(format_err!("a constructed error"))
 
-        // Ok(())
+        Ok(())
     }
 }
 
@@ -83,14 +84,16 @@ pub fn init(pool: Pool) {
 
             // -- submit jobs which should be run to the thread pool
             let mut failed_to_submit = Vec::new();
+
             for job_record in top_of_queue {
                 let pool = pool.clone();
                 let job_id = job_record.id;
+                let job = job_record.clone();
 
                 if let Err(e) = worker.job_tick(
                     &job_record.kind.clone(),
                     job_record.data.clone(),
-                    move |result| {
+                    move |result, execution_contract| {
                         match result {
                             // If the job encountered an inner error, fail/reschedule it, following the job type's execution policy.
                             Err(turnstile::Error::JobInnerError(inner_error)) => {
@@ -99,38 +102,38 @@ pub fn init(pool: Pool) {
                             // If the job panicked, fail/reschedule it, following the job type's execution policy.
                             Err(turnstile::Error::JobPanicked(panic_msg)) => {
                                 error!("Job panicked!"; "panic_message" => %panic_msg);
+
+                                match execution_contract.panic {
+                                    PanicBehavior::Fail => {} // fail the job.
+                                    PanicBehavior::Retry(behavior) => {
+                                        info!("Enqueueing job retry"; "kind" => &job.kind, "id" => &job.id);
+                                    }
+                                }
                             },
-                            
+
                             // Immediately terminate the job if we failed to deserialize, since serde is generally deterministic,
                             // and won't succeed if we try again.
                             Err(turnstile::Error::DeserializeError(serde_error)) => {
                                 error!("Job failed to deserialize"; "error" => %serde_error);
-                                use crate::db::schema::jobs::dsl::*;
+
                                 let conn = pool.get().unwrap();
-                                diesel::update(jobs)
-                                    .filter(id.eq(job_id))
-                                    .set(status.eq(JobStatus::Dead))
-                                    .execute(&conn)
-                                    .unwrap();
+                                job.kill(&conn).unwrap();
                             },
 
-                            Err(turnstile::Error::InvalidKind) => unreachable!(), // wouldn't be accepted in the first place
+                            Err(turnstile::Error::InvalidKind) => unreachable!(), // wouldn't be accepted to thread pool in the first place;
+                                                                                  // it will be handled in the outer `if let Err`.
 
                             // The job completed successfully! We can just delete it from the database.
                             Ok(_) => {
                                 debug!("Job execution succeeded!"; "id" => job_id);
-
-                                use crate::db::schema::jobs::dsl::*;
                                 let conn = pool.get().unwrap();
-                                diesel::delete(jobs.filter(id.eq(job_id)))
-                                    .execute(&conn)
-                                    .unwrap();
+                                job.drop(&conn).unwrap();
                             },
                         }
                     },
                 ) {
                     error!("submitting job to thread pool failed"; "error" => %e, "job" => ?job_record);
-                    failed_to_submit.push(job_record.id);
+                    failed_to_submit.push(job_id);
                 }
             }
 
