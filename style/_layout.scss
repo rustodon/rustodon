@@ -14,8 +14,6 @@ main {
   padding: 2rem 0;
   margin-top: 5rem;
   display: flex;
-  border-bottom: $border_width solid $border_color; // set the footer off
-  @extend %big-shadow;
 }
 
 footer {
