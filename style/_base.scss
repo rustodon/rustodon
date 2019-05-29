@@ -5,8 +5,6 @@
   margin: 0;
   list-style-type: none;
   font: inherit;
-  color: inherit;
-  background-color: inherit;
   border: 0 currentcolor solid;
 }
 
@@ -16,8 +14,8 @@ html {
 
 body {
   // aesthetics
-  color: $text_color;
-  background-color: $background_color;
+  color: $ink_color;
+  background-color: $paper_color;
   font-family: $base_font;
   line-height: $line_height;
   text-rendering: optimizeLegibility;
@@ -49,6 +47,10 @@ a {
   }
 }
 
+hr {
+  border-bottom: $border_width_alt solid $ink_color_alt;
+}
+
 code,
 pre {
   font-family: $mono_font;
@@ -63,8 +65,8 @@ small {
 // restyle inputs so they look consistent across browsers
 input,
 textarea {
-  color: $text_color;
-  background: $invert_color;
+  color: $ink_color;
+  background: $paper_color_alt;
   border: $border_width solid $border_color;
   border-radius: $border_radius;
   padding: .25em .5em;
@@ -82,11 +84,9 @@ button,
 a.button,
 a.button:visited {
   @extend %button-styling;
-  display: inline-block;
   padding: 1px 1rem;
   text-align: center;
   text-decoration: none;
-  cursor: pointer;
 }
 
 .button-row {
@@ -103,7 +103,7 @@ a.button:visited {
   float: left;
   background: $border_color_alt;
   &:hover {
-    background: $warning_color;
+    background: $error_color_alt;
   }
 }
 

@@ -1,9 +1,8 @@
 .top-menu {
-    @extend %big-shadow;
     position: fixed;
     right: 0;
     left: 0;
-    background: $background_color;
+    background: $paper_color;
     padding: 0 1rem;
     flex-direction: column;
     flex: 0 0 auto;
@@ -13,7 +12,7 @@
     button {
         padding: 0.5rem 1rem;
         display: inline-block;
-        color: $text_color;
+        color: $ink_color;
         text-decoration: none;
     }
 
@@ -77,7 +76,7 @@
         font-weight: 400;
          &:hover {
             background: $error_color;
-            color: $invert_color;
+            color: $paper_color_alt;
         }
     }
 }
@@ -87,12 +86,12 @@
     width: 8rem;
 }
 .tab:hover {
-    color: $text_color;
-    background: $background_color;
+    color: $ink_color;
+    background: $paper_color;
     border-bottom: 3px solid;
 }
 .tab:active, .tab:focus {
-    color: $text_color;
+    color: $ink_color;
     background: $focused_color;;
 }
 .tab.active {
