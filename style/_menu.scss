@@ -92,7 +92,7 @@
 }
 .tab:active, .tab:focus {
     color: $ink_color;
-    background: $focused_color;;
+    background: $active_color;;
 }
 .tab.active {
     border-bottom: 3px solid $active_color;
@@ -125,8 +125,8 @@
 
 .top-menu__profile a::before {
     content: "⚇";
-    background: $visited_color;
-    color: $visited_color_alt;
+    background: $special_color;
+    color: $special_color_alt;
     border-radius: $border_radius;
     text-align: center;
     overflow: hidden;
