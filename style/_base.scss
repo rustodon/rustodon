@@ -24,20 +24,19 @@ body {
 
 // show focus outlines on everything!! tab accessibility~
 :focus {
-  outline: $focused_color auto 1px;
+  outline: $active_color auto 1px;
 }
 
 a {
   color: $link_color;
   &:hover {
-    color: $hover_color;
     text-decoration: underline;
   }
   &:active {
     color: $active_color;
   }
   &:visited {
-    color: $visited_color;
+    color: $link_color;
   }
   &[disabled] {
     opacity: .5;
@@ -128,7 +127,7 @@ button.link {
     color: $active_color;
   }
   &:hover {
-    color: $hover_color;
+    color: $active_color;
   }
 }
 
@@ -140,14 +139,14 @@ button.link {
   left: 30%;
   right: 30%;
   text-align: center;
-  @extend %big-shadow;
+  @extend %shadow;
   &.error {
     border-color: $error_color;
     background-color: $error_color_alt;
   }
   &.success {
     border-color: $active_color;
-    background-color: $active_color_alt;
+    background-color: $action_color;
   }
   &-hider {
     &,
@@ -187,6 +186,9 @@ button.link {
   max-width: $column_width;
   border-top: $standard_border;
   padding: 1rem 0;
+  & > header {
+    font-size: 0.8em;
+  }
 }
 
 .timeline-avatar {
@@ -195,5 +197,18 @@ button.link {
   margin-right: 1rem;
   border-radius: $border_radius;
   float: left;
-  background: $visited_color;
+  background: $ink_color_alt;
+  overflow: hidden;
+}
+
+.timeline-avatar::before {
+  content: attr(title);
+  display: inline-block;
+  color: $border_color_alt;
+  font-size: 5rem;
+  line-height: 0.5;
+  margin-left: -0.5em;
+  letter-spacing: -0.3em;
+  font-weight: 700;
+  font-style:italic;
 }
