@@ -7,3 +7,4 @@ Rocket.toml
 /.bundle
 /vendor
 .vscode/
+node_modules
