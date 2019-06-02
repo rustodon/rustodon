@@ -11,6 +11,7 @@
     <header class="top-menu">
         {%- block topmenu -%}
         {%- endblock -%}
+    <hr/>
     </header>
     <main class="main-content">
         {%- match flash -%}
@@ -27,6 +28,7 @@
         {%- endblock -%}
     </main>
     <footer class="page-end">
+        <hr/>
         <small class="commit-message">
             Powered by Rustodon. Running commit
             <a href="https://github.com/rustodon/rustodon/commit/{{revision}}">
@@ -34,6 +36,6 @@
             </a>
         </small>
     </footer>
-    <script src="/static/js/accessibility.js"></script>
+    <script src="/static/js/accessibility.min.js"></script>
 </body>
 </html>

@@ -30,10 +30,10 @@
 {% block content %}
     <section class="h-card">
         <header>
-            <span class="p-name">{{account_to_show.display_name_or_username()}}</span>
-            <span class="fq-username">
+            <p class="p-name">{{account_to_show.display_name_or_username()}}</p>
+            <p class="fq-username">
                 <a class="url u-uid" href="{{account_to_show.profile_path()|safe}}">{{account_to_show.fully_qualified_username()}}</a>
-            </span>
+            </p>
         </header>
         <section class="p-note">
             {% match account_to_show.transformed_bio(connection.as_ref()) %}

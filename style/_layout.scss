@@ -16,7 +16,7 @@ main {
   display: flex;
 }
 
-footer {
+.page-end {
   flex-shrink: 0; // prevent flexbox shrinkage (looking @ u, blink flexbox)
   padding: 1rem 2rem;
   margin: 1rem 0;
