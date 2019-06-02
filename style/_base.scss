@@ -24,7 +24,7 @@ body {
 
 // show focus outlines on everything!! tab accessibility~
 :focus {
-  outline: $active_color auto 1px;
+  outline: $link_color_alt auto 1px;
 }
 
 a {
@@ -132,12 +132,13 @@ button.link {
 }
 
 .flash {
-  border: 2px dashed $border_color;
-  padding: 1rem;
+  color: $paper_color_alt;
+  background-color: $ink_color_alt;
+  border: $border_width solid $border_color;
+  padding: 0.5rem 4rem;
   position: absolute;
   top: 0;
-  left: 30%;
-  right: 30%;
+  right: 0;
   text-align: center;
   @extend %shadow;
   &.error {
@@ -155,12 +156,12 @@ button.link {
       display: none;
     }
     &-label {
-      color: $error_color;
+      color: $paper_color_alt;
       position: absolute;
       top: 0;
-      right: 30%;
+      right: 1rem;
       z-index: 5;
-      margin: .5em;
+      margin: .5rem;
       background: transparent;
     }
   }
@@ -207,7 +208,7 @@ button.link {
   color: $border_color_alt;
   font-size: 5rem;
   line-height: 0.5;
-  margin-left: -0.5em;
+  margin-left: -0.75em;
   letter-spacing: -0.3em;
   font-weight: 700;
   font-style:italic;
