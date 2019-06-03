@@ -8,3 +8,4 @@ Rocket.toml
 /vendor
 .vscode/
 node_modules
+npm-debug.log

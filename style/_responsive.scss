@@ -42,4 +42,11 @@
   html {
     font-size: 14px;
   }
+  .top-menu__primary{
+    display: none;
+  }
+  .top-menu_secondary{
+    // TODO: not sure why this is necessary
+    height: 38px;
+  }
 }
