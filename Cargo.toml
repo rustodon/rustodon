@@ -18,7 +18,7 @@ failure_derive = "0.1.5"
 lazy_static = "1.3"
 itertools = "0.8.0"
 resopt = { path = "lib/resopt/" }
-structopt = "0.2.15"
+structopt = "0.2.17"
 
 regex = "1.1.6"
 posticle = { path = "lib/posticle/" }
