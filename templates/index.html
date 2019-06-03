@@ -21,14 +21,6 @@
         <nav class="top-menu__primary">
             <ul>
                 <li class="top-menu__home"><h1><a class="top-menu__home-link" href="/">Rustodon</a></h1></li>
-                <li class="top-menu__profile"><a class="top-menu__profile-link" href="{{a.profile_path()|safe}}">Profile</a></li>
-                <li class="top-menu__logout">
-                    <form class="inline" method="post" action="/auth/sign_out">
-                        <input type="hidden" name="stub" />
-                        <button class="link" type="submit" name="submit">Sign&#160;out</button>
-                    </form>
-                </li>
-                <li class="top-menu__settings"><a href="" disabled>Settings</a></li>
             </ul>
         </nav>
         <nav class="top-menu__secondary">
@@ -37,7 +29,20 @@
                 <li class="top-menu__tl-home"><a class="{%- call active(timeline, "home") %} tab" href="?timeline=home" disabled>Home</a></li>
                 <li class="top-menu__tl-local"><a class="{%- call active(timeline, "local") %} tab" href="?timeline=local">Local</a></li>
                 <li class="top-menu__tl-fed"><a class="{%- call active(timeline, "federated") %} tab" href="?timeline=federated" disabled>Federated</a></li>
-                <li class="top-menu__space"></li>
+                <li class="top-menu__user"><a class="top-menu__user-link" href="">Menu</a>
+                    <ul class="top-menu__user-submenu">
+                        <li class="top-menu__profile"><a class="top-menu__profile-link" href="{{a.profile_path()|safe}}">Profile</a>
+                        <li class="top-menu__logout">
+                            <form class="inline" method="post" action="/auth/sign_out">
+                                <input type="hidden" name="stub" />
+                                <button class="link" type="submit" name="submit">Sign&#160;out</button>
+                            </form>
+                        </li>
+                        <li class="top-menu__settings">
+                            <a href="" disabled>Settings</a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </nav>
     {%- when None -%}

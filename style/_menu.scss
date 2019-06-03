@@ -26,9 +26,9 @@
     display: inline-block;
   }
 
-  &__home {
-    flex-basis: 90%;
-    font-size: 1.6rem;
+  &__home a {
+    font-size: 1.5rem;
+    padding:0;
   }
 
   &__home,
@@ -38,10 +38,6 @@
       padding-left: 0;
     }
   }
-
-  &__settings,
-  &__logout,
-  &__profile,
   &__tl-home,
   &__tl-local,
   &__tl-fed {
@@ -49,18 +45,23 @@
     flex-basis: 9rem;
     white-space: nowrap;
   }
-
+  &__profile,
   &__settings,
-  &__logout,
-  &__profile {
+  &__logout {
+    text-align: left;
+    white-space: nowrap;
+  }
+  &__user {
+    // Container for positioned submenu
+    position: relative;
+    white-space: nowrap;
     text-align: end;
     a {
       padding-right: 0;
     }
   }
-
   &__write,
-  &__space {
+  &__user {
     flex-basis: 48%;
   }
   &__a11y {
@@ -146,11 +147,36 @@
   background-position: -90px 0;
 }
 
-.top-menu__profile a::before {
-  content: "⚇";
+.top-menu__profile>a::before {
+  background-position: -60px 0;
+}
+.top-menu__profile>a:hover {
   background: $special_color;
-  color: $special_color_alt;
-  border-radius: $border_radius;
-  text-align: center;
-  overflow: hidden;
+  color: $paper_color_alt;
+}
+
+ul.top-menu__user-submenu{
+  display: none;
+  position:absolute;
+  right: 0;
+  top: 2em;
+  background: $paper_color_alt;
+
+  li {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+  a, button{
+    padding: 0.5rem 1rem;
+    width: 100%;
+  }
+}
+
+.top-menu__user:hover ul,
+ul.top-menu__user-submenu:hover,
+.top-menu__user:focus .top-menu__user-submenu,
+.top-menu__user:focus-within .top-menu__user-submenu {
+  display: block;
+  @extend %shadow;
 }
