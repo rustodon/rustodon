@@ -56,7 +56,7 @@
     position: relative;
     white-space: nowrap;
     text-align: end;
-    a {
+    & > a {
       padding-right: 0;
     }
   }
@@ -88,10 +88,13 @@
   }
 }
 
+.top-menu__secondary {
+  margin-bottom: -$border_width_alt;
+}
+
 .tab {
   border-radius: $border_radius $border_radius 0 0;
   border-bottom: $border_width_alt solid transparent;
-  margin-bottom: -$border_width_alt;
   width: 8rem;
 }
 .tab:hover {

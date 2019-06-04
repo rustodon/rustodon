@@ -13,7 +13,7 @@
     flex-direction: column;
   }
   .write-status {
-    padding-top: 7rem;
+    padding-top: 6rem;
   }
   .write-status-form,
   .status {
@@ -26,6 +26,9 @@
     overflow: hidden;
     white-space: nowrap;
     max-width: 20px;
+  }
+  .top-menu__secondary {
+    height: 45px;
   }
   .top-menu a.top-menu__home-link {
     max-width: 8em;
@@ -42,11 +45,13 @@
   html {
     font-size: 14px;
   }
+  .write-status {
+    padding-top: 3rem;
+  }
   .top-menu__primary{
     display: none;
   }
-  .top-menu_secondary{
-    // TODO: not sure why this is necessary
-    height: 38px;
+  .top-menu__secondary, .top-menu a{
+    height: 40px;
   }
 }
