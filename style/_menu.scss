@@ -1,4 +1,4 @@
-.top-menu {
+.page-header {
   position: fixed;
   right: 0;
   left: 0;
@@ -26,12 +26,17 @@
     display: inline-block;
   }
 
-  &__home a {
+  .logo,
+  .logo a {
+    text-align: start;
     font-size: 1.5rem;
-    padding:0;
+    padding: 0;
   }
+}
 
-  &__home,
+.top-menu {
+  margin-bottom: -$border_width_alt;
+
   &__write {
     text-align: start;
     a {
@@ -86,10 +91,6 @@
       color: $paper_color_alt;
     }
   }
-}
-
-.top-menu__secondary {
-  margin-bottom: -$border_width_alt;
 }
 
 .tab {
@@ -150,17 +151,17 @@
   background-position: -90px 0;
 }
 
-.top-menu__profile>a::before {
+.top-menu__profile > a::before {
   background-position: -60px 0;
 }
-.top-menu__profile>a:hover {
+.top-menu__profile > a:hover {
   background: $special_color;
   color: $paper_color_alt;
 }
 
-ul.top-menu__user-submenu{
+ul.top-menu__user-submenu {
   display: none;
-  position:absolute;
+  position: absolute;
   right: 0;
   top: 2em;
   background: $paper_color_alt;
@@ -170,12 +171,12 @@ ul.top-menu__user-submenu{
     margin: 0;
     padding: 0;
   }
-  a, button{
+  a,
+  button {
     padding: 0.5rem 1rem;
     width: 100%;
   }
 }
-
 .top-menu__user:hover ul,
 ul.top-menu__user-submenu:hover,
 .top-menu__user:focus .top-menu__user-submenu,
