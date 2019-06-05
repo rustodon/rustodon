@@ -46,7 +46,7 @@ flaken = "0.2.2"
 chrono = "0.4"
 chrono-humanize = "0.0.11"
 
-openssl = "0.10.22"
+openssl = "0.10.23"
 pwhash = "0.3"
 
 base32 = "0.4"
