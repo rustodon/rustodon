@@ -112,48 +112,110 @@
   border-color: $active_color;
 }
 
-.top-menu__write a::before,
-.top-menu__search a::before,
-.top-menu__settings a::before,
-.top-menu__logout button::before,
-.top-menu__tl-home a::before,
-.top-menu__tl-local a::before,
-.top-menu__tl-fed a::before,
-.top-menu__profile a::before {
-  background: no-repeat url(img/icons.png);
-  background-size: 199px;
+.icon {
   width: 20px;
   height: 20px;
-  content: "";
   display: inline-block;
   margin-right: 0.5em;
+  stroke: currentcolor;
+  stroke-width: 4px;
+  fill-opacity: 0;
+  &:hover {
+    fill-opacity: 1;
+  }
 }
 
-.top-menu__write a::before {
-  background-position: 0 0;
+.no-fill,
+.house-outline,
+.rocket-body,
+.rocket-fin,
+.exit-door,
+.magnifier-handle,
+.magnifier-frame,
+.gear-inner-circle,
+.globe {
+  fill: none;
 }
-.top-menu__search a::before {
-  background-position: -180px 0;
+.globe-node {
+  stroke: none;
 }
-.top-menu__settings a::before {
-  background-position: -150px 0;
+.house-outline {
+  fill: $active_color;
 }
-.top-menu__logout button::before {
-  background-position: -120px 0;
+.house2 .house-outline,
+.globe-node {
+  fill: $link_color_alt;
 }
-.top-menu__tl-home a::before {
-  background-position: -60px 0;
+.house3 .house-outline {
+  fill: $special_color;
 }
-.top-menu__tl-local a::before {
-  background-position: -30px 0;
+.gear-outer-circle {
+  fill: $ink_color;
 }
-.top-menu__tl-fed a::before {
-  background-position: -90px 0;
+.gear-inner-circle {
+  fill: $paper_color;
+}
+.exit-arrow,
+.rocket-fin {
+  fill: $error_color_alt;
+}
+.rocket-body,
+.house-window {
+  fill: $paper_color_alt;
+}
+#post,
+#fave,
+.rocket-flame {
+  fill: $highlight_color;
+}
+.gear-tooth {
+  fill: $ink_color_alt;
 }
 
-.top-menu__profile > a::before {
-  background-position: -60px 0;
-}
+
+
+// .top-menu__write a::before,
+// .top-menu__search a::before,
+// .top-menu__settings a::before,
+// .top-menu__logout button::before,
+// .top-menu__tl-home a::before,
+// .top-menu__tl-local a::before,
+// .top-menu__tl-fed a::before,
+// .top-menu__profile a::before {
+//   background-repeat: no-repeat;
+//   background-size: 199px;
+//   width: 20px;
+//   height: 20px;
+//   content: "";
+//   display: inline-block;
+//   margin-right: 0.5em;
+// }
+
+// .top-menu__write a::before {
+//   background-position: 0 0;
+// }
+// .top-menu__search a::before {
+//   background-position: -180px 0;
+// }
+// .top-menu__settings a::before {
+//   background-position: -150px 0;
+// }
+// .top-menu__logout button::before {
+//   background-position: -120px 0;
+// }
+// .top-menu__tl-home a::before {
+//   background-position: -60px 0;
+// }
+// .top-menu__tl-local a::before {
+//   background-position: -30px 0;
+// }
+// .top-menu__tl-fed a::before {
+//   background-position: -90px 0;
+// }
+
+// .top-menu__profile > a::before {
+//   background-position: -60px 0;
+// }
 .top-menu__profile > a:hover {
   background: $special_color;
   color: $paper_color_alt;
