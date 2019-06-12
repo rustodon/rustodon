@@ -19,14 +19,18 @@
   .status {
     max-width: 100%;
   }
-  .top-menu a {
-    padding: 0.5rem 0;
-    overflow: hidden;
-    white-space: nowrap;
-    max-width: 20px;
+  .logo {
+    height: 32px;
   }
   .top-menu {
-    height: 44px;
+    height: 42px;
+    a {
+      padding: 0.5rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+      max-width: 20px;
+      height: 42px;
+    }
   }
   ul.top-menu__user-submenu a,
   ul.top-menu__user-submenu button,
@@ -42,6 +46,9 @@
   .page-end {
     padding: 0 1rem;
   }
+  .button-row button {
+    padding: 0.5rem 2rem;
+  }
 }
 @media screen and (max-width: 480px) {
   html {
@@ -50,10 +57,11 @@
   .write-status {
     padding-top: 3rem;
   }
-  .logo{
+  .logo {
     display: none;
   }
-  .top-menu, .top-menu a{
+  .top-menu,
+  .top-menu a {
     height: 40px;
   }
 }
