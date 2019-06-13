@@ -22,6 +22,7 @@
     display: flex;
     text-align: center;
   }
+
   li {
     display: inline-block;
   }
@@ -97,125 +98,21 @@
   border-radius: $border_radius $border_radius 0 0;
   border-bottom: $border_width_alt solid transparent;
   width: 8rem;
-}
-.tab:hover {
-  color: $ink_color;
-  background: $paper_color;
-  border-color: $action_color;
-}
-.tab:active,
-.tab:focus {
-  color: $ink_color;
-  background: $active_color;
-}
-.tab.active {
-  border-color: $active_color;
-}
-
-.icon {
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  margin-right: 0.5em;
-  stroke: currentcolor;
-  stroke-width: 4px;
-  fill-opacity: 0;
   &:hover {
-    fill-opacity: 1;
+    color: $ink_color;
+    background: $paper_color;
+    border-color: $action_color;
+  }
+  &:active,
+  &:focus {
+    color: $ink_color;
+    background: $active_color;
+  }
+  &.active {
+    border-color: $active_color;
   }
 }
 
-.no-fill,
-.house-outline,
-.rocket-body,
-.rocket-fin,
-.exit-door,
-.magnifier-handle,
-.magnifier-frame,
-.gear-inner-circle,
-.globe {
-  fill: none;
-}
-.globe-node {
-  stroke: none;
-}
-.house-outline {
-  fill: $active_color;
-}
-.house2 .house-outline,
-.globe-node {
-  fill: $link_color_alt;
-}
-.house3 .house-outline {
-  fill: $special_color;
-}
-.gear-outer-circle {
-  fill: $ink_color;
-}
-.gear-inner-circle {
-  fill: $paper_color;
-}
-.exit-arrow,
-.rocket-fin {
-  fill: $error_color_alt;
-}
-.rocket-body,
-.house-window {
-  fill: $paper_color_alt;
-}
-#post,
-#fave,
-.rocket-flame {
-  fill: $highlight_color;
-}
-.gear-tooth {
-  fill: $ink_color_alt;
-}
-
-
-
-// .top-menu__write a::before,
-// .top-menu__search a::before,
-// .top-menu__settings a::before,
-// .top-menu__logout button::before,
-// .top-menu__tl-home a::before,
-// .top-menu__tl-local a::before,
-// .top-menu__tl-fed a::before,
-// .top-menu__profile a::before {
-//   background-repeat: no-repeat;
-//   background-size: 199px;
-//   width: 20px;
-//   height: 20px;
-//   content: "";
-//   display: inline-block;
-//   margin-right: 0.5em;
-// }
-
-// .top-menu__write a::before {
-//   background-position: 0 0;
-// }
-// .top-menu__search a::before {
-//   background-position: -180px 0;
-// }
-// .top-menu__settings a::before {
-//   background-position: -150px 0;
-// }
-// .top-menu__logout button::before {
-//   background-position: -120px 0;
-// }
-// .top-menu__tl-home a::before {
-//   background-position: -60px 0;
-// }
-// .top-menu__tl-local a::before {
-//   background-position: -30px 0;
-// }
-// .top-menu__tl-fed a::before {
-//   background-position: -90px 0;
-// }
-
-// .top-menu__profile > a::before {
-//   background-position: -60px 0;
-// }
 .top-menu__profile > a:hover {
   background: $special_color;
   color: $paper_color_alt;
@@ -233,12 +130,14 @@ ul.top-menu__user-submenu {
     margin: 0;
     padding: 0;
   }
+
   a,
   button {
     padding: 0.5rem 1rem;
     width: 100%;
   }
 }
+
 .top-menu__user:hover ul,
 ul.top-menu__user-submenu:hover,
 .top-menu__user:focus .top-menu__user-submenu,
