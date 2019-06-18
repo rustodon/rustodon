@@ -2,6 +2,10 @@
 
 {% block title %}Sign up{% endblock %}
 
+{% block topmenu -%}
+<h1 class="logo"><a class="top-menu__home-link" href="/">Rustodon</a></h1>
+{%- endblock %}
+
 {% block content %}
 <section>
     <header>
@@ -10,21 +14,24 @@
     <section>
         <form method="post">
             <div>
-                <label for="username">username:</label>
+                <label for="username">Name:</label>
                 <input type="text" id="username" name="username" />
             </div>
             <div>
-                <label for="email">email:</label>
+                <label for="email">Email:</label>
                 <input type="email" id="email" name="email" />
             </div>
             <div>
-                <label for="password">password:</label>
+                <label for="password">Password:</label>
                 <input type="password" id="password" name="password" />
             </div>            
             <div class="button-row">
                 <button type="submit">Sign up</button>
             </div>
         </form>
+    </section>
+    <section>
+        <a href="/auth/sign_in">I already have an account</a>
     </section>
 </section>
 {% endblock %}
