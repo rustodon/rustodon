@@ -31,9 +31,17 @@ You will need to install several base dependencies:
    On some operating systems, you may need to separately install the Postgres client library:
    * Debian/Ubuntu/etc: `apt install libpq-dev`
    * Arch: `pacman -S postgresql-libs`
-1. [SASS](https://sass-lang.com/). To install, follow [the official directions](https://sass-lang.com/install), and make sure the `sass` binary is somewhere in your `PATH`.
 
 Once you have installed these base components, you should run `scripts/setup` to install the remainder of the application dependencies.
+
+### Building the browser-side code
+
+To compile SCSS, and minify CSS, JS and SVG resources, we use [Gulp](https://gulpjs.com/). If you intend to make changes to these files, you will need to install [Node](https://nodejs.org/) and [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm). Then, in the Rustodon code folder, run these commands to install and run Gulp:
+```bash
+sudo npm install gulp-cli -g
+npm install
+gulp
+```
 
 ### Running the application
 
