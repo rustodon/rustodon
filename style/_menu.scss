@@ -87,25 +87,21 @@
   }
   &__logout button {
     font: inherit;
-    &:hover {
-      background: $error_color;
-      color: $paper_color_alt;
-    }
   }
 }
 
 .tab {
   border-radius: $border_radius $border_radius 0 0;
   border-bottom: $border_width_alt solid transparent;
+  height: 48px;
   width: 8rem;
   &:hover {
     color: $ink_color;
-    background: $paper_color;
     border-color: $action_color;
   }
   &:active,
   &:focus {
-    color: $ink_color;
+    color: $paper_color_alt;
     background: $active_color;
   }
   &.active {
@@ -113,16 +109,11 @@
   }
 }
 
-.top-menu__profile > a:hover {
-  background: $special_color;
-  color: $paper_color_alt;
-}
-
 ul.top-menu__user-submenu {
   display: none;
   position: absolute;
   right: 0;
-  top: 2em;
+  top: 2rem;
   background: $paper_color_alt;
 
   li {
@@ -135,6 +126,10 @@ ul.top-menu__user-submenu {
   button {
     padding: 0.5rem 1rem;
     width: 100%;
+    &:hover {
+      background: $border_color;
+      color: $paper_color_alt;
+    }
   }
 }
 

@@ -19,7 +19,7 @@
         {%- when Some with (flashmessage) -%}
             <div class="flash-container">
                 <input type="checkbox" class="flash-hider" id="flash-hider"/>
-                <label class="flash-hider-label" for="flash-hider">❌</label>
+                <label class="flash-hider-label" for="flash-hider" name="hide message"><svg class="icon"><use href="static/img/icons.min.svg#x"/></svg></label>
                 <div class="flash {{flashmessage.name()}}">{{flashmessage.msg()}}</div>
             </div>
         {%- when None -%}
