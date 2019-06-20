@@ -6,32 +6,30 @@
 <h1 class="logo"><a class="top-menu__home-link" href="/">Rustodon</a></h1>
 {%- endblock %}
 
-{% block content %}
+{% block content -%}
 <section>
     <header>
         <h2 class="title">Sign up</h2>
     </header>
-    <section>
-        <form method="post">
-            <div>
-                <label for="username">Name:</label>
-                <input type="text" id="username" name="username" />
-            </div>
-            <div>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" />
-            </div>
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" />
-            </div>            
-            <div class="button-row">
-                <button type="submit">Sign up</button>
-            </div>
-        </form>
-    </section>
-    <section>
+    <form method="post">
+        <div>
+            <label for="username">Name:</label>
+            <input type="text" id="username" name="username" />
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" />
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" />
+        </div>
+        <div class="button-row">
+            <button type="submit">Sign up</button>
+        </div>
+    </form>
+    <footer class="form-footer">
         <a href="/auth/sign_in">I already have an account</a>
-    </section>
+    </footer>
 </section>
-{% endblock %}
+{%- endblock %}
