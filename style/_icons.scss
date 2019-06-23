@@ -1,0 +1,73 @@
+.icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin-right: 0.5em;
+  stroke: currentcolor;
+  stroke-width: 4px;
+  fill-opacity: 0;
+}
+
+a,
+button {
+  // This is the trick that allows color-changing SVGs on hover across the <use> element's document boundary...
+  &:hover .icon {
+    fill-opacity: 1;
+  }
+}
+
+.no-fill,
+.house-outline,
+.rocket-body,
+.rocket-fin,
+.magnifier-handle,
+.magnifier-frame,
+.gear-inner-circle,
+.globe {
+  fill: none;
+}
+.globe-node {
+  stroke: none;
+}
+.house-outline {
+  fill: $active_color;
+}
+.house2 .house-outline,
+.globe-node {
+  fill: $link_color_alt;
+}
+.house3 .house-outline {
+  fill: $special_color;
+}
+.mask-outline {
+  fill: $special_color_alt;
+}
+.gear-outer-circle {
+  fill: $ink_color;
+}
+.exit-door,
+.gear-inner-circle {
+  fill: $paper_color;
+}
+.exit-arrow,
+.rocket-fin {
+  fill: $error_color_alt;
+}
+.rocket-body,
+.house-window {
+  fill: $paper_color_alt;
+}
+#post,
+#fave,
+.rocket-flame {
+  fill: $highlight_color;
+}
+.gear-tooth,
+.mask-features {
+  fill: $ink_color_alt;
+}
+
+#x {
+  stroke: $paper_color_alt;
+  stroke-width: 1px;
+}

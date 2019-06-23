@@ -6,9 +6,10 @@
     <meta name="theme-color" content="#f8f8f6">
     <title>Rustodon - {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css" />
+    <link rel="icon" href="/static/favicon.png">
 </head>
 <body>
-    <header class="top-menu">
+    <header class="page-header">
         {%- block topmenu -%}
         {%- endblock -%}
     <hr/>
@@ -18,7 +19,7 @@
         {%- when Some with (flashmessage) -%}
             <div class="flash-container">
                 <input type="checkbox" class="flash-hider" id="flash-hider"/>
-                <label class="flash-hider-label" for="flash-hider">❌</label>
+                <label class="flash-hider-label" for="flash-hider" name="hide message"><svg class="icon"><use href="static/img/icons.min.svg#x"/></svg></label>
                 <div class="flash {{flashmessage.name()}}">{{flashmessage.msg()}}</div>
             </div>
         {%- when None -%}

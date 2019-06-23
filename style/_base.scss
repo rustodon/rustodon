@@ -90,8 +90,10 @@ a.button:visited {
 
 .button-row {
   padding: .5rem 0;
+  overflow: hidden;
   button {
     min-width: 5rem;
+    padding: 0.5rem 2rem;
   }
   button[type=submit] {
     float: right;
@@ -161,7 +163,7 @@ button.link {
       top: 0;
       right: 1rem;
       z-index: 5;
-      margin: .5rem;
+      margin: .67rem;
       background: transparent;
     }
   }

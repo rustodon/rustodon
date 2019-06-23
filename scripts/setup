@@ -42,13 +42,6 @@ if ! which psql 2>/dev/null 1>&2 ; then
   exit 1
 fi
 
-# Ensure SASS is installed
-if ! which sass 2>/dev/null 1>&2 ; then
-  # Installation deferred to user
-  alertMsg "You must install SASS, see: https://sass-lang.com/install"
-  exit 1
-fi
-
 # Don't track changes to .env
 git update-index --assume-unchanged .env
 
