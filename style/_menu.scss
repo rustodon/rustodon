@@ -1,4 +1,4 @@
-.top-menu {
+.page-header {
   position: fixed;
   right: 0;
   left: 0;
@@ -22,16 +22,22 @@
     display: flex;
     text-align: center;
   }
+
   li {
     display: inline-block;
   }
 
-  &__home a {
+  .logo,
+  .logo a {
+    text-align: start;
     font-size: 1.5rem;
-    padding:0;
+    padding: 0;
   }
+}
 
-  &__home,
+.top-menu {
+  margin-bottom: -$border_width_alt;
+  height: 48px;
   &__write {
     text-align: start;
     a {
@@ -56,7 +62,7 @@
     position: relative;
     white-space: nowrap;
     text-align: end;
-    a {
+    & > a {
       padding-right: 0;
     }
   }
@@ -81,85 +87,33 @@
   }
   &__logout button {
     font: inherit;
-    &:hover {
-      background: $error_color;
-      color: $paper_color_alt;
-    }
   }
 }
 
 .tab {
   border-radius: $border_radius $border_radius 0 0;
   border-bottom: $border_width_alt solid transparent;
-  margin-bottom: -$border_width_alt;
+  height: 48px;
   width: 8rem;
-}
-.tab:hover {
-  color: $ink_color;
-  background: $paper_color;
-  border-color: $action_color;
-}
-.tab:active,
-.tab:focus {
-  color: $ink_color;
-  background: $active_color;
-}
-.tab.active {
-  border-color: $active_color;
-}
-
-.top-menu__write a::before,
-.top-menu__search a::before,
-.top-menu__settings a::before,
-.top-menu__logout button::before,
-.top-menu__tl-home a::before,
-.top-menu__tl-local a::before,
-.top-menu__tl-fed a::before,
-.top-menu__profile a::before {
-  background: no-repeat url(img/icons.png);
-  background-size: 199px;
-  width: 20px;
-  height: 20px;
-  content: "";
-  display: inline-block;
-  margin-right: 0.5em;
+  &:hover {
+    color: $ink_color;
+    border-color: $action_color;
+  }
+  &:active,
+  &:focus {
+    color: $paper_color_alt;
+    background: $active_color;
+  }
+  &.active {
+    border-color: $active_color;
+  }
 }
 
-.top-menu__write a::before {
-  background-position: 0 0;
-}
-.top-menu__search a::before {
-  background-position: -180px 0;
-}
-.top-menu__settings a::before {
-  background-position: -150px 0;
-}
-.top-menu__logout button::before {
-  background-position: -120px 0;
-}
-.top-menu__tl-home a::before {
-  background-position: -60px 0;
-}
-.top-menu__tl-local a::before {
-  background-position: -30px 0;
-}
-.top-menu__tl-fed a::before {
-  background-position: -90px 0;
-}
-
-.top-menu__profile>a::before {
-  background-position: -60px 0;
-}
-.top-menu__profile>a:hover {
-  background: $special_color;
-  color: $paper_color_alt;
-}
-
-ul.top-menu__user-submenu{
+ul.top-menu__user-submenu {
   display: none;
-  position:absolute;
+  position: absolute;
   right: 0;
-  top: 2em;
+  top: 2rem;
   background: $paper_color_alt;
 
   li {
@@ -167,9 +121,15 @@ ul.top-menu__user-submenu{
     margin: 0;
     padding: 0;
   }
-  a, button{
+
+  a,
+  button {
     padding: 0.5rem 1rem;
     width: 100%;
+    &:hover {
+      background: $ink_color_alt;
+      color: $paper_color_alt;
+    }
   }
 }
 
