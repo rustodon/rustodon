@@ -93,6 +93,7 @@ a.button:visited {
   overflow: hidden;
   button {
     min-width: 5rem;
+    padding: 0.5rem 2rem;
   }
   button[type=submit] {
     float: right;

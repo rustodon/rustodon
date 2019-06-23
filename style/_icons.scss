@@ -20,7 +20,6 @@ button {
 .house-outline,
 .rocket-body,
 .rocket-fin,
-.exit-door,
 .magnifier-handle,
 .magnifier-frame,
 .gear-inner-circle,
@@ -46,6 +45,7 @@ button {
 .gear-outer-circle {
   fill: $ink_color;
 }
+.exit-door,
 .gear-inner-circle {
   fill: $paper_color;
 }
