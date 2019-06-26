@@ -1,0 +1,152 @@
+{
+  "projectName": "rustodon",
+  "projectOwner": "rustodon",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "none",
+  "contributors": [
+    {
+      "login": "barzamin",
+      "name": "Erin Moon",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/20133857?v=4",
+      "profile": "https://imer.in",
+      "contributions": [
+        "blog",
+		"content",
+        "code",
+        "ideas",
+        "maintenance",
+        "review",
+        "doc"
+      ]
+    },
+    {
+      "login": "measlytwerp",
+      "name": "Measly Twerp",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/42093217?v=4",
+      "profile": "https://measlytwerp.live",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "yipdw",
+      "name": "David Yip",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/3859?v=4",
+      "profile": "https://gitlab.peach-bun.com/yipdw",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "RobotDisco",
+      "name": "Gaelan D'costa",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/487847?v=4",
+      "profile": "http://www.robot-disco.net",
+      "contributions": [
+        "infra",
+        "ideas"
+      ]
+    },
+    {
+      "login": "netshade",
+      "name": "Chris Zelenak",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3809?v=4",
+      "profile": "http://yeti-factory.org/",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "y6nH",
+      "name": "Hugh",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/355120?v=4",
+      "profile": "https://github.com/y6nH",
+      "contributions": [
+        "code",
+        "design",
+		"content",
+        "ideas"
+      ]
+    },
+    {
+      "login": "moritzheiber",
+      "name": "Moritz Heiber",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/616813?v=4",
+      "profile": "https://heiber.im",
+      "contributions": [
+        "doc",
+        "platform",
+        "tool"
+      ]
+    },
+    {
+      "login": "iliana",
+      "name": "iliana destroyer of worlds",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/52814?v=4",
+      "profile": "https://linuxwit.ch",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "1011X",
+      "name": "1011X",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/1851619?v=4",
+      "profile": "https://github.com/1011X",
+      "contributions": [
+        "maintenance"
+      ]
+    },
+    {
+      "login": "csos95",
+      "name": "Christopher Silva",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/1892750?v=4",
+      "profile": "https://www.csos95.com",
+      "contributions": [
+        "maintenance",
+        "code"
+      ]
+    },
+    {
+      "login": "utam0k",
+      "name": "utam0k",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/13010913?v=4",
+      "profile": "https://www.utam0k.jp/",
+      "contributions": [
+        "maintenance",
+        "platform"
+      ]
+    },
+    {
+      "login": "dexamphetamine",
+      "name": "dexamphetamine",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/20431955?v=4",
+      "profile": "https://github.com/dexamphetamine",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "ashkitten",
+      "name": "ash lea",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/9281956?v=4",
+      "profile": "https://ktn.fyi",
+      "contributions": [
+        "code",
+        "ideas",
+        "maintenance"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
