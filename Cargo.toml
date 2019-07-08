@@ -18,7 +18,7 @@ itertools = "0.8.0"
 resopt = { path = "lib/resopt/" }
 structopt = "0.2.16"
 
-regex = "1.1.8"
+regex = "1.1.9"
 posticle = { path = "lib/posticle/" }
 
 slog = "2.4"
