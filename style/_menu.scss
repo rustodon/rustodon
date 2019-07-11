@@ -90,6 +90,10 @@
   }
 }
 
+.spacer {
+  flex: auto;
+}
+
 .tab {
   border-radius: $border_radius $border_radius 0 0;
   border-bottom: $border_width_alt solid transparent;
