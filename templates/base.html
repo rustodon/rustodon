@@ -19,7 +19,7 @@
         {%- when Some with (flashmessage) -%}
             <div class="flash-container">
                 <input type="checkbox" class="flash-hider" id="flash-hider"/>
-                <label class="flash-hider-label" for="flash-hider" name="hide message"><svg class="icon"><use href="static/img/icons.min.svg#x"/></svg></label>
+                <label class="flash-hider-label" for="flash-hider" title="hide message"><svg class="icon"><use href="/static/img/icons.min.svg#x"/></svg></label>
                 <div class="flash {{flashmessage.name()}}">{{flashmessage.msg()}}</div>
             </div>
         {%- when None -%}
@@ -37,6 +37,6 @@
             </a>
         </small>
     </footer>
-    <script src="/static/js/accessibility.min.js"></script>
+    <script src="/static/js/accessibility.min.js"></script>post
 </body>
 </html>

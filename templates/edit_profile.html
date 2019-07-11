@@ -6,17 +6,17 @@
     <h1 class="logo"><a class="top-menu__home-link" href="/">Rustodon</a></h1>
     <nav class="top-menu">
         <ul>
-            <li class="top-menu__user"><a class="top-menu__user-link" href="javascript:void 0" aria-haspopup="true"><svg class="icon"><use href="static/img/icons.min.svg#settings"/></svg>Menu</a>
+            <li class="top-menu__user"><a class="top-menu__user-link" href="javascript:void 0" aria-haspopup="true"><svg class="icon"><use href="/static/img/icons.min.svg#settings"/></svg>Menu</a>
                 <ul class="top-menu__user-submenu">
-                    <li class="top-menu__profile"><a class="top-menu__profile-link" href="{{account.profile_path()|safe}}"><svg class="icon"><use href="static/img/icons.min.svg#profile"/></svg>Profile</a>
+                    <li class="top-menu__profile"><a class="top-menu__profile-link" href="{{account.profile_path()|safe}}"><svg class="icon"><use href="/static/img/icons.min.svg#profile"/></svg>Profile</a>
                     <li class="top-menu__logout">
                         <form class="inline" method="post" action="/auth/sign_out">
                             <input type="hidden" name="stub" />
-                            <button class="link" type="submit" name="submit"><svg class="icon"><use href="static/img/icons.min.svg#exit"/></svg>Sign&#160;out</button>
+                            <button class="link" type="submit" name="submit"><svg class="icon"><use href="/static/img/icons.min.svg#exit"/></svg>Sign&#160;out</button>
                         </form>
                     </li>
                     <li class="top-menu__settings">
-                        <a href="" disabled><svg class="icon"><use href="static/img/icons.min.svg#settings"/></svg>Settings</a>
+                        <a href="" disabled><svg class="icon"><use href="/static/img/icons.min.svg#settings"/></svg>Settings</a>
                     </li>
                 </ul>
             </li>
