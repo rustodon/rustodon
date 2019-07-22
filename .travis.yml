@@ -31,11 +31,13 @@ env:
 
 before_script:
   - scripts/setup
+  - npm install -g gulp-cli
 
 script:
   - cargo fmt -- --check
   - if [[ "$TRAVIS_BRANCH" == "master" ]]; then cargo build --release; else cargo build; fi
   - cargo test --all
+  - gulp
 
 after_success: ./scripts/after_success.sh
 
