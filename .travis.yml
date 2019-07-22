@@ -31,6 +31,7 @@ env:
 
 before_script:
   - scripts/setup
+  - nvm install 10
   - npm install -g gulp-cli
   - npm install
 
