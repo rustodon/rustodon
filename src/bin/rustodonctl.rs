@@ -19,7 +19,8 @@ enum Command {
     GenerateKeys,
 }
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // TODO: replace Box<StdError> with failure
     // load environment variables fron .env
     dotenv().ok();
 

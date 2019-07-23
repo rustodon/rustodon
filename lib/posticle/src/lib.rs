@@ -86,7 +86,7 @@ impl<'t> ReaderBuilder<'t> {
     ///     })]
     /// );
     /// ```
-    pub fn with_transformer(self, transformer: Box<'t + Fn(Token) -> Token>) -> Self {
+    pub fn with_transformer(self, transformer: Box<dyn 't + Fn(Token) -> Token>) -> Self {
         ReaderBuilder(Reader {
             transformer,
             ..self.0
@@ -99,7 +99,7 @@ pub struct Reader<'t> {
     input: String,
     tokens: Vec<Token>,
     current_token: usize,
-    transformer: Box<'t + Fn(Token) -> Token>,
+    transformer: Box<dyn 't + Fn(Token) -> Token>,
 }
 
 impl Default for Reader<'_> {
