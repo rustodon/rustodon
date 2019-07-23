@@ -24,8 +24,8 @@ use lazy_static::lazy_static;
 use rocket::config::Config;
 use rocket::Rocket;
 use rocket_slog::SlogFairing;
+use slog::slog_o;
 use slog::Drain;
-use slog::{slog_o, slog_warn};
 use slog_scope::warn;
 use std::env;
 
@@ -53,13 +53,11 @@ pub fn init_logger() -> slog::Logger {
 /// disable logging, but still load Rocket.toml like Rocket::ignite() does.
 fn rocket_load_config() -> Config {
     use rocket::config::ConfigError::{self, *};
-    use rocket::config::LoggingLevel;
     use rocket::config::RocketConfig;
+    use rocket::logger::{self, LoggingLevel};
+    use std::process;
 
     let bail = |e: ConfigError| -> ! {
-        use rocket::logger::{self, LoggingLevel};
-        use std::process;
-
         logger::init(LoggingLevel::Debug);
         e.pretty_print();
         process::exit(1)
