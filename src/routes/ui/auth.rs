@@ -58,8 +58,8 @@ pub fn signout(user: Option<User>, mut cookies: Cookies) -> Redirect {
 pub struct SignupForm {
     #[validate(
         length(
-            min = "1",
-            max = "32",
+            min = 1,
+            max = 32,
             message = "Username must be between 1 and 32 characters long."
         ),
         regex(
@@ -71,8 +71,8 @@ pub struct SignupForm {
     #[validate(email)]
     email: String,
     #[validate(length(
-        min = "3",
-        max = "64",
+        min = 3,
+        max = 64,
         message = "Password must be between 3 and 64 characters long."
     ))]
     password: String,
@@ -95,7 +95,7 @@ pub fn signup_post(
         // TODO: make this less ugly :(
         let error_desc = errs
             .iter()
-            .flat_map(|(_, errs)| errs)
+            .flat_map(|(_, &errs)| errs)
             .map(|e| {
                 let msg = e.message.to_owned();
                 msg.unwrap_or(Cow::Borrowed("unknown error"))
