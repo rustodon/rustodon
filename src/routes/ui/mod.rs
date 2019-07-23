@@ -61,7 +61,7 @@ impl<'v> FromFormValue<'v> for Timeline {
 
 #[derive(Debug, FromForm, Validate)]
 pub struct CreateStatusForm {
-    #[validate(length(min = "1", message = "Content must not be empty"))]
+    #[validate(length(min = 1, message = "Content must not be empty"))]
     content: String,
     content_warning: String,
 }
@@ -79,7 +79,7 @@ pub fn create_status(
         // TODO: make this less ugly :(
         let error_desc = errs
             .iter()
-            .flat_map(|(_, errs)| errs)
+            .flat_map(|(_, &errs)| errs)
             .map(|e| {
                 let msg = e.message.to_owned();
                 msg.unwrap_or(Cow::Borrowed("unknown error"))
