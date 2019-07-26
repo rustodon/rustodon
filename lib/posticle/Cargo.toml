@@ -7,7 +7,7 @@ categories = ["text-processing"]
 edition = "2018"
 
 [dependencies]
-ammonia = "2.1"
+ammonia = "3.0"
 maplit = "1.0"
 pest = "2.1"
 pest_derive = "2.1"
