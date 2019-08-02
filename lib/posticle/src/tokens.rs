@@ -135,7 +135,7 @@ pub enum Token {
 impl Token {
     pub fn from_parse_pair<'t>(
         pair: Pair<Rule>,
-        transformer: &Box<'t + Fn(Token) -> Token>,
+        transformer: &Box<dyn 't + Fn(Token) -> Token>,
     ) -> Vec<Self> {
         match pair.as_rule() {
             Rule::emoticon => Self::from_emoticon_rule(pair, transformer),
@@ -151,7 +151,7 @@ impl Token {
 
     fn from_emoticon_rule<'t>(
         pair: Pair<Rule>,
-        transformer: &Box<'t + Fn(Token) -> Token>,
+        transformer: &Box<dyn 't + Fn(Token) -> Token>,
     ) -> Vec<Self> {
         let mut tokens = Vec::new();
         let mut name: Option<String> = None;
@@ -176,7 +176,7 @@ impl Token {
 
     fn from_hashtag_rule<'t>(
         pair: Pair<Rule>,
-        transformer: &Box<'t + Fn(Token) -> Token>,
+        transformer: &Box<dyn 't + Fn(Token) -> Token>,
     ) -> Vec<Self> {
         let mut tokens = Vec::new();
         let mut name: Option<String> = None;
@@ -201,7 +201,7 @@ impl Token {
 
     fn from_link_rule<'t>(
         pair: Pair<Rule>,
-        transformer: &Box<'t + Fn(Token) -> Token>,
+        transformer: &Box<dyn 't + Fn(Token) -> Token>,
     ) -> Vec<Self> {
         let mut tokens = Vec::new();
         let mut schema: Option<String> = None;
@@ -232,7 +232,7 @@ impl Token {
 
     fn from_mention_rule<'t>(
         pair: Pair<Rule>,
-        transformer: &Box<'t + Fn(Token) -> Token>,
+        transformer: &Box<dyn 't + Fn(Token) -> Token>,
     ) -> Vec<Self> {
         let mut tokens = Vec::new();
         let mut username: Option<String> = None;
@@ -261,7 +261,7 @@ impl Token {
 
     fn from_symbol_prefix<'t>(
         pair: Pair<Rule>,
-        transformer: &Box<'t + Fn(Token) -> Token>,
+        transformer: &Box<dyn 't + Fn(Token) -> Token>,
     ) -> Vec<Self> {
         let mut tokens = Vec::new();
 

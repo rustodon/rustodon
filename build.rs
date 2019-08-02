@@ -31,7 +31,7 @@ fn main() {
 // (git not installed or if this is not a git repository) just return an empty string.
 fn commit_info() -> String {
     match commit_hash() {
-        Ok(hash) => hash.trim_right().to_owned(),
+        Ok(hash) => hash.trim_end().to_owned(),
         _ => String::new(),
     }
 }

@@ -18,13 +18,13 @@ itertools = "0.8.0"
 resopt = { path = "lib/resopt/" }
 structopt = "0.2.16"
 
-regex = "1.1.8"
+regex = "1.2.0"
 posticle = { path = "lib/posticle/" }
 
-slog = "2.4"
+slog = "2.5"
 slog-term = "2.4"
 slog-async = "2.3"
-slog-scope = "4.0"
+slog-scope = "4.1"
 rocket-slog = "0.4"
 
 rocket = "0.4"
@@ -32,11 +32,11 @@ rocket = "0.4"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-validator = "0.8"
-validator_derive = "0.8"
+validator = "0.9"
+validator_derive = "0.9"
 
 askama = { version = "0.8.0", features = ["with-rocket"] }
-ammonia = "2.1.2"
+ammonia = "3.0.0"
 
 diesel = { version = "1.4.2", features = ["postgres", "chrono", "r2d2"] }
 flaken = "0.2.2"
@@ -44,7 +44,7 @@ flaken = "0.2.2"
 chrono = "0.4"
 chrono-humanize = "0.0.11"
 
-openssl = "0.10.23"
+openssl = "0.10.24"
 pwhash = "0.3"
 
 base32 = "0.4"
