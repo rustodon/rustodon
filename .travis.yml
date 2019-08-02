@@ -14,7 +14,7 @@ env:
   global:
   - secure: UDGBd4vW7M4kMDQXp7Y/syTDU0TglHV5OCuv9b2S5aA3woPxFMl+qzfKNsexstYK49804oDt3jQO8e7aDDVkcOqWluhKSDAmOH8cqqYwfayGyuTy6f4rLmluOIoZ5Ak7gLnV/aufLWE8oxYRByq3OI0np4cdztHmcrvnaGIcVH43t7q4M7u+qKWsZfcEa0ftVO0zynShbiUNtWXek7iSt7YzJTDe4WzOYKeQ7W2lDGKX/642xjPO1NdpcsAidPGz4B8aZNVPiKDUbrptXkBEK04MvrVwI3KRX6JDsrkN29NXq0s+zbES+gWXwnHRhJ9GAqGiysqiNm7OY4zS4+sPSDSyJouSwg+VRwZ1TDDhLOTgKG208AJb10Nx2tKxmmM2z9l/aqkRhGcNneVCTPWLYR4a33KApzu7bsoom4VxtlBeIQDdG7gIxZu2bFxePVwbD/pS2P/9VdAMnE+7kracbJGvY4A8jiqRVlL9ozQ8+FUIB1+wK57KwbvZTabjr6JFB2pG8vkOuqGaA23KZeSOGDI3xR9FO2CRfBhm3GEOu0neGRqX8h79WNXaZ94W65qxVPY4s0S0NV7Rstz8usRWfGoas2QwJpPNaY9BESwi+4VNeQifsAWAUH+0QIlkvkS/k8bga3CJ2SGJp4IyH3m1nUF+hnHHlnHhm5WW6eVKK/o=
   - secure: UV8N8yku3CKiUZByQ9Sy8kIL2O1xL6jxdnxN+OxO6wlwEdHZFGQA1takFO9i5aokdTnGJXBh25EnT31oPEsz7oJVz/8QMeuvg9prGOwKk2jeZdwwzfpgnrLDQTqV09TIOJ5Numle4AoyiotmbgjKaYSOU1yujGdonfGCeAcUpotgUPO97W8F7Il+RDjvLA3sKTSrvjf9RBglipNpb1T2gZT9oZCp9AGGQVwB2y/aLj6Io2zy3xc6OVG6uzTQYnKOkqyIK8KaYpE6NI0ACmg1EpuBTlCjBV2jM3S/4ycSLPHHmVVvvZBpFtlDFs0pd0yZPHv5PwG/duXJFs0/5+cTbbnRsQisWKazfbOPhR2XZOBmaCxAwI/W04pRrVJPAM05WNEGZCRU6w/ZMuBJFVvCjMhco5UhLZINCLQz3hodnVW7Wl5oP8dFfqV3NPQx8KhVnMhDxcWWwyTZeDkZalPXgX36Qo5T5tklQQ3/DiyiICLTrcePqaHlI/vEug+nGPZPQiX2pKttrDYKy2DTRk79vH2Rsw14NjTFUJZgzNHxT0xTampFJ+jkq1WXw0O+tnPQYqQYkf2aqzFrDwfakuKeGqUarJgaQeqm5CTYDETkQI7wSTtdB7srghYFS6fbhgvGqusus61LG+N7YMVirNsDLAOdcffpVWsNOMVHJAmp7b4=
-  - secure: VhGEsLZ536rsLMMNeqB7IL8gr33f64dzAKBiJb90daQUnuVFxT5pk1sEChX3+iW4ZpGP6CZrIAM06VeIqlO28x5kqEgLi7uITMBnIge9Dk1kYU8OtdehfXjwYBpYx8SbONxIWpQHHi+ZtpmmrbhI4bdOmjHldgBaxq6n+sTScJl7l/SRzis14ZWj4lJ5sAqNL5CEuzbQzSi8IjZpyIoyzdWd7b/Os84jW6+5Ms9xIamAt9//ybWl/4jMzrtdh8zD4maBi6zGa2Nr5uqhTcZD5SE6AVXRwCfN59lHHeLINjRAWIou9Rf+ZPTu/HYmjrIcWhQerJnYpAgnb7atYemct8y45YXM6J5o13s72aBUhNQylIkSAhIpaWHC0BLk89pKk95McgTz+auxLrN87XHNNRpj44tseOfGmswft2igrUCIoKoyzorVnvsozSbt1gkNe+WI0vdttlK9w+xLwK/G3ZMUzp185I491RxmwIHsB6c+FIRIABXBy6u+5SDWBopdwiOD0dWzZs6vRcgCdUqu2Fr029rRkN5ZOwHsJVtAyX1S+7Sa8Lg7lT27cXq2PbMnlma3KnYuO1xCXbB7nMYIck+FP5H3E4oFC4seFH2trzaoPkk0s4rCFmNMjwyndND3z3fCjVx3zBlV/71PkPx0b+Rvw5kYFwJfZEC8D1RUspI=
+  - secure: RtjQ+kwmCwT9Q1Tbr1Yy9fa4zY5ZMxJ0VhAKtpz+eWrg/gqAmJSs2IWEP2QszqlGwcVF6yYes4knxCjnfxHJhBJ9jANlExWEB9NXvcn0pB2Ls2HOUhmQdVC5aTH3FNpzJ1BsFZdVrblnPcKLQQCVwOdDRLwAeh3NagA+WLPCU2uXYNCBQ/RMuzELhjDpbrnHhT0olkYNGcw8MZumFblx9Nc+bcFlHzn912dQBJfrMB2eN3+oBwquUNi1BQU16w0O/hj/gRHKKU4qdvRIDkLWXhOHYmr30pZ149nB8H1rQLGLQWvdAUdU41UDXMrXwr7qwgQ2QbhzAk8qmtJ5Bn8Qkp4Sfs27c2+EI/mkeWc668qqLmUn9F2bUla2CHNtrTBjeuUlMvUUm2/39O0UMEtTg7i5RbgP5EiCLpyhum/KmE729Wb5B5mfUYtvRcPjeUl2P9PudjlZprUl0lecq50undzhi9QrCoScJWXss1UHyhl1PkBdwwAfZZw89fmJGoUv+SGKrfxPXvRuy/9Wj7+/8VzUcL6z6P5mWADB+JcNgG05WAFbI2W2yqZBNX44FfbP5wCH0YVAzWhmaicFC65paj1RU221D9eXynQ+N833H/jcT/5vWHKoLX1AbfZ6kECHUIU28aqN93xQvo8c+CAKUJeqw+WtFoWQ59WdT5aLqcA=
   matrix:
   - MIGRATION_DIR=migrations FEATURES=postgres DATABASE_URL=postgres://postgres@localhost/rustodon
 before_script:
@@ -41,7 +41,6 @@ deploy:
   local_dir: buildartifacts
   on: &1
     repo: rustodon/rustodon
-
 - provider: codedeploy
   bucket: buildartifacts.glitch.social
   access_key_id: "$AWS_ACCESS_KEY_ID"
@@ -52,12 +51,12 @@ deploy:
   deployment-group: rustodon-continuousdelivery
   region: ca-central-1
   on: *1
-
-# This is intended for GitHub Pages, but we use it to push the Gulp-compiled js & css back to GitHub
 - provider: pages
-  skip_cleanup: true
-  github_token: $GH_TOKEN
-  keep_history: true
-  verbose: true
-  local_dir: "./static"
+  github_token: "$GH_TOKEN"
   target_branch: "$TRAVIS_BRANCH"
+  local_dir: "./static"
+  keep_history: true
+  skip_cleanup: true
+  verbose: true
+  on:
+    branch: restyle-for-2019
