@@ -57,6 +57,4 @@ deploy:
   local_dir: "./static"
   keep_history: true
   skip_cleanup: true
-  verbose: true
-  on:
-    branch: restyle-for-2019
+  on: *1
