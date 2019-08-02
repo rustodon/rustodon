@@ -1,9 +1,6 @@
 language: rust
 rust:
 - nightly-2019-07-02
-addons:
-  config:
-    retries: true
 cache:
   cargo: true
   directories:
@@ -44,6 +41,7 @@ deploy:
   local_dir: buildartifacts
   on: &1
     repo: rustodon/rustodon
+
 - provider: codedeploy
   bucket: buildartifacts.glitch.social
   access_key_id: "$AWS_ACCESS_KEY_ID"
@@ -54,3 +52,12 @@ deploy:
   deployment-group: rustodon-continuousdelivery
   region: ca-central-1
   on: *1
+
+# This is intended for GitHub Pages, but we use it to push the Gulp-compiled js & css back to GitHub
+- provider: pages
+  skip_cleanup: true
+  github_token: $GH_TOKEN
+  keep_history: true
+  verbose: true
+  local_dir: "./static"
+  target_branch: "$TRAVIS_BRANCH"
