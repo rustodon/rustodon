@@ -1,0 +1,3 @@
+ROCKET_ENV=development
+DAEMON_OPTS=run
+
