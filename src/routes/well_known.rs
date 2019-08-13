@@ -91,7 +91,7 @@ pub fn webfinger_nodeinfo() -> Content<JsonValue> {
     Content(jrd_ctype, JsonValue(doc))
 }
 
-#[get("/nodeinfo/2.0", format = "application/json")]
+#[get("/nodeinfo/2.0")]
 pub fn nodeinfo(db_conn: db::Connection) -> Result<Content<JsonValue>, Error> {
     let ctype = ContentType::with_params(
         "application",
