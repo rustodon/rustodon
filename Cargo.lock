@@ -903,7 +903,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "pest"
-version = "2.1.1"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "ucd-trie 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -914,7 +914,7 @@ name = "pest_derive"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "pest 2.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pest 2.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "pest_generator 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -923,7 +923,7 @@ name = "pest_generator"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "pest 2.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pest 2.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "pest_meta 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 0.4.27 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 0.6.11 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -936,7 +936,7 @@ version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "maplit 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "pest 2.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pest 2.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha-1 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -985,7 +985,7 @@ version = "0.3.0"
 dependencies = [
  "ammonia 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "maplit 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "pest 2.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pest 2.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "pest_derive 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "yaml-rust 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1958,7 +1958,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum pear_codegen 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "336db4a192cc7f54efeb0c4e11a9245394824cc3bcbd37ba3ff51240c35d7a6e"
 "checksum percent-encoding 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "31010dd2e1ac33d5b46a5b413495239882813e0369f8ed8a5e266f173602f831"
 "checksum percent-encoding 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ba4f28a6faf4ffea762ba8f4baef48c61a6db348647c73095034041fc79dd954"
-"checksum pest 2.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "933085deae3f32071f135d799d75667b63c8dc1f4537159756e3d4ceab41868c"
+"checksum pest 2.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7e4fb201c5c22a55d8b24fef95f78be52738e5e1361129be1b5e862ecdb6894a"
 "checksum pest_derive 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "833d1ae558dc601e9a60366421196a8d94bc0ac980476d0b67e1d0988d72b2d0"
 "checksum pest_generator 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "63120576c4efd69615b5537d3d052257328a4ca82876771d6944424ccfd9f646"
 "checksum pest_meta 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f5a3492a4ed208ffc247adcdcc7ba2a95be3104f58877d0d02f0df39bf3efb5e"
