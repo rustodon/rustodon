@@ -12,7 +12,7 @@ members = ['lib/resopt/', 'lib/posticle/']
 dotenv = "0.14"
 maplit = "1.0"
 failure = "0.1.5"
-failure_derive = "0.1.5"
+failure_derive = "0.1.6"
 lazy_static = "1.4"
 itertools = "0.8.0"
 resopt = { path = "lib/resopt/" }
