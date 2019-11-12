@@ -1,0 +1,14 @@
+[Unit]
+Description=Rustodon ActivityPub compatible micro-blogging
+After=network.target
+ConditionPathExists=/srv/rustodon/.env
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/default/rustodon
+WorkingDirectory=/srv/rustodon
+ExecStart=/srv/rustodon/target/release/rustodon -- $DAEMON_OPTS
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
