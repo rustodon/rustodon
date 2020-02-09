@@ -5,8 +5,6 @@
   margin: 0;
   list-style-type: none;
   font: inherit;
-  color: inherit;
-  background-color: inherit;
   border: 0 currentcolor solid;
 }
 
@@ -16,8 +14,8 @@ html {
 
 body {
   // aesthetics
-  color: $text_color;
-  background-color: $background_color;
+  color: $ink_color;
+  background-color: $paper_color;
   font-family: $base_font;
   line-height: $line_height;
   text-rendering: optimizeLegibility;
@@ -26,20 +24,19 @@ body {
 
 // show focus outlines on everything!! tab accessibility~
 :focus {
-  outline: $focused_color auto 1px;
+  outline: $link_color_alt auto 1px;
 }
 
 a {
   color: $link_color;
   &:hover {
-    color: $hover_color;
     text-decoration: underline;
   }
   &:active {
     color: $active_color;
   }
   &:visited {
-    color: $visited_color;
+    color: $link_color;
   }
   &[disabled] {
     opacity: .5;
@@ -47,6 +44,10 @@ a {
     // prevent clicks on disabled links
     pointer-events: none;
   }
+}
+
+hr {
+  border-bottom: $border_width_alt solid $ink_color_alt;
 }
 
 code,
@@ -63,8 +64,8 @@ small {
 // restyle inputs so they look consistent across browsers
 input,
 textarea {
-  color: $text_color;
-  background: $invert_color;
+  color: $ink_color;
+  background: $paper_color_alt;
   border: $border_width solid $border_color;
   border-radius: $border_radius;
   padding: .25em .5em;
@@ -82,17 +83,17 @@ button,
 a.button,
 a.button:visited {
   @extend %button-styling;
-  display: inline-block;
   padding: 1px 1rem;
   text-align: center;
   text-decoration: none;
-  cursor: pointer;
 }
 
 .button-row {
   padding: .5rem 0;
+  overflow: hidden;
   button {
     min-width: 5rem;
+    padding: 0.5rem 2rem;
   }
   button[type=submit] {
     float: right;
@@ -103,7 +104,7 @@ a.button:visited {
   float: left;
   background: $border_color_alt;
   &:hover {
-    background: $warning_color;
+    background: $error_color_alt;
   }
 }
 
@@ -128,26 +129,27 @@ button.link {
     color: $active_color;
   }
   &:hover {
-    color: $hover_color;
+    color: $active_color;
   }
 }
 
 .flash {
-  border: 2px dashed $border_color;
-  padding: 1rem;
+  color: $paper_color_alt;
+  background-color: $ink_color_alt;
+  border: $border_width solid $border_color;
+  padding: 0.5rem 4rem;
   position: absolute;
   top: 0;
-  left: 30%;
-  right: 30%;
+  right: 0;
   text-align: center;
-  @extend %big-shadow;
+  @extend %shadow;
   &.error {
     border-color: $error_color;
     background-color: $error_color_alt;
   }
   &.success {
     border-color: $active_color;
-    background-color: $active_color_alt;
+    background-color: $action_color;
   }
   &-hider {
     &,
@@ -156,12 +158,12 @@ button.link {
       display: none;
     }
     &-label {
-      color: $error_color;
+      color: $paper_color_alt;
       position: absolute;
       top: 0;
-      right: 30%;
+      right: 1rem;
       z-index: 5;
-      margin: .5em;
+      margin: .67rem;
       background: transparent;
     }
   }
@@ -187,6 +189,9 @@ button.link {
   max-width: $column_width;
   border-top: $standard_border;
   padding: 1rem 0;
+  & > header {
+    font-size: 0.8em;
+  }
 }
 
 .timeline-avatar {
@@ -195,5 +200,18 @@ button.link {
   margin-right: 1rem;
   border-radius: $border_radius;
   float: left;
-  background: $visited_color;
+  background: $ink_color_alt;
+  overflow: hidden;
+}
+
+.timeline-avatar::before {
+  content: attr(title);
+  display: inline-block;
+  color: $border_color_alt;
+  font-size: 5rem;
+  line-height: 0.5;
+  margin-left: -0.75em;
+  letter-spacing: -0.3em;
+  font-weight: 700;
+  font-style:italic;
 }

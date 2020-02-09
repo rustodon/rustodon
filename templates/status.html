@@ -4,9 +4,27 @@
 {%- endblock -%}
 
 {%- block topmenu -%}
-    <nav class="top-menu__home">
-        <h1><a class="top-menu__home-link" href="/">Rustodon</a></h1>
-    </nav>
+
+<nav class="top-menu">
+    <ul>
+        <li><h1 class="logo"><a class="top-menu__home-link" href="/">Rustodon</a></h1></li> 
+        <li class="spacer"></li>
+        <li class="top-menu__user"><a class="top-menu__user-link" href="javascript:void 0" aria-haspopup="true"><svg class="icon"><use href="/static/img/icons.min.svg#settings"/></svg>Menu</a>
+            <ul class="top-menu__user-submenu">
+                <li class="top-menu__profile"><a class="top-menu__profile-link" href="{{account.profile_path()|safe}}"><svg class="icon"><use href="/static/img/icons.min.svg#profile"/></svg>Profile</a>
+                <li class="top-menu__logout">
+                    <form class="inline" method="post" action="/auth/sign_out">
+                        <input type="hidden" name="stub" />
+                        <button class="link" type="submit" name="submit"><svg class="icon"><use href="/static/img/icons.min.svg#exit"/></svg>Sign&#160;out</button>
+                    </form>
+                </li>
+                <li class="top-menu__settings">
+                    <a href="" disabled><svg class="icon"><use href="/static/img/icons.min.svg#settings"/></svg>Settings</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</nav>
 {%- endblock -%}
 
 {%- block content -%}

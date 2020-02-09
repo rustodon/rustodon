@@ -6,18 +6,20 @@
     <meta name="theme-color" content="#f8f8f6">
     <title>Rustodon - {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css" />
+    <link rel="icon" href="/static/favicon.png">
 </head>
 <body>
-    <header class="top-menu">
+    <header class="page-header">
         {%- block topmenu -%}
         {%- endblock -%}
+    <hr/>
     </header>
     <main class="main-content">
         {%- match flash -%}
         {%- when Some with (flashmessage) -%}
             <div class="flash-container">
                 <input type="checkbox" class="flash-hider" id="flash-hider"/>
-                <label class="flash-hider-label" for="flash-hider">❌</label>
+                <label class="flash-hider-label" for="flash-hider" title="hide message"><svg class="icon"><use href="/static/img/icons.min.svg#x"/></svg></label>
                 <div class="flash {{flashmessage.name()}}">{{flashmessage.msg()}}</div>
             </div>
         {%- when None -%}
@@ -27,6 +29,7 @@
         {%- endblock -%}
     </main>
     <footer class="page-end">
+        <hr/>
         <small class="commit-message">
             Powered by Rustodon. Running commit
             <a href="https://github.com/rustodon/rustodon/commit/{{revision}}">
@@ -34,6 +37,6 @@
             </a>
         </small>
     </footer>
-    <script src="/static/js/accessibility.js"></script>
+    <script src="/static/js/accessibility.min.js"></script>post
 </body>
 </html>

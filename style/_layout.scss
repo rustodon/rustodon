@@ -14,11 +14,9 @@ main {
   padding: 2rem 0;
   margin-top: 5rem;
   display: flex;
-  border-bottom: $border_width solid $border_color; // set the footer off
-  @extend %big-shadow;
 }
 
-footer {
+.page-end {
   flex-shrink: 0; // prevent flexbox shrinkage (looking @ u, blink flexbox)
   padding: 1rem 2rem;
   margin: 1rem 0;
@@ -39,6 +37,11 @@ main>section {
   input, textarea {
     width: 100%;
   }
+}
+
+.form-footer {
+  text-align: end;
+  padding: 1rem 0;
 }
 
 .statuses {

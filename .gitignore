@@ -1,9 +1,9 @@
 /target/
 **/*.rs.bk
 .sass-cache/
-static/style.css
-static/style.css.map
 Rocket.toml
 /.bundle
 /vendor
 .vscode/
+node_modules
+npm-debug.log

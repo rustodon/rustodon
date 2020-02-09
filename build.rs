@@ -19,25 +19,11 @@ where
 }
 
 fn main() {
-    if let Err(_) = Command::new("sass").status() {
-        eprintln!(
-            "build error: sass compiler not installed.\n\
-             please follow the instructions at https://sass-lang.com/install, \
-             making sure the `sass` executable is in your $PATH."
-        );
-        process::exit(1);
-    }
-
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
 
     File::create(out_dir.join("commit-info.txt"))
         .unwrap()
         .write_all(commit_info().as_bytes())
-        .unwrap();
-
-    Command::new("sass")
-        .args(&["style/style.scss", "static/style.css"])
-        .status()
         .unwrap();
 }
 

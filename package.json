@@ -1,0 +1,16 @@
+{
+  "name": "rustodon",
+  "description": "This NPM package file is used to support the front-end build tasks (Gulp). No NPM dependencies are included in the build.",
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-clean-css": "^4.2.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-terser": "^1.2.0",
+    "gulp-svgmin": "^2.2.0"
+  },
+  "scripts": {},
+  "license": "AGPL-3.0",
+  "homepage": "https://github.com/rustodon/rustodon#readme"
+}
