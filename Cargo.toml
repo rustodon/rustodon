@@ -14,7 +14,7 @@ maplit = "1.0"
 failure = "0.1.6"
 failure_derive = "0.1.5"
 lazy_static = "1.4"
-itertools = "0.8.0"
+itertools = "0.9.0"
 resopt = { path = "lib/resopt/" }
 structopt = "0.2.16"
 
