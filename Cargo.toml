@@ -24,7 +24,7 @@ posticle = { path = "lib/posticle/" }
 slog = "2.5"
 slog-term = "2.4"
 slog-async = "2.3"
-slog-scope = "4.1"
+slog-scope = "4.4"
 rocket-slog = "0.4"
 
 rocket = "0.4"
