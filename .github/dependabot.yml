@@ -1,0 +1,22 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: openssl
+    versions:
+    - 0.10.32
+    - 0.10.33
+  - dependency-name: slog-term
+    versions:
+    - 2.6.0
+    - 2.7.0
+  - dependency-name: validator_derive
+    versions:
+    - 0.12.0
+  - dependency-name: validator
+    versions:
+    - 0.12.0
